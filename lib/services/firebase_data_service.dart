@@ -1,0 +1,399 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+
+/// Firebase Firestore veri yönetimi servisi
+/// Favoriler, sepet ve kullanıcı verilerini yönetir
+class FirebaseDataService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  /// Kullanıcının favori ürün ID'lerini getir
+  Future<List<String>> getFavoriteProductIds() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return [];
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorites')
+          .get();
+
+      return snapshot.docs.map((doc) => doc.id).toList();
+    } catch (e) {
+      debugPrint('Error getting favorite product IDs: $e');
+      return [];
+    }
+  }
+
+  /// Favorilere ürün ekle
+  Future<void> addToFavorites(String productId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorites')
+          .doc(productId)
+          .set({
+        'productId': productId,
+        'addedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error adding to favorites: $e');
+      rethrow;
+    }
+  }
+
+  /// Favorilerden ürün çıkar
+  Future<void> removeFromFavorites(String productId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorites')
+          .doc(productId)
+          .delete();
+    } catch (e) {
+      debugPrint('Error removing from favorites: $e');
+      rethrow;
+    }
+  }
+
+  /// Kullanıcının sepet öğelerini getir
+  Future<List<Map<String, dynamic>>> getCartItems() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return [];
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart')
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'productId': doc.id,
+          'quantity': data['quantity'] ?? 1,
+          ...data,
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Error getting cart items: $e');
+      return [];
+    }
+  }
+
+  /// Sepete ürün ekle
+  Future<void> addToCart(String productId, int quantity) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart')
+          .doc(productId)
+          .set({
+        'productId': productId,
+        'quantity': quantity,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error adding to cart: $e');
+      rethrow;
+    }
+  }
+
+  /// Sepetten ürün çıkar
+  Future<void> removeFromCart(String productId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart')
+          .doc(productId)
+          .delete();
+    } catch (e) {
+      debugPrint('Error removing from cart: $e');
+      rethrow;
+    }
+  }
+
+  /// Sepetteki ürün miktarını güncelle
+  Future<void> updateCartQuantity(String productId, int quantity) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      if (quantity <= 0) {
+        // Miktar 0 veya negatifse sepetten çıkar
+        await removeFromCart(productId);
+      } else {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('cart')
+            .doc(productId)
+            .update({
+          'quantity': quantity,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      debugPrint('Error updating cart quantity: $e');
+      rethrow;
+    }
+  }
+
+  /// Sepeti temizle
+  Future<void> clearCart() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart')
+          .get();
+
+      final batch = _firestore.batch();
+      for (var doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint('Error clearing cart: $e');
+      rethrow;
+    }
+  }
+
+  /// Kullanıcı profil bilgilerini getir
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return null;
+    }
+
+    try {
+      final doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      final data = doc.data()!;
+      // Timestamp'leri string'e çevir
+      final result = <String, dynamic>{...data};
+      if (data['createdAt'] is Timestamp) {
+        result['createdAt'] = (data['createdAt'] as Timestamp).toDate().toIso8601String();
+      }
+      if (data['updatedAt'] is Timestamp) {
+        result['updatedAt'] = (data['updatedAt'] as Timestamp).toDate().toIso8601String();
+      }
+      if (data['birthDate'] is Timestamp) {
+        result['birthDate'] = (data['birthDate'] as Timestamp).toDate().toIso8601String();
+      }
+
+      return result;
+    } catch (e) {
+      debugPrint('Error getting user profile: $e');
+      return null;
+    }
+  }
+
+  /// Kullanıcı istatistiklerini getir
+  Future<Map<String, dynamic>> getUserStats() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return {};
+    }
+
+    try {
+      // Favori sayısı
+      final favoritesSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorites')
+          .get();
+
+      // Sepet öğe sayısı
+      final cartSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart')
+          .get();
+
+      // Sipariş sayısı
+      final ordersSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('orders')
+          .get();
+
+      return {
+        'favoriteCount': favoritesSnapshot.docs.length,
+        'cartItemCount': cartSnapshot.docs.length,
+        'orderCount': ordersSnapshot.docs.length,
+      };
+    } catch (e) {
+      debugPrint('Error getting user stats: $e');
+      return {};
+    }
+  }
+
+  /// Kullanıcı profil bilgilerini kaydet
+  Future<void> saveUserProfile({
+    required String fullName,
+    required String username,
+    required String email,
+    String? phone,
+    String? address,
+    String? profileImageUrl,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      final updateData = <String, dynamic>{
+        'fullName': fullName,
+        'displayName': fullName,
+        'username': username,
+        'usernameLower': username.toLowerCase(),
+        'email': email.toLowerCase(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (phone != null && phone.isNotEmpty) {
+        updateData['phone'] = phone;
+      }
+      
+      if (address != null && address.isNotEmpty) {
+        updateData['address'] = address;
+      }
+      
+      if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+        updateData['profileImageUrl'] = profileImageUrl;
+      }
+
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .set(updateData, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error saving user profile: $e');
+      rethrow;
+    }
+  }
+
+  /// Kullanıcı verilerini güncelle
+  Future<void> updateUserData(Map<String, dynamic> data) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        ...data,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error updating user data: $e');
+      rethrow;
+    }
+  }
+
+  /// Kullanıcının adreslerini getir
+  Future<List<Map<String, dynamic>>> getAddresses() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return [];
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('addresses')
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          ...data,
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Error getting addresses: $e');
+      return [];
+    }
+  }
+
+  /// Kullanıcının ödeme yöntemlerini getir
+  Future<List<Map<String, dynamic>>> getPaymentMethods() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return [];
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('paymentMethods')
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          ...data,
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Error getting payment methods: $e');
+      return [];
+    }
+  }
+}
+

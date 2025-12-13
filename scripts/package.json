@@ -1,0 +1,16 @@
+{
+  "name": "delete-users-scripts",
+  "version": "1.0.0",
+  "description": "Scripts to delete all users from Firebase",
+  "main": "delete_all_users.js",
+  "scripts": {
+    "delete-auth": "node delete_all_users.js",
+    "delete-firestore": "node delete_all_firestore_users.js",
+    "delete-all": "node delete_all_users.js && node delete_all_firestore_users.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "private": true
+}
+
