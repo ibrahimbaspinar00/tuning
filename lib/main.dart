@@ -252,21 +252,6 @@ class TuningWebApp extends StatelessWidget {
           ),
           toolbarHeight: 80,
         ),
-        // Web-optimize edilmiş Card teması - Premium görünüm
-        cardTheme: const CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-          shadowColor: Color(0x0F000000), // Colors.black.withOpacity(0.06) equivalent
-          surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(28)), // Web için daha yuvarlak
-            side: BorderSide(
-              color: Color(0x80E8E8E8), // Color(0xFFE8E8E8).withOpacity(0.5) equivalent
-              width: 1, // İnce border
-            ),
-          ),
-          margin: EdgeInsets.all(16), // Web için daha büyük margin
-        ),
         // Web-optimize edilmiş Button temaları - Premium ve büyük
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(

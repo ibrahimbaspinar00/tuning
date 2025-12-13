@@ -159,13 +159,6 @@ class AppTheme {
         backgroundColor: AppColors.lightPrimary,
         foregroundColor: Colors.white,
       ),
-      cardTheme: const CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-        color: AppColors.lightSurface,
-      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 2,
@@ -198,14 +191,6 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.darkPrimary,
         foregroundColor: Colors.white,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 4,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-        color: AppColors.darkSurface,
-        shadowColor: Colors.black.withOpacity(0.3),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
