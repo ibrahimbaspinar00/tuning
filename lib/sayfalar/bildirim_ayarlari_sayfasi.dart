@@ -353,10 +353,18 @@ class _BildirimAyarlariSayfasiState extends State<BildirimAyarlariSayfasi> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: Colors.orange[600],
-            activeTrackColor: Colors.orange[200],
-            inactiveThumbColor: Colors.grey[400],
-            inactiveTrackColor: Colors.grey[200],
+            thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.orange[600]!;
+              }
+              return Colors.grey[400]!;
+            }),
+            trackColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.orange[200]!;
+              }
+              return Colors.grey[200]!;
+            }),
           ),
         ],
       ),
