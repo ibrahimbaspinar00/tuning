@@ -552,7 +552,7 @@ class _KayitSayfasiState extends State<KayitSayfasi> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.purple.withValues(alpha: 0.3),
+                                color: Colors.purple.withOpacity(0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -600,7 +600,7 @@ class _KayitSayfasiState extends State<KayitSayfasi> {
                     Text(
                       'Zaten hesabınız var mı? ',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withOpacity(0.9),
                         fontSize: 16,
                       ),
                     ),

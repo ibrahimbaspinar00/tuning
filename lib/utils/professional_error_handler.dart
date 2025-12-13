@@ -302,7 +302,7 @@ class _ProfessionalErrorDialogState extends State<ProfessionalErrorDialog>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -360,7 +360,7 @@ class _ProfessionalErrorDialogState extends State<ProfessionalErrorDialog>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: headerColor.withValues(alpha: 0.1),
+        color: headerColor.withOpacity(0.1),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Row(

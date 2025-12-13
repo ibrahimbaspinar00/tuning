@@ -205,7 +205,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
         ),
         color: AppColors.darkSurface,
-        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shadowColor: Colors.black.withOpacity(0.3),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

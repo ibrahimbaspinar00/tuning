@@ -121,7 +121,7 @@ class _NotificationWidgetState extends State<NotificationWidget>
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -164,7 +164,7 @@ class _NotificationWidgetState extends State<NotificationWidget>
                               },
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.white,
-                                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                                backgroundColor: Colors.white.withOpacity(0.2),
                               ),
                               child: Text(widget.actionText ?? 'İşlem'),
                             ),
