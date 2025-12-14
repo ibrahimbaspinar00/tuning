@@ -5,6 +5,7 @@ import '../model/product.dart';
 import '../services/order_service.dart';
 import 'siparis_detay_sayfasi.dart';
 import '../theme/app_design_system.dart';
+import '../utils/responsive_helper.dart';
 
 class SiparislerSayfasi extends StatefulWidget {
   final List<Order> orders;
@@ -138,8 +139,7 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth >= 1200;
+    final isMobile = ResponsiveHelper.isMobile(context);
     
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -156,26 +156,48 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         flexibleSpace: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isDesktop ? 80 : 24,
-            vertical: 16,
+          padding: ResponsiveHelper.responsiveHorizontalPadding(
+            context,
+            mobile: 16.0,
+            tablet: 24.0,
+            desktop: 80.0,
+          ).copyWith(
+            top: 16,
+            bottom: 16,
           ),
           child: Row(
             children: [
               // Sol tarafta başlık
-              Text(
-                'Siparişlerim',
-                style: AppDesignSystem.heading2,
+              Flexible(
+                child: Text(
+                  'Siparişlerim',
+                  style: AppDesignSystem.heading2.copyWith(
+                    fontSize: ResponsiveHelper.responsiveFontSize(
+                      context,
+                      mobile: 18.0,
+                      tablet: 20.0,
+                      desktop: 24.0,
+                    ),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const Spacer(),
-              // Sağ tarafta arama ve tarih filtresi
-              Row(
-                children: [
-                  // Arama çubuğu
-                  Container(
-                    width: 200,
-                    height: 40,
-                    child: TextField(
+              if (!isMobile) ...[
+                const Spacer(),
+                // Sağ tarafta arama ve tarih filtresi
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Arama çubuğu
+                    SizedBox(
+                      width: ResponsiveHelper.responsiveValue(
+                        context,
+                        mobile: 150.0,
+                        tablet: 180.0,
+                        desktop: 200.0,
+                      ),
+                      height: 40,
+                      child: TextField(
                       onChanged: (value) {
                         setState(() {
                           _searchQuery = value;
@@ -185,50 +207,68 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                         fontSize: 14,
                         color: const Color(0xFF0F0F0F),
                       ),
-                      decoration: AppDesignSystem.inputDecoration(
-                        label: '',
-                        hint: 'Sipariş ara',
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: AppDesignSystem.textSecondary,
-                          size: 20,
+                        decoration: AppDesignSystem.inputDecoration(
+                          label: '',
+                          hint: 'Sipariş ara',
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: AppDesignSystem.textSecondary,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Tarih filtresi
-                  Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: AppDesignSystem.surfaceVariant,
-                      borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
-                      border: Border.all(
-                        color: AppDesignSystem.borderLight,
-                        width: 1,
+                    SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
+                    // Tarih filtresi
+                    Container(
+                      height: 40,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppDesignSystem.surfaceVariant,
+                        borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                        border: Border.all(
+                          color: AppDesignSystem.borderLight,
+                          width: 1,
+                        ),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedDateFilter,
+                          style: AppDesignSystem.bodyMedium.copyWith(
+                            fontSize: ResponsiveHelper.responsiveFontSize(
+                              context,
+                              mobile: 12.0,
+                              desktop: 14.0,
+                            ),
+                          ),
+                          items: ['Tüm tarihler', 'Son 7 gün', 'Son 30 gün', 'Son 3 ay'].map((option) {
+                            return DropdownMenuItem(
+                              value: option,
+                              child: Text(
+                                option,
+                                style: TextStyle(
+                                  fontSize: ResponsiveHelper.responsiveFontSize(
+                                    context,
+                                    mobile: 12.0,
+                                    desktop: 14.0,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedDateFilter = value!;
+                            });
+                          },
+                        ),
                       ),
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedDateFilter,
-                        style: AppDesignSystem.bodyMedium,
-                        items: ['Tüm tarihler', 'Son 7 gün', 'Son 30 gün', 'Son 3 ay'].map((option) {
-                          return DropdownMenuItem(
-                            value: option,
-                            child: Text(option),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedDateFilter = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -238,9 +278,14 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
           children: [
             // Trendyol tarzı tab'lar
             Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 80 : 24,
-                vertical: 12,
+              padding: ResponsiveHelper.responsiveHorizontalPadding(
+                context,
+                mobile: 16.0,
+                tablet: 24.0,
+                desktop: 80.0,
+              ).copyWith(
+                top: 12,
+                bottom: 12,
               ),
               color: Colors.white,
               child: SingleChildScrollView(
@@ -248,11 +293,11 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                 child: Row(
                   children: [
                     _buildTabButton('Tümü'),
-                    const SizedBox(width: 8),
+                    SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
                     _buildTabButton('Devam Eden'),
-                    const SizedBox(width: 8),
+                    SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
                     _buildTabButton('İptal Edilen'),
-                    const SizedBox(width: 8),
+                    SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
                     _buildTabButton('İade Edilen'),
                   ],
                 ),
@@ -306,9 +351,14 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                           onRefresh: _loadOrders,
                           color: AppDesignSystem.primary,
                           child: ListView.builder(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isDesktop ? 80 : 24,
-                              vertical: 16,
+                            padding: ResponsiveHelper.responsiveHorizontalPadding(
+                              context,
+                              mobile: 16.0,
+                              tablet: 24.0,
+                              desktop: 80.0,
+                            ).copyWith(
+                              top: 16,
+                              bottom: 16,
                             ),
                             itemCount: _filteredOrders.length,
                             itemBuilder: (context, index) {
@@ -334,7 +384,10 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 12.0, desktop: 20.0),
+          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 10.0),
+        ),
         decoration: BoxDecoration(
           color: isSelected ? AppDesignSystem.primary : AppDesignSystem.surface,
           borderRadius: BorderRadius.circular(AppDesignSystem.radiusRound),
@@ -346,6 +399,11 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
         child: Text(
           label,
           style: AppDesignSystem.labelMedium.copyWith(
+            fontSize: ResponsiveHelper.responsiveFontSize(
+              context,
+              mobile: 12.0,
+              desktop: 14.0,
+            ),
             color: isSelected ? AppDesignSystem.textOnPrimary : AppDesignSystem.textPrimary,
           ),
         ),
@@ -361,17 +419,26 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                        order.status.toLowerCase() == 'teslim edildi';
     final isCreated = order.status.toLowerCase() == 'pending' || 
                      order.status.toLowerCase() == 'beklemede';
+    final isMobile = ResponsiveHelper.isMobile(context);
     
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(
+        bottom: ResponsiveHelper.responsiveSpacing(context, mobile: 12.0, desktop: 16.0),
+      ),
       decoration: AppDesignSystem.cardDecoration(
         borderRadius: AppDesignSystem.radiusM,
         shadows: AppDesignSystem.shadowS,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppDesignSystem.spacingM),
+        padding: ResponsiveHelper.responsivePadding(
+          context,
+          mobile: 12.0,
+          tablet: 14.0,
+          desktop: 16.0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Üst kısım: Tarih, özet, alıcı
             Row(
@@ -380,36 +447,58 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Sipariş tarihi
                       Text(
                         _formatOrderDate(order.orderDate),
                         style: AppDesignSystem.bodyMedium.copyWith(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 13.0,
+                            desktop: 14.0,
+                          ),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: AppDesignSystem.spacingS),
+                      SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
                       // Sipariş özeti
                       Text(
                         '$deliveryCount Teslimat, $productCount Ürün',
                         style: AppDesignSystem.bodySmall.copyWith(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 11.0,
+                            desktop: 12.0,
+                          ),
                           color: AppDesignSystem.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: AppDesignSystem.spacingXS),
+                      SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
                       // Alıcı
                       Text(
                         'Alıcı: ${order.customerName}',
                         style: AppDesignSystem.bodySmall.copyWith(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 11.0,
+                            desktop: 12.0,
+                          ),
                           color: AppDesignSystem.textSecondary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (order.totalAmount > 0) ...[
-                        const SizedBox(height: 4),
+                        SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
                         Text(
                           'Toplam: ${order.totalAmount.toStringAsFixed(2)} TL',
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: ResponsiveHelper.responsiveFontSize(
+                              context,
+                              mobile: 12.0,
+                              desktop: 14.0,
+                            ),
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF0F0F0F),
                           ),
@@ -419,137 +508,276 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                   ),
                 ),
                 // Sağ tarafta ürün görselleri
-                SizedBox(
-                  width: 120,
-                  height: 80,
-                  child: ListView.builder(
+                if (!isMobile)
+                  SizedBox(
+                    width: ResponsiveHelper.responsiveValue(
+                      context,
+                      mobile: 80.0,
+                      tablet: 100.0,
+                      desktop: 120.0,
+                    ),
+                    height: ResponsiveHelper.responsiveValue(
+                      context,
+                      mobile: 60.0,
+                      tablet: 70.0,
+                      desktop: 80.0,
+                    ),
+                    child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: order.products.length > 4 ? 4 : order.products.length,
-                    itemBuilder: (context, index) {
-                      final product = order.products[index];
-                      return Container(
-                        width: 60,
-                        height: 60,
-                        margin: const EdgeInsets.only(right: AppDesignSystem.spacingS),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
-                          border: Border.all(
-                            color: AppDesignSystem.borderLight,
-                            width: 1,
+                      itemCount: order.products.length > 4 ? 4 : order.products.length,
+                      itemBuilder: (context, index) {
+                        final product = order.products[index];
+                        return Container(
+                          width: ResponsiveHelper.responsiveValue(
+                            context,
+                            mobile: 50.0,
+                            tablet: 55.0,
+                            desktop: 60.0,
                           ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(AppDesignSystem.radiusS - 1),
-                          child: (product.imageUrl.isNotEmpty && product.imageUrl != '')
-                              ? Image.network(
-                                  product.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stack) => Container(
+                          height: ResponsiveHelper.responsiveValue(
+                            context,
+                            mobile: 50.0,
+                            tablet: 55.0,
+                            desktop: 60.0,
+                          ),
+                          margin: EdgeInsets.only(
+                            right: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0),
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                            border: Border.all(
+                              color: AppDesignSystem.borderLight,
+                              width: 1,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppDesignSystem.radiusS - 1),
+                            child: (product.imageUrl.isNotEmpty && product.imageUrl != '')
+                                ? Image.network(
+                                    product.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stack) => Container(
+                                      color: AppDesignSystem.surfaceVariant,
+                                      child: Icon(
+                                        Icons.image_not_supported, 
+                                        color: AppDesignSystem.textTertiary,
+                                        size: ResponsiveHelper.responsiveIconSize(context, mobile: 16.0, desktop: 20.0),
+                                      ),
+                                    ),
+                                  )
+                                : Container(
                                     color: AppDesignSystem.surfaceVariant,
                                     child: Icon(
-                                      Icons.image_not_supported, 
+                                      Icons.image,
                                       color: AppDesignSystem.textTertiary,
-                                      size: 20,
+                                      size: ResponsiveHelper.responsiveIconSize(context, mobile: 16.0, desktop: 20.0),
                                     ),
                                   ),
-                                )
-                              : Container(
-                                  color: AppDesignSystem.surfaceVariant,
-                                  child: Icon(
-                                    Icons.image,
-                                    color: AppDesignSystem.textTertiary,
-                                    size: 20,
-                                  ),
-                                ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Durum ve detaylar butonu
-            Row(
-              children: [
-                // Durum kutusu
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDesignSystem.spacingM,
-                    vertical: AppDesignSystem.spacingS,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDelivered 
-                        ? AppDesignSystem.successLight
-                        : AppDesignSystem.infoLight,
-                    borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
-                    border: Border.all(
-                      color: isDelivered 
-                          ? AppDesignSystem.success
-                          : AppDesignSystem.info,
-                      width: 1.5,
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+              ],
+            ),
+            SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 12.0, desktop: 16.0)),
+            // Durum ve detaylar butonu
+            isMobile
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Icon(
-                        isDelivered ? Icons.check_circle : Icons.thumb_up,
-                        size: 16,
-                        color: isDelivered 
-                            ? AppDesignSystem.success
-                            : AppDesignSystem.info,
-                      ),
-                      const SizedBox(width: AppDesignSystem.spacingS),
-                      Text(
-                        isDelivered 
-                            ? 'Teslim edildi'
-                            : isCreated
-                                ? 'Sipariş oluşturuldu'
-                                : order.statusText,
-                        style: AppDesignSystem.bodySmall.copyWith(
-                          fontWeight: FontWeight.w600,
+                      // Durum kutusu
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 16.0),
+                          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
+                        ),
+                        decoration: BoxDecoration(
                           color: isDelivered 
-                              ? AppDesignSystem.success
-                              : AppDesignSystem.info,
+                              ? AppDesignSystem.successLight
+                              : AppDesignSystem.infoLight,
+                          borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                          border: Border.all(
+                            color: isDelivered 
+                                ? AppDesignSystem.success
+                                : AppDesignSystem.info,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isDelivered ? Icons.check_circle : Icons.thumb_up,
+                              size: ResponsiveHelper.responsiveIconSize(context, mobile: 14.0, desktop: 16.0),
+                              color: isDelivered 
+                                  ? AppDesignSystem.success
+                                  : AppDesignSystem.info,
+                            ),
+                            SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
+                            Flexible(
+                              child: Text(
+                                isDelivered 
+                                    ? 'Teslim edildi'
+                                    : isCreated
+                                        ? 'Sipariş oluşturuldu'
+                                        : order.statusText,
+                                style: AppDesignSystem.bodySmall.copyWith(
+                                  fontSize: ResponsiveHelper.responsiveFontSize(
+                                    context,
+                                    mobile: 11.0,
+                                    desktop: 12.0,
+                                  ),
+                                  fontWeight: FontWeight.w600,
+                                  color: isDelivered 
+                                      ? AppDesignSystem.success
+                                      : AppDesignSystem.info,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
+                      // Detaylar butonu
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SiparisDetaySayfasi(order: order),
+                              ),
+                            );
+                          },
+                          style: AppDesignSystem.primaryButtonStyle(
+                            padding: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 16.0),
+                            borderRadius: AppDesignSystem.radiusS,
+                          ),
+                          child: Text(
+                            'Detaylar',
+                            style: AppDesignSystem.buttonSmall.copyWith(
+                              fontSize: ResponsiveHelper.responsiveFontSize(
+                                context,
+                                mobile: 12.0,
+                                desktop: 14.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      // Durum kutusu
+                      Flexible(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 16.0),
+                            vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDelivered 
+                                ? AppDesignSystem.successLight
+                                : AppDesignSystem.infoLight,
+                            borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                            border: Border.all(
+                              color: isDelivered 
+                                  ? AppDesignSystem.success
+                                  : AppDesignSystem.info,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isDelivered ? Icons.check_circle : Icons.thumb_up,
+                                size: ResponsiveHelper.responsiveIconSize(context, mobile: 14.0, desktop: 16.0),
+                                color: isDelivered 
+                                    ? AppDesignSystem.success
+                                    : AppDesignSystem.info,
+                              ),
+                              SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
+                              Flexible(
+                                child: Text(
+                                  isDelivered 
+                                      ? 'Teslim edildi'
+                                      : isCreated
+                                          ? 'Sipariş oluşturuldu'
+                                          : order.statusText,
+                                  style: AppDesignSystem.bodySmall.copyWith(
+                                    fontSize: ResponsiveHelper.responsiveFontSize(
+                                      context,
+                                      mobile: 11.0,
+                                      desktop: 12.0,
+                                    ),
+                                    fontWeight: FontWeight.w600,
+                                    color: isDelivered 
+                                        ? AppDesignSystem.success
+                                        : AppDesignSystem.info,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
+                      if (!isMobile)
+                        Flexible(
+                          child: Text(
+                            isDelivered 
+                                ? '$productCount ürün teslim edildi'
+                                : isCreated
+                                    ? '$productCount ürün için sipariş oluşturuldu'
+                                    : '',
+                            style: AppDesignSystem.bodySmall.copyWith(
+                              fontSize: ResponsiveHelper.responsiveFontSize(
+                                context,
+                                mobile: 11.0,
+                                desktop: 12.0,
+                              ),
+                              color: AppDesignSystem.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      const Spacer(),
+                      // Detaylar butonu
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SiparisDetaySayfasi(order: order),
+                            ),
+                          );
+                        },
+                        style: AppDesignSystem.primaryButtonStyle(
+                          padding: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 16.0),
+                          borderRadius: AppDesignSystem.radiusS,
+                        ),
+                        child: Text(
+                          'Detaylar',
+                          style: AppDesignSystem.buttonSmall.copyWith(
+                            fontSize: ResponsiveHelper.responsiveFontSize(
+                              context,
+                              mobile: 12.0,
+                              desktop: 14.0,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: AppDesignSystem.spacingS),
-                Text(
-                  isDelivered 
-                      ? '$productCount ürün teslim edildi'
-                      : isCreated
-                          ? '$productCount ürün için sipariş oluşturuldu'
-                          : '',
-                  style: AppDesignSystem.bodySmall.copyWith(
-                    color: AppDesignSystem.textSecondary,
-                  ),
-                ),
-                const Spacer(),
-                // Detaylar butonu
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SiparisDetaySayfasi(order: order),
-                      ),
-                    );
-                  },
-                  style: AppDesignSystem.primaryButtonStyle(
-                    padding: AppDesignSystem.spacingM,
-                    borderRadius: AppDesignSystem.radiusS,
-                  ),
-                  child: Text(
-                    'Detaylar',
-                    style: AppDesignSystem.buttonSmall,
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
