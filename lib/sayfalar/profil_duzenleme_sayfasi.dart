@@ -196,44 +196,42 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         });
       }
 
-      // E-posta değiştirilmişse kontrol et
+      // E-posta değiştirilmişse direkt Firebase Auth'ta güncellemeyi dene
       final newEmail = _emailController.text.trim();
       if (user != null && user.email != null && user.email!.toLowerCase() != newEmail.toLowerCase()) {
-        // Email değişikliği için Firebase Auth'ta doğrulama gerekiyor
-        // Bu yüzden sadece Firestore'da güncelliyoruz
-        // Kullanıcıya bilgi ver
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'E-posta adresi Firestore\'da güncellendi. Firebase Authentication e-posta değişikliği için doğrulama gereklidir.',
-              ),
-              backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 4),
-            ),
-          );
-        }
-        
-        // Firebase Auth email'ini değiştirmeyi dene (opsiyonel - hata olursa sadece Firestore'da kalır)
         try {
-          // Önce email doğrulama linki gönder
-          await user.sendEmailVerification();
-          // Email değişikliği için kullanıcıya bilgi ver
+          // Direkt email değişikliğini dene
+          await user.updateEmail(newEmail);
+          
+          // Başarılı olursa kullanıcıya bilgi ver
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'E-posta değişikliği için doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.',
-                ),
-                backgroundColor: Colors.blue,
-                duration: Duration(seconds: 5),
-              ),
-            );
+            debugPrint('✅ Email başarıyla Firebase Auth\'da güncellendi');
           }
         } catch (authError) {
-          // Firebase Auth email değişikliği başarısız olursa sadece Firestore'da kalır
-          // Bu normal bir durum, kullanıcıya bilgi ver
-          debugPrint('Firebase Auth email güncelleme hatası (normal): $authError');
+          // Email değişikliği başarısız olursa (doğrulama gerekiyorsa)
+          // Firestore'da güncelleme zaten yapıldı, kullanıcıya bilgi ver
+          debugPrint('⚠️ Firebase Auth email güncelleme hatası: $authError');
+          
+          // Hata mesajını kontrol et
+          final errorString = authError.toString();
+          if (errorString.contains('requires-recent-login') || 
+              errorString.contains('operation-not-allowed')) {
+            // Doğrulama gerekiyor ama Firestore'da güncellendi
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'E-posta adresi Firestore\'da güncellendi. Firebase Authentication için yeniden giriş yapmanız gerekebilir.',
+                  ),
+                  backgroundColor: Colors.orange,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            }
+          } else {
+            // Diğer hatalar için genel mesaj
+            debugPrint('Email güncelleme hatası: $authError');
+          }
         }
       }
 
