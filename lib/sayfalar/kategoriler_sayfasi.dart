@@ -701,9 +701,6 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
           ],
         ),
       ),
-          ],
-        ),
-      ),
     );
   }
 
