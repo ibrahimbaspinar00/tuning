@@ -196,44 +196,8 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         });
       }
 
-      // E-posta değiştirilmişse direkt Firebase Auth'ta güncellemeyi dene
-      final newEmail = _emailController.text.trim();
-      if (user != null && user.email != null && user.email!.toLowerCase() != newEmail.toLowerCase()) {
-        try {
-          // Direkt email değişikliğini dene
-          await user.updateEmail(newEmail);
-          
-          // Başarılı olursa kullanıcıya bilgi ver
-          if (mounted) {
-            debugPrint('✅ Email başarıyla Firebase Auth\'da güncellendi');
-          }
-        } catch (authError) {
-          // Email değişikliği başarısız olursa (doğrulama gerekiyorsa)
-          // Firestore'da güncelleme zaten yapıldı, kullanıcıya bilgi ver
-          debugPrint('⚠️ Firebase Auth email güncelleme hatası: $authError');
-          
-          // Hata mesajını kontrol et
-          final errorString = authError.toString();
-          if (errorString.contains('requires-recent-login') || 
-              errorString.contains('operation-not-allowed')) {
-            // Doğrulama gerekiyor ama Firestore'da güncellendi
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'E-posta adresi Firestore\'da güncellendi. Firebase Authentication için yeniden giriş yapmanız gerekebilir.',
-                  ),
-                  backgroundColor: Colors.orange,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            }
-          } else {
-            // Diğer hatalar için genel mesaj
-            debugPrint('Email güncelleme hatası: $authError');
-          }
-        }
-      }
+      // Email değişikliği yapılmıyor - email alanı disabled
+      // Sadece mevcut email'i Firestore'da sakla (değişiklik yok)
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -415,48 +379,57 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
                           ),
                           const SizedBox(height: 20),
                           
-                          // E-posta Adresi
-                          Text(
-                            'E-posta Adresi',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              hintText: 'E-posta adresinizi girin',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: const BorderSide(color: Color(0xFFF27A1A)),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                            ),
-                            style: GoogleFonts.inter(fontSize: 14),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'E-posta gereklidir';
-                              }
-                              if (!value.contains('@') || !value.contains('.')) {
-                                return 'Geçerli bir e-posta adresi girin';
-                              }
-                              return null;
-                            },
-                          ),
+                           // E-posta Adresi - Sadece görüntüleme (düzenlenemez)
+                           Text(
+                             'E-posta Adresi',
+                             style: GoogleFonts.inter(
+                               fontSize: 14,
+                               fontWeight: FontWeight.w500,
+                               color: Colors.black87,
+                             ),
+                           ),
+                           const SizedBox(height: 8),
+                           TextFormField(
+                             controller: _emailController,
+                             enabled: false, // Düzenlenemez
+                             keyboardType: TextInputType.emailAddress,
+                             decoration: InputDecoration(
+                               hintText: 'E-posta adresiniz',
+                               border: OutlineInputBorder(
+                                 borderRadius: BorderRadius.circular(4),
+                                 borderSide: BorderSide(color: Colors.grey[300]!),
+                               ),
+                               enabledBorder: OutlineInputBorder(
+                                 borderRadius: BorderRadius.circular(4),
+                                 borderSide: BorderSide(color: Colors.grey[300]!),
+                               ),
+                               disabledBorder: OutlineInputBorder(
+                                 borderRadius: BorderRadius.circular(4),
+                                 borderSide: BorderSide(color: Colors.grey[300]!),
+                               ),
+                               filled: true,
+                               fillColor: Colors.grey[100], // Disabled görünümü
+                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                               suffixIcon: Icon(
+                                 Icons.lock_outline,
+                                 size: 18,
+                                 color: Colors.grey[600],
+                               ),
+                             ),
+                             style: GoogleFonts.inter(
+                               fontSize: 14,
+                               color: Colors.grey[700], // Disabled text rengi
+                             ),
+                           ),
+                           const SizedBox(height: 4),
+                           Text(
+                             'E-posta adresi güvenlik nedeniyle değiştirilemez',
+                             style: GoogleFonts.inter(
+                               fontSize: 12,
+                               color: Colors.grey[600],
+                               fontStyle: FontStyle.italic,
+                             ),
+                           ),
                           const SizedBox(height: 20),
                           
                           // Cep Telefonu
