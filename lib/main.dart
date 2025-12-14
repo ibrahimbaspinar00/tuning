@@ -3466,14 +3466,14 @@ class ProductCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
-                // Sepete Ekle Butonu
+                // Sepete Ekle Butonu - Responsive ve kompakt
                 SizedBox(
                   width: double.infinity,
                   height: ResponsiveHelper.responsiveValue(
                     context,
-                    mobile: 36.0,
-                    tablet: 40.0,
-                    desktop: 44.0,
+                    mobile: 28.0, // Küçültüldü
+                    tablet: 32.0,
+                    desktop: 36.0,
                   ),
                   child: ElevatedButton(
                     onPressed: () {
@@ -3514,18 +3514,25 @@ class ProductCard extends StatelessWidget {
                       backgroundColor: const Color(0xFFD4AF37),
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
-                        horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
-                        vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
+                        horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0),
+                        vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0),
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
                       elevation: 0,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
                       'Sepete Ekle',
                       style: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: ResponsiveHelper.responsiveFontSize(
+                          context,
+                          mobile: 11.0,
+                          tablet: 12.0,
+                          desktop: 13.0,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

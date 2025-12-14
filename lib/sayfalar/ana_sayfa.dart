@@ -7,6 +7,7 @@ import '../services/product_service.dart';
 import '../widgets/optimized_image.dart';
 import '../config/app_routes.dart';
 import '../theme/app_design_system.dart';
+import '../utils/responsive_helper.dart';
 
 class AnaSayfa extends StatefulWidget {
   final List<Product> favoriteProducts;
@@ -1413,7 +1414,12 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                         
                         return SizedBox(
                           width: double.infinity,
-                          height: 28, // 30'dan 28'e düşürüldü - overflow önleme
+                          height: ResponsiveHelper.responsiveValue(
+                            context,
+                            mobile: 26.0, // Daha da küçültüldü
+                            tablet: 28.0,
+                            desktop: 30.0,
+                          ),
                           child: ElevatedButton(
                             onPressed: isAdding ? null : () async {
                               if (inCart) {
@@ -1434,12 +1440,17 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
                               ),
-                              padding: EdgeInsets.zero,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0),
+                                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0),
+                              ),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: isAdding
                                 ? SizedBox(
-                                    width: 14,
-                                    height: 14,
+                                    width: 12,
+                                    height: 12,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 1.5,
                                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -1451,14 +1462,27 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                                     children: [
                                       Icon(
                                         inCart ? Icons.check : Icons.shopping_cart,
-                                        size: 13,
+                                        size: ResponsiveHelper.responsiveIconSize(
+                                          context,
+                                          mobile: 11.0,
+                                          desktop: 13.0,
+                                        ),
                                         color: AppDesignSystem.textOnPrimary,
                                       ),
-                                      const SizedBox(width: AppDesignSystem.spacingXS),
-                                      Text(
-                                        inCart ? 'Sepette' : 'Sepete Ekle',
-                                        style: AppDesignSystem.labelSmall.copyWith(
-                                          color: AppDesignSystem.textOnPrimary,
+                                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0)),
+                                      Flexible(
+                                        child: Text(
+                                          inCart ? 'Sepette' : 'Sepete Ekle',
+                                          style: AppDesignSystem.labelSmall.copyWith(
+                                            fontSize: ResponsiveHelper.responsiveFontSize(
+                                              context,
+                                              mobile: 10.0,
+                                              desktop: 12.0,
+                                            ),
+                                            color: AppDesignSystem.textOnPrimary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],

@@ -643,10 +643,15 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                           ),
                         ),
                         SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
-                        // Sepete ekle butonu
+                        // Sepete ekle butonu - Responsive
                         SizedBox(
                           width: double.infinity,
-                          height: 28,
+                          height: ResponsiveHelper.responsiveValue(
+                            context,
+                            mobile: 26.0,
+                            tablet: 28.0,
+                            desktop: 30.0,
+                          ),
                           child: ElevatedButton(
                             onPressed: () {
                               // Sepete ekle
@@ -654,18 +659,29 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFF27A1A),
                               foregroundColor: Colors.white,
-                              padding: EdgeInsets.zero,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0),
+                                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0),
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               elevation: 0,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: Text(
                               'Sepete Ekle',
                               style: GoogleFonts.inter(
-                                fontSize: 11,
+                                fontSize: ResponsiveHelper.responsiveFontSize(
+                                  context,
+                                  mobile: 10.0,
+                                  desktop: 12.0,
+                                ),
                                 fontWeight: FontWeight.w600,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),

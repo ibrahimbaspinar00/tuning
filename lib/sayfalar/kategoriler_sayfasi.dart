@@ -171,17 +171,31 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
 
   // Desktop layout: Sol sidebar filtreler, sağ tarafta ürün listesi
   Widget _buildDesktopLayout(bool isSmallScreen, bool isTablet, bool isDesktop) {
+    final screenWidth = ResponsiveHelper.screenWidth(context);
+    final isVeryNarrow = screenWidth < 900; // Çok dar ekranlar için
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Sol sidebar - Filtreler
-        Container(
-          width: 280,
-          color: Colors.white,
-          child: SingleChildScrollView(
-            child: _buildFilters(isSmallScreen, isTablet, 280),
+        // Sol sidebar - Filtreler (dar ekranlarda gizle veya küçült)
+        if (!isVeryNarrow)
+          Container(
+            width: ResponsiveHelper.responsiveValue(
+              context,
+              mobile: 0.0, // Mobilde gösterilmez
+              tablet: 240.0,
+              desktop: 280.0,
+            ),
+            color: Colors.white,
+            child: SingleChildScrollView(
+              child: _buildFilters(isSmallScreen, isTablet, ResponsiveHelper.responsiveValue(
+                context,
+                mobile: 0.0,
+                tablet: 240.0,
+                desktop: 280.0,
+              )),
+            ),
           ),
-        ),
         // Sağ taraf - Ürün listesi
         Expanded(
           child: _isLoading
@@ -434,12 +448,14 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
     final crossAxisCount = ResponsiveHelper.responsiveProductGridColumns(context);
     final bool veryNarrow = ResponsiveHelper.screenWidth(context) < 360;
     
-    // Responsive aspect ratio - Overflow önlemek için daha küçük değerler
+    // Responsive aspect ratio - Overflow önlemek için optimize edilmiş değerler
+    // Filtreleme paneli varsa daha küçük, yoksa daha büyük
+    final hasFilterPanel = ResponsiveHelper.screenWidth(context) >= 900;
     final double aspect = ResponsiveHelper.responsiveValue<double>(
       context,
-      mobile: veryNarrow ? 0.65 : 0.70, // 0.72/0.78'den düşürüldü
-      tablet: 0.75, // 0.85'ten düşürüldü
-      desktop: 0.80, // 0.92'den düşürüldü
+      mobile: veryNarrow ? 0.60 : 0.65, // Daha da küçültüldü
+      tablet: hasFilterPanel ? 0.70 : 0.75, // Filtre paneli varsa daha küçük
+      desktop: hasFilterPanel ? 0.75 : 0.82, // Filtre paneli varsa daha küçük
     );
 
     return GridView.builder(
@@ -581,11 +597,11 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                 ),
               ),
             
-            // Ürün bilgileri - Sabit padding (Expanded yerine)
+            // Ürün bilgileri - Sabit padding (Expanded yerine) - Daha kompakt
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
-                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 10.0),
+                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
+                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,17 +611,17 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                   SizedBox(
                     height: ResponsiveHelper.responsiveValue(
                       context,
-                      mobile: 30.0, // 32'den 30'a düşürüldü
-                      tablet: 34.0, // 36'dan 34'e düşürüldü
-                      desktop: 38.0, // 40'tan 38'e düşürüldü
+                      mobile: 28.0, // Daha da küçültüldü
+                      tablet: 32.0,
+                      desktop: 36.0,
                     ),
                     child: Text(
                       product.name,
                       style: GoogleFonts.inter(
                         fontSize: ResponsiveHelper.responsiveFontSize(
                           context,
-                          mobile: 13.0,
-                          tablet: 13.5,
+                          mobile: 12.0, // Daha küçük font
+                          tablet: 13.0,
                           desktop: 14.0,
                         ),
                         fontWeight: FontWeight.w500,
@@ -616,7 +632,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0)),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
                   
                   // Fiyat
                   Text(
@@ -624,9 +640,9 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     style: GoogleFonts.inter(
                       fontSize: ResponsiveHelper.responsiveFontSize(
                         context,
-                        mobile: 15.0,
-                        tablet: 16.0,
-                        desktop: 17.0,
+                        mobile: 14.0, // Biraz küçültüldü
+                        tablet: 15.0,
+                        desktop: 16.0,
                       ),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF0F0F0F),
@@ -634,16 +650,16 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0)),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
                   
-                  // Sepete ekle butonu - Daha küçük ve kompakt
+                  // Sepete ekle butonu - Responsive ve kompakt
                   SizedBox(
                     width: double.infinity,
                     height: ResponsiveHelper.responsiveValue(
                       context,
-                      mobile: 30.0, // 32'den 30'a düşürüldü
-                      tablet: 32.0, // 34'ten 32'ye düşürüldü
-                      desktop: 34.0, // 36'dan 34'e düşürüldü
+                      mobile: 28.0, // Daha da küçültüldü
+                      tablet: 30.0,
+                      desktop: 32.0,
                     ),
                     child: ElevatedButton(
                       onPressed: () => widget.onAddToCart(product),
@@ -657,8 +673,11 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
+                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0),
+                          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0),
                         ),
+                        minimumSize: Size.zero, // Minimum size'ı kaldır
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Tap target'ı küçült
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -668,21 +687,21 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                             inCart ? Icons.check : Icons.shopping_cart,
                             size: ResponsiveHelper.responsiveIconSize(
                               context,
-                              mobile: 14.0,
-                              desktop: 16.0,
+                              mobile: 12.0, // Daha küçük icon
+                              desktop: 14.0,
                             ),
                             color: Colors.white,
                           ),
-                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
+                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0)),
                           Flexible(
                             child: Text(
                               inCart ? 'Sepette' : 'Sepete Ekle',
                               style: GoogleFonts.inter(
                                 fontSize: ResponsiveHelper.responsiveFontSize(
                                   context,
-                                  mobile: 12.0,
-                                  tablet: 12.5,
-                                  desktop: 13.0,
+                                  mobile: 11.0, // Daha küçük font
+                                  tablet: 11.5,
+                                  desktop: 12.0,
                                 ),
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
