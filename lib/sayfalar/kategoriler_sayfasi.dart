@@ -434,12 +434,12 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
     final crossAxisCount = ResponsiveHelper.responsiveProductGridColumns(context);
     final bool veryNarrow = ResponsiveHelper.screenWidth(context) < 360;
     
-    // Responsive aspect ratio - Optimize edilmiş: resim daha büyük, buton daha küçük
+    // Responsive aspect ratio - Overflow önlemek için daha küçük değerler
     final double aspect = ResponsiveHelper.responsiveValue<double>(
       context,
-      mobile: veryNarrow ? 0.72 : 0.78,
-      tablet: 0.85,
-      desktop: 0.92,
+      mobile: veryNarrow ? 0.65 : 0.70, // 0.72/0.78'den düşürüldü
+      tablet: 0.75, // 0.85'ten düşürüldü
+      desktop: 0.80, // 0.92'den düşürüldü
     );
 
     return GridView.builder(
@@ -502,14 +502,12 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Ürün resmi - Daha büyük alan
-            Expanded(
-              flex: 4, // 3'ten 4'e çıkarıldı - resim daha büyük olacak
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Stack(
-                  clipBehavior: Clip.hardEdge,
-                  children: [
+            // Ürün resmi - Sabit yükseklik (Expanded yerine)
+            AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                clipBehavior: Clip.hardEdge,
+                children: [
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -582,75 +580,72 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                   ],
                 ),
               ),
-            ),
             
-            // Ürün bilgileri - Daha kompakt
-            Expanded(
-              flex: 2, // Aynı kaldı ama içerik daha optimize
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
-                  vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Ürün adı
-                    SizedBox(
-                      height: ResponsiveHelper.responsiveValue(
-                        context,
-                        mobile: 32.0,
-                        tablet: 36.0,
-                        desktop: 40.0,
-                      ),
-                      child: Text(
-                        product.name,
-                        style: GoogleFonts.inter(
-                          fontSize: ResponsiveHelper.responsiveFontSize(
-                            context,
-                            mobile: 13.0,
-                            tablet: 13.5,
-                            desktop: 14.0,
-                          ),
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF0F0F0F),
-                          height: 1.3,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+            // Ürün bilgileri - Sabit padding (Expanded yerine)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
+                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 10.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Ürün adı
+                  SizedBox(
+                    height: ResponsiveHelper.responsiveValue(
+                      context,
+                      mobile: 30.0, // 32'den 30'a düşürüldü
+                      tablet: 34.0, // 36'dan 34'e düşürüldü
+                      desktop: 38.0, // 40'tan 38'e düşürüldü
                     ),
-                    SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
-                    
-                    // Fiyat
-                    Text(
-                      '${product.price.toStringAsFixed(2)} ₺',
+                    child: Text(
+                      product.name,
                       style: GoogleFonts.inter(
                         fontSize: ResponsiveHelper.responsiveFontSize(
                           context,
-                          mobile: 15.0,
-                          tablet: 16.0,
-                          desktop: 17.0,
+                          mobile: 13.0,
+                          tablet: 13.5,
+                          desktop: 14.0,
                         ),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF0F0F0F),
+                        height: 1.3,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
-                    
-                    // Sepete ekle butonu - Daha küçük ve kompakt
-                    SizedBox(
-                      width: double.infinity,
-                      height: ResponsiveHelper.responsiveValue(
+                  ),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0)),
+                  
+                  // Fiyat
+                  Text(
+                    '${product.price.toStringAsFixed(2)} ₺',
+                    style: GoogleFonts.inter(
+                      fontSize: ResponsiveHelper.responsiveFontSize(
                         context,
-                        mobile: 32.0, // 28'den 32'ye - biraz daha büyük ama hala kompakt
-                        tablet: 34.0,
-                        desktop: 36.0, // 32'den 36'ya
+                        mobile: 15.0,
+                        tablet: 16.0,
+                        desktop: 17.0,
                       ),
-                      child: ElevatedButton(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0F0F0F),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 5.0)),
+                  
+                  // Sepete ekle butonu - Daha küçük ve kompakt
+                  SizedBox(
+                    width: double.infinity,
+                    height: ResponsiveHelper.responsiveValue(
+                      context,
+                      mobile: 30.0, // 32'den 30'a düşürüldü
+                      tablet: 32.0, // 34'ten 32'ye düşürüldü
+                      desktop: 34.0, // 36'dan 34'e düşürüldü
+                    ),
+                    child: ElevatedButton(
                         onPressed: () => widget.onAddToCart(product),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: inCart 
