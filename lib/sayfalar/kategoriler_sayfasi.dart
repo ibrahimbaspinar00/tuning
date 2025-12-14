@@ -446,17 +446,9 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
 
   Widget _buildProductGrid(bool isSmallScreen, bool isTablet, bool isDesktop) {
     final crossAxisCount = ResponsiveHelper.responsiveProductGridColumns(context);
-    final bool veryNarrow = ResponsiveHelper.screenWidth(context) < 360;
     
-    // Responsive aspect ratio - Container yeterince büyük (overflow önleme)
-    // Filtreleme paneli varsa daha küçük, yoksa daha büyük
-    final hasFilterPanel = ResponsiveHelper.screenWidth(context) >= 900;
-    final double aspect = ResponsiveHelper.responsiveValue<double>(
-      context,
-      mobile: veryNarrow ? 0.68 : 0.73, // Daha büyük - overflow önleme
-      tablet: hasFilterPanel ? 0.78 : 0.83, // Daha büyük - overflow önleme
-      desktop: hasFilterPanel ? 0.83 : 0.88, // Daha büyük - overflow önleme
-    );
+    // Ana sayfadaki gibi aspect ratio kullan
+    final double aspect = ResponsiveHelper.responsiveProductAspectRatio(context);
 
     return GridView.builder(
       padding: ResponsiveHelper.responsivePadding(
@@ -508,7 +500,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(ResponsiveHelper.responsiveBorderRadius(context, mobile: 6.0, desktop: 8.0)),
           border: Border.all(
             color: const Color(0xFFE8E8E8),
             width: 1,
@@ -522,214 +514,259 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Ürün resmi - Dengeli yükseklik
-            AspectRatio(
-              aspectRatio: 1, // 1:1 - standart kare
-              child: Stack(
-                clipBehavior: Clip.hardEdge,
-                children: [
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFAFBFC),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: OptimizedImage(
-                          imageUrl: product.imageUrl,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    // İndirim badge - Dengeli
-                    if (product.discountPercentage > 0)
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            '%${product.discountPercentage.toStringAsFixed(0)}',
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ),
-                    // Favori butonu - Dengeli
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: () async {
-                          await widget.onFavoriteToggle(product);
-                          if (mounted) {
-                            setState(() {}); // State'i güncelle
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorite ? const Color(0xFFEF4444) : const Color(0xFF6A6A6A),
-                            size: ResponsiveHelper.responsiveIconSize(
-                              context,
-                              mobile: 16.0,
-                              desktop: 18.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            
-            // Ürün bilgileri - Optimize padding (overflow önleme)
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
-                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              AppRoutes.navigateToProductDetail(
+                context,
+                product,
+                favoriteProducts: widget.favoriteProducts,
+                cartProducts: widget.cartProducts,
+                onFavoriteToggle: widget.onFavoriteToggle,
+                onAddToCart: widget.onAddToCart,
+                onRemoveFromCart: widget.onRemoveFromCart,
+              );
+            },
+            borderRadius: BorderRadius.circular(ResponsiveHelper.responsiveBorderRadius(context, mobile: 6.0, desktop: 8.0)),
+            child: Padding(
+              padding: ResponsiveHelper.responsivePadding(
+                context,
+                mobile: 8.0,
+                tablet: 10.0,
+                desktop: 12.0,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Ürün adı - Optimize yükseklik
-                  SizedBox(
-                    height: ResponsiveHelper.responsiveValue(
-                      context,
-                      mobile: 34.0, // Optimize
-                      tablet: 38.0,
-                      desktop: 42.0,
-                    ),
-                    child: Text(
-                      product.name,
-                      style: GoogleFonts.inter(
-                        fontSize: ResponsiveHelper.responsiveFontSize(
-                          context,
-                          mobile: 13.0,
-                          tablet: 14.0,
-                          desktop: 15.0,
-                        ),
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF0F0F0F),
-                        height: 1.3,
+                  // Ürün Resmi - Ana sayfadaki gibi
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.grey[50],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 5.0, desktop: 7.0)),
-                  
-                  // Fiyat - Optimize
-                  Text(
-                    '${product.price.toStringAsFixed(2)} ₺',
-                    style: GoogleFonts.inter(
-                      fontSize: ResponsiveHelper.responsiveFontSize(
-                        context,
-                        mobile: 15.0,
-                        tablet: 16.0,
-                        desktop: 17.0,
-                      ),
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F0F0F),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 5.0, desktop: 7.0)),
-                  
-                  // Sepete ekle butonu - Optimize boyut
-                  SizedBox(
-                    width: double.infinity,
-                    height: ResponsiveHelper.responsiveValue(
-                      context,
-                      mobile: 34.0, // Optimize
-                      tablet: 36.0,
-                      desktop: 38.0,
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () => widget.onAddToCart(product),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: inCart 
-                            ? const Color(0xFF10B981) 
-                            : const Color(0xFFFF6000),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
-                          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
+                      child: Stack(
                         children: [
-                          Icon(
-                            inCart ? Icons.check : Icons.shopping_cart,
-                            size: ResponsiveHelper.responsiveIconSize(
-                              context,
-                              mobile: 16.0, // Biraz büyük icon
-                              desktop: 18.0,
-                            ),
-                            color: Colors.white,
+                          Center(
+                            child: product.imageUrl.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: OptimizedImage(
+                                      imageUrl: product.imageUrl,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.image,
+                                    size: 48,
+                                    color: Colors.grey[400],
+                                  ),
                           ),
-                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 5.0, desktop: 7.0)),
-                          Flexible(
-                            child: Text(
-                              inCart ? 'Sepette' : 'Sepete Ekle',
-                              style: GoogleFonts.inter(
-                                fontSize: ResponsiveHelper.responsiveFontSize(
-                                  context,
-                                  mobile: 13.0, // Biraz büyük font
-                                  tablet: 13.5,
-                                  desktop: 14.0,
+                          // İndirim Badge
+                          if (product.discountPercentage > 0)
+                            Positioned(
+                              top: 8,
+                              left: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEF4444),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                child: Text(
+                                  '%${product.discountPercentage.toStringAsFixed(0)}',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                  ),
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                          // Favori butonu
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () async {
+                                await widget.onFavoriteToggle(product);
+                                if (mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                                  color: isFavorite ? const Color(0xFFEF4444) : const Color(0xFF6A6A6A),
+                                  size: ResponsiveHelper.responsiveIconSize(
+                                    context,
+                                    mobile: 16.0,
+                                    desktop: 18.0,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
+                  // Ürün Adı - Ana sayfadaki gibi
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: ResponsiveHelper.responsiveFontSize(
+                        context,
+                        mobile: 12.0,
+                        tablet: 13.0,
+                        desktop: 14.0,
+                      ),
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF1A1A1A),
+                      height: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
+                  // Değerlendirme - Ana sayfadaki gibi
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: Colors.amber[700],
+                        size: ResponsiveHelper.responsiveIconSize(
+                          context,
+                          mobile: 14.0,
+                          desktop: 16.0,
+                        ),
+                      ),
+                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 4.0)),
+                      Text(
+                        product.averageRating.toStringAsFixed(1),
+                        style: GoogleFonts.inter(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 11.0,
+                            desktop: 12.0,
+                          ),
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 4.0)),
+                      Text(
+                        '(${product.reviewCount})',
+                        style: GoogleFonts.inter(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 11.0,
+                            desktop: 12.0,
+                          ),
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
+                  // Fiyat - Ana sayfadaki gibi (indirimli fiyat göster)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (product.discountPercentage > 0)
+                        Text(
+                          '${product.price.toStringAsFixed(2)} ₺',
+                          style: GoogleFonts.inter(
+                            fontSize: ResponsiveHelper.responsiveFontSize(
+                              context,
+                              mobile: 11.0,
+                              desktop: 12.0,
+                            ),
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 1.0, desktop: 2.0)),
+                      Text(
+                        '${product.discountedPrice.toStringAsFixed(2)} ₺',
+                        style: GoogleFonts.inter(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 16.0,
+                            tablet: 17.0,
+                            desktop: 18.0,
+                          ),
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFD4AF37),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
+                  // Sepete Ekle Butonu - Ana sayfadaki gibi
+                  SizedBox(
+                    width: double.infinity,
+                    height: ResponsiveHelper.responsiveValue(
+                      context,
+                      mobile: 28.0,
+                      tablet: 32.0,
+                      desktop: 36.0,
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () => widget.onAddToCart(product),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: inCart 
+                            ? const Color(0xFF10B981) 
+                            : const Color(0xFFD4AF37),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0),
+                          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        elevation: 0,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        inCart ? 'Sepette' : 'Sepete Ekle',
+                        style: GoogleFonts.inter(
+                          fontSize: ResponsiveHelper.responsiveFontSize(
+                            context,
+                            mobile: 11.0,
+                            tablet: 12.0,
+                            desktop: 13.0,
+                          ),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
