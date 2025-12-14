@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -72,10 +75,38 @@ double getCartTotal() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Firebase'i başlat
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Global error handler - Beyaz ekran sorununu önlemek için
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Error: ${details.exception}');
+    debugPrint('Stack trace: ${details.stack}');
+  };
+  
+  // Platform error handler
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Platform Error: $error');
+    debugPrint('Stack trace: $stack');
+    return true;
+  };
+  
+  // Firebase'i başlat - Hata yakalama ile
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        debugPrint('⚠️ Firebase initialization timeout');
+        throw TimeoutException('Firebase initialization timeout');
+      },
+    );
+    debugPrint('✅ Firebase başarıyla başlatıldı');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Firebase başlatma hatası: $e');
+    debugPrint('Stack trace: $stackTrace');
+    // Firebase hatası olsa bile uygulamayı başlat
+    // Kullanıcı giriş yapamaz ama uygulama çalışır
+  }
   
   // Performans optimizasyonları - Önce UI optimizasyonları
   // Image cache ayarları - Web için optimize edilmiş
@@ -97,6 +128,47 @@ class TuningWebApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Tuning Web',
+      // Error handling - Beyaz ekran sorununu önlemek için
+      builder: (context, widget) {
+        Widget errorWidget = widget!;
+        if (widget is ErrorWidget) {
+          errorWidget = Scaffold(
+            backgroundColor: const Color(0xFFFAFBFC),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Bir hata oluştu',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Lütfen sayfayı yenileyin',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Sayfayı yenile
+                        if (kIsWeb) {
+                          html.window.location.reload();
+                        }
+                      },
+                      child: const Text('Sayfayı Yenile'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        return errorWidget;
+      },
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
