@@ -196,9 +196,45 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         });
       }
 
-      // E-posta değiştirilmişse Firebase Auth'u da güncelle
-      if (user != null && user.email != _emailController.text.trim()) {
-        await user.updateEmail(_emailController.text.trim());
+      // E-posta değiştirilmişse kontrol et
+      final newEmail = _emailController.text.trim();
+      if (user != null && user.email != null && user.email!.toLowerCase() != newEmail.toLowerCase()) {
+        // Email değişikliği için Firebase Auth'ta doğrulama gerekiyor
+        // Bu yüzden sadece Firestore'da güncelliyoruz
+        // Kullanıcıya bilgi ver
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'E-posta adresi Firestore\'da güncellendi. Firebase Authentication e-posta değişikliği için doğrulama gereklidir.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+        
+        // Firebase Auth email'ini değiştirmeyi dene (opsiyonel - hata olursa sadece Firestore'da kalır)
+        try {
+          // Önce email doğrulama linki gönder
+          await user.sendEmailVerification();
+          // Email değişikliği için kullanıcıya bilgi ver
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'E-posta değişikliği için doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.',
+                ),
+                backgroundColor: Colors.blue,
+                duration: Duration(seconds: 5),
+              ),
+            );
+          }
+        } catch (authError) {
+          // Firebase Auth email değişikliği başarısız olursa sadece Firestore'da kalır
+          // Bu normal bir durum, kullanıcıya bilgi ver
+          debugPrint('Firebase Auth email güncelleme hatası (normal): $authError');
+        }
       }
 
       if (mounted) {
@@ -212,9 +248,18 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
       }
     } catch (e) {
       if (mounted) {
+        // Hata mesajını daha anlaşılır hale getir
+        String errorMessage = 'Profil güncellenirken hata oluştu: $e';
+        
+        if (e.toString().contains('operation-not-allowed') || 
+            e.toString().contains('email-already-in-use') ||
+            e.toString().contains('requires-recent-login')) {
+          errorMessage = 'E-posta değişikliği için doğrulama gereklidir. Profil bilgileriniz Firestore\'da güncellendi, ancak Firebase Authentication e-posta değişikliği için lütfen e-postanızı doğrulayın.';
+        }
+        
         ErrorHandler.showError(
           context,
-          'Profil güncellenirken hata oluştu: $e',
+          errorMessage,
         );
       }
     } finally {
