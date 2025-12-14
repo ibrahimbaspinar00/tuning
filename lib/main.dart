@@ -3372,7 +3372,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
+                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
                 // Ürün Adı
                 Text(
                   product.name,
@@ -3381,16 +3381,16 @@ class ProductCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: ResponsiveHelper.responsiveFontSize(
                       context,
-                      mobile: 13.0,
-                      tablet: 13.5,
+                      mobile: 12.0,
+                      tablet: 13.0,
                       desktop: 14.0,
                     ),
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A1A),
-                    height: 1.4,
+                    height: 1.3,
                   ),
                 ),
-                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
+                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
                 // Değerlendirme
                 Row(
                   children: [
@@ -3430,11 +3430,11 @@ class ProductCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Spacer(),
-                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
+                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
                 // Fiyat
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     if (product.discountPercentage > 0)
                       Text(
@@ -3465,10 +3465,16 @@ class ProductCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
+                SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
                 // Sepete Ekle Butonu
                 SizedBox(
                   width: double.infinity,
+                  height: ResponsiveHelper.responsiveValue(
+                    context,
+                    mobile: 36.0,
+                    tablet: 40.0,
+                    desktop: 44.0,
+                  ),
                   child: ElevatedButton(
                     onPressed: () {
                       addToCart(product);
@@ -3507,7 +3513,10 @@ class ProductCard extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFD4AF37),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
+                        vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
