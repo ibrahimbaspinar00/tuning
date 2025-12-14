@@ -646,59 +646,61 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                       desktop: 34.0, // 36'dan 34'e düşürüldü
                     ),
                     child: ElevatedButton(
-                        onPressed: () => widget.onAddToCart(product),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: inCart 
-                              ? const Color(0xFF10B981) 
-                              : const Color(0xFFFF6000),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
-                          ),
+                      onPressed: () => widget.onAddToCart(product),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: inCart 
+                            ? const Color(0xFF10B981) 
+                            : const Color(0xFFFF6000),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              inCart ? Icons.check : Icons.shopping_cart,
-                              size: ResponsiveHelper.responsiveIconSize(
-                                context,
-                                mobile: 14.0,
-                                desktop: 16.0,
-                              ),
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
-                            Flexible(
-                              child: Text(
-                                inCart ? 'Sepette' : 'Sepete Ekle',
-                                style: GoogleFonts.inter(
-                                  fontSize: ResponsiveHelper.responsiveFontSize(
-                                    context,
-                                    mobile: 12.0,
-                                    tablet: 12.5,
-                                    desktop: 13.0,
-                                  ),
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
                         ),
                       ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            inCart ? Icons.check : Icons.shopping_cart,
+                            size: ResponsiveHelper.responsiveIconSize(
+                              context,
+                              mobile: 14.0,
+                              desktop: 16.0,
+                            ),
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
+                          Flexible(
+                            child: Text(
+                              inCart ? 'Sepette' : 'Sepete Ekle',
+                              style: GoogleFonts.inter(
+                                fontSize: ResponsiveHelper.responsiveFontSize(
+                                  context,
+                                  mobile: 12.0,
+                                  tablet: 12.5,
+                                  desktop: 13.0,
+                                ),
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+      ),
           ],
         ),
       ),
