@@ -448,14 +448,14 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
     final crossAxisCount = ResponsiveHelper.responsiveProductGridColumns(context);
     final bool veryNarrow = ResponsiveHelper.screenWidth(context) < 360;
     
-    // Responsive aspect ratio - Dengeli değerler (overflow yok, güzel görünüm)
+    // Responsive aspect ratio - Büyük container (içerik sığsın, overflow yok)
     // Filtreleme paneli varsa daha küçük, yoksa daha büyük
     final hasFilterPanel = ResponsiveHelper.screenWidth(context) >= 900;
     final double aspect = ResponsiveHelper.responsiveValue<double>(
       context,
-      mobile: veryNarrow ? 0.58 : 0.62, // Dengeli - overflow yok ama güzel
-      tablet: hasFilterPanel ? 0.68 : 0.73, // Dengeli
-      desktop: hasFilterPanel ? 0.72 : 0.78, // Dengeli
+      mobile: veryNarrow ? 0.65 : 0.70, // Daha büyük container
+      tablet: hasFilterPanel ? 0.75 : 0.80, // Daha büyük container
+      desktop: hasFilterPanel ? 0.80 : 0.85, // Daha büyük container
     );
 
     return GridView.builder(
@@ -609,52 +609,52 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                 ),
               ),
             
-            // Ürün bilgileri - Dengeli padding (güzel görünüm, overflow yok)
+            // Ürün bilgileri - Geniş padding (büyük container'a uygun)
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
-                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
+                horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 12.0, desktop: 16.0),
+                vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Ürün adı - Dengeli yükseklik
+                  // Ürün adı - Daha geniş yükseklik
                   SizedBox(
                     height: ResponsiveHelper.responsiveValue(
                       context,
-                      mobile: 32.0, // Dengeli
-                      tablet: 36.0,
-                      desktop: 40.0,
+                      mobile: 36.0, // Daha geniş
+                      tablet: 40.0,
+                      desktop: 44.0,
                     ),
                     child: Text(
                       product.name,
                       style: GoogleFonts.inter(
                         fontSize: ResponsiveHelper.responsiveFontSize(
                           context,
-                          mobile: 12.0, // Dengeli font
-                          tablet: 13.0,
-                          desktop: 14.0,
+                          mobile: 13.0, // Biraz büyük font
+                          tablet: 14.0,
+                          desktop: 15.0,
                         ),
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF0F0F0F),
-                        height: 1.3, // Dengeli satır aralığı
+                        height: 1.3,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
                   
-                  // Fiyat - Dengeli
+                  // Fiyat - Daha büyük
                   Text(
                     '${product.price.toStringAsFixed(2)} ₺',
                     style: GoogleFonts.inter(
                       fontSize: ResponsiveHelper.responsiveFontSize(
                         context,
-                        mobile: 14.0, // Dengeli
-                        tablet: 15.0,
-                        desktop: 16.0,
+                        mobile: 15.0, // Biraz büyük
+                        tablet: 16.0,
+                        desktop: 17.0,
                       ),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF0F0F0F),
@@ -662,16 +662,16 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
                   
-                  // Sepete ekle butonu - Dengeli boyut
+                  // Sepete ekle butonu - Daha büyük
                   SizedBox(
                     width: double.infinity,
                     height: ResponsiveHelper.responsiveValue(
                       context,
-                      mobile: 32.0, // Dengeli
-                      tablet: 34.0,
-                      desktop: 36.0,
+                      mobile: 36.0, // Daha büyük
+                      tablet: 38.0,
+                      desktop: 40.0,
                     ),
                     child: ElevatedButton(
                       onPressed: () => widget.onAddToCart(product),
@@ -685,11 +685,11 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0),
-                          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0),
+                          horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 10.0, desktop: 14.0),
+                          vertical: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 10.0),
                         ),
-                        minimumSize: Size.zero, // Minimum size'ı kaldır
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Tap target'ı küçült
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -699,21 +699,21 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                             inCart ? Icons.check : Icons.shopping_cart,
                             size: ResponsiveHelper.responsiveIconSize(
                               context,
-                              mobile: 14.0, // Dengeli icon
-                              desktop: 16.0,
+                              mobile: 16.0, // Biraz büyük icon
+                              desktop: 18.0,
                             ),
                             color: Colors.white,
                           ),
-                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
+                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 5.0, desktop: 7.0)),
                           Flexible(
                             child: Text(
                               inCart ? 'Sepette' : 'Sepete Ekle',
                               style: GoogleFonts.inter(
                                 fontSize: ResponsiveHelper.responsiveFontSize(
                                   context,
-                                  mobile: 12.0, // Dengeli font
-                                  tablet: 12.5,
-                                  desktop: 13.0,
+                                  mobile: 13.0, // Biraz büyük font
+                                  tablet: 13.5,
+                                  desktop: 14.0,
                                 ),
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
