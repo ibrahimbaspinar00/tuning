@@ -18,8 +18,12 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Tuning Web - Premium Auto Parts">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Cache busting - Service worker güncellemeleri için -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -83,6 +87,39 @@
   </div>
   
   <script>
+    // Service Worker Cache Yönetimi - Beyaz ekran sorununu önlemek için
+    if ('serviceWorker' in navigator) {
+      // Service worker'ı kontrol et ve güncelle
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          // Service worker'ı güncelle
+          registration.update();
+          
+          // Eski cache'leri temizle
+          if (registration.waiting) {
+            // Yeni service worker bekliyorsa, hemen aktif et
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+        }
+      });
+      
+      // Service worker update kontrolü
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        // Yeni service worker aktif olduğunda sayfayı yenile
+        window.location.reload();
+      });
+    }
+    
+    // Cache temizleme - Eski cache sorunlarını önlemek için
+    if ('caches' in window) {
+      // Eski cache'leri temizle (opsiyonel - sadece sorun olduğunda)
+      // caches.keys().then(function(names) {
+      //   for (let name of names) {
+      //     caches.delete(name);
+      //   }
+      // });
+    }
+    
     // Flutter yüklendiğinde loading ekranını gizle
     window.addEventListener('flutter-first-frame', function() {
       const loading = document.getElementById('loading');
@@ -104,6 +141,18 @@
         }, 300);
       }
     }, 10000);
+    
+    // Hata yakalama - JavaScript hatalarını logla
+    window.addEventListener('error', function(event) {
+      console.error('JavaScript Error:', event.error);
+      console.error('Error Message:', event.message);
+      console.error('Error Source:', event.filename, ':', event.lineno);
+    });
+    
+    // Promise rejection yakalama
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error('Unhandled Promise Rejection:', event.reason);
+    });
   </script>
   
   <script src="flutter_bootstrap.js" async></script>
