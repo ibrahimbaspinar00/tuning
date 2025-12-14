@@ -183,8 +183,8 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                 ),
               ),
               if (!isMobile) ...[
-                const Spacer(),
-                // Sağ tarafta arama ve tarih filtresi
+              if (!ResponsiveHelper.isMobile(context)) const Spacer(),
+              // Sağ tarafta arama ve tarih filtresi
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -748,9 +748,9 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                          ),
                         ),
-                      const Spacer(),
+                      ),
+                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
                       // Detaylar butonu
                       ElevatedButton(
                         onPressed: () {

@@ -8,6 +8,7 @@ import '../services/notification_service.dart';
 import '../widgets/error_handler.dart';
 import '../config/app_routes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/responsive_helper.dart';
 
 class BildirimlerSayfasi extends StatefulWidget {
   const BildirimlerSayfasi({super.key});
@@ -615,7 +616,7 @@ class _BildirimlerSayfasiState extends State<BildirimlerSayfasi>
                                     color: Colors.grey[500],
                                   ),
                                 ),
-                                const Spacer(),
+                                SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
                                 _buildTypeChip(notification.type),
                               ],
                             ),

@@ -13,6 +13,7 @@ import '../services/product_service.dart';
 import 'urun_detay_sayfasi.dart';
 import 'koleksiyon_detay_sayfasi.dart';
 import '../theme/app_design_system.dart';
+import '../utils/responsive_helper.dart';
 
 class FavorilerSayfasi extends StatefulWidget {
   final List<Product> favoriteProducts;
@@ -327,7 +328,7 @@ class _FavorilerSayfasiState extends State<FavorilerSayfasi> with TickerProvider
                   ),
                 ],
               ),
-              const Spacer(),
+              SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 16.0)),
               // Sağ tarafta arama çubuğu - Fotoğraftaki gibi
               Expanded(
                 flex: 2,

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_data_service.dart';
 import '../widgets/error_handler.dart';
+import '../utils/responsive_helper.dart';
 
 class OdemeYontemi {
   final String id;
@@ -304,7 +305,7 @@ class _OdemeYontemleriSayfasiState extends State<OdemeYontemleriSayfasi> {
                                           ),
                                       ],
                                     ),
-                                    const Spacer(),
+                                    SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
                                     
                                     // Banka/kart logosu (basit gösterim)
                                     Container(

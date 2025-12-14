@@ -8,6 +8,7 @@ import '../model/product.dart';
 import '../services/review_service.dart';
 import '../widgets/optimized_image.dart';
 import '../config/app_routes.dart';
+import '../utils/responsive_helper.dart';
 
 class SiparisDetaySayfasi extends StatefulWidget {
   final Order order;
@@ -450,7 +451,7 @@ class _SiparisDetaySayfasiState extends State<SiparisDetaySayfasi> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Spacer(),
+                  SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
                   TextButton.icon(
                     onPressed: () => _navigateToReviewPage(product),
                     icon: const Icon(Icons.visibility, size: 16),

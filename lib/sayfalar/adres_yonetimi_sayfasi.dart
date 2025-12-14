@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/responsive_helper.dart';
 
 class Adres {
   final String id;
@@ -221,7 +222,7 @@ class _AdresYonetimiSayfasiState extends State<AdresYonetimiSayfasi> {
                                       ),
                                     ),
                                   ),
-                                  const Spacer(),
+                                  SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 12.0)),
                                   if (widget.selectMode)
                                     ElevatedButton.icon(
                                       onPressed: () => Navigator.pop(context, address),

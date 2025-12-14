@@ -7,6 +7,7 @@ import '../services/collection_service.dart';
 import '../services/product_service.dart';
 import '../widgets/error_handler.dart';
 import '../config/app_routes.dart';
+import '../utils/responsive_helper.dart';
 
 class KoleksiyonDetaySayfasi extends StatefulWidget {
   final Collection collection;
@@ -457,7 +458,7 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                         color: Colors.grey[600],
                       ),
                     ),
-                    const Spacer(),
+                    SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 8.0, desktop: 16.0)),
                     // Arama çubuğu
                     SizedBox(
                       width: 200,
@@ -641,7 +642,7 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                             color: const Color(0xFFF27A1A),
                           ),
                         ),
-                        const Spacer(),
+                        SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
                         // Sepete ekle butonu
                         SizedBox(
                           width: double.infinity,
@@ -1072,7 +1073,7 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const Spacer(),
+                        SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
                         // Koleksiyona Ekle butonu
                         ElevatedButton(
                           onPressed: selectedProductIds.isEmpty

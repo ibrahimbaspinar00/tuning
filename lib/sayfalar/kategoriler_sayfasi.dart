@@ -639,7 +639,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Spacer(),
+                    SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
                     
                     // Sepete ekle butonu - Daha küçük ve kompakt
                     SizedBox(
