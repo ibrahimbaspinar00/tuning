@@ -779,7 +779,7 @@ class _FavorilerSayfasiState extends State<FavorilerSayfasi> with TickerProvider
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Header - Koleksiyon Oluştur butonu
+          // Header - Sadece başlık (buton kaldırıldı)
           Container(
             padding: EdgeInsets.symmetric(
               horizontal: isDesktop ? 80 : 24,
@@ -787,47 +787,22 @@ class _FavorilerSayfasiState extends State<FavorilerSayfasi> with TickerProvider
             ),
             color: Colors.white,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'Koleksiyonlarım',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '(${_collections.length})',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton.icon(
-                  onPressed: _createNewCollection,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(
-                    '+ Koleksiyon Oluştur',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                Text(
+                  'Koleksiyonlarım',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6000),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    elevation: 0,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '(${_collections.length})',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
               ],
@@ -916,14 +891,23 @@ class _FavorilerSayfasiState extends State<FavorilerSayfasi> with TickerProvider
               const SizedBox(height: AppDesignSystem.spacingL),
               ElevatedButton.icon(
                 onPressed: _createNewCollection,
-                icon: const Icon(Icons.add),
+                icon: const Icon(Icons.add, size: 20),
                 label: Text(
                   'Koleksiyon Oluştur',
-                  style: AppDesignSystem.buttonMedium,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
-                style: AppDesignSystem.primaryButtonStyle(
-                  padding: AppDesignSystem.spacingL,
-                  borderRadius: AppDesignSystem.radiusS,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6000),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
                 ),
               ),
             ],
