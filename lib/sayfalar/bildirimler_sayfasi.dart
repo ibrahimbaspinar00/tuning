@@ -882,49 +882,49 @@ class _BildirimlerSayfasiState extends State<BildirimlerSayfasi>
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.green[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.green[200]!, width: 1),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.receipt_long, color: Colors.green[700], size: 24),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.green[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green[200]!, width: 1),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.receipt_long, color: Colors.green[700], size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           displayText,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green[900],
-                          ),
-                        ),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green[900],
+                    ),
+                  ),
                       ),
                       Icon(Icons.copy, size: 16, color: Colors.green[700]),
-                    ],
-                  ),
-                  if (amount != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tutar: ${amount.toStringAsFixed(2)} ₺',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.green[700],
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+                  ),
+                if (amount != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tutar: ${amount.toStringAsFixed(2)} ₺',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.green[700],
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
+        ],
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../model/product_review.dart';
 import '../services/review_service.dart';
 import 'star_rating.dart';
+import 'review_form.dart';
 
 class ReviewList extends StatefulWidget {
   final String productId;
@@ -316,7 +317,18 @@ class _ReviewListState extends State<ReviewList> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Düzenleme butonu kaldırıldı - kullanıcılar istediği kadar yorum yapabilir
+                    // Düzenleme butonu (sadece kullanıcının kendi yorumu için)
+                    if (FirebaseAuth.instance.currentUser != null &&
+                        FirebaseAuth.instance.currentUser!.uid == review.userId) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(Icons.edit, size: isSmallScreen ? 16 : 18, color: Colors.blue[600]),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => _showEditReviewDialog(context, review),
+                        tooltip: 'Yorumu Düzenle',
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -502,7 +514,61 @@ class _ReviewListState extends State<ReviewList> {
     );
   }
 
-  // _showImageFullScreen kaldırıldı - _showImageGallery kullanılıyor
+  void _showImageFullScreen(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => Container(
+                    color: Colors.black87,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.black87,
+                    child: const Center(
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showImageGallery(BuildContext context, List<String> imageUrls, int initialIndex) {
     int currentIndex = initialIndex;
@@ -597,7 +663,65 @@ class _ReviewListState extends State<ReviewList> {
     );
   }
 
-  // _showEditReviewDialog fonksiyonu kaldırıldı - kullanıcılar istediği kadar yorum yapabilir
+  void _showEditReviewDialog(BuildContext context, ProductReview review) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Başlık
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Yorumu Düzenle',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            // Review Form
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: ReviewForm(
+                  productId: review.productId,
+                  existingReview: review,
+                  onReviewAdded: () {
+                    Navigator.pop(context); // Dialog'u kapat
+                    // Yorumları yenile
+                    if (widget.onReviewUpdated != null) {
+                      widget.onReviewUpdated!();
+                    }
+                    _loadReviews(); // Yorumları yeniden yükle
+                  },
+                  hasPurchased: true, // Düzenleme modunda zaten satın alınmış
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();

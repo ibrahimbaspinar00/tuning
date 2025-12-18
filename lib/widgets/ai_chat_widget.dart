@@ -66,12 +66,12 @@ class _AIChatWidgetState extends State<AIChatWidget> {
 
     if (mounted && !_welcomeMessageShown) {
       setState(() {
-        _messages.add({
-          'role': 'assistant',
+    _messages.add({
+      'role': 'assistant',
           'content': 'Merhaba $userName! 👋\n\nHoşgeldiniz! Ben ${AIChatConfig.botName}. Size nasıl yardımcı olabilirim?\n\n• Ürün bilgisi\n• Sipariş durumu\n• Kargo takibi\n• Genel sorular',
         });
         _welcomeMessageShown = true;
-      });
+    });
       _scrollToBottom();
     }
   }
