@@ -185,11 +185,7 @@ class ReviewService {
       
       debugPrint('✓ Satın alma kontrolü geçildi');
 
-      // Kullanıcının daha önce bu ürün için yorum yapıp yapmadığını kontrol et
-      final existingReview = await getUserReviewForProduct(productId, user.uid);
-      if (existingReview != null) {
-        throw Exception('Bu ürün için zaten yorum yapmışsınız');
-      }
+      // Kullanıcılar istediği kadar yorum yapabilir - mevcut yorum kontrolü kaldırıldı
 
       // Kullanıcı adını kontrol et - gerçek kullanıcı olmalı
       String userName = user.displayName ?? '';
