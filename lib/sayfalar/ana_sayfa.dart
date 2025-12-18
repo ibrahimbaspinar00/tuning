@@ -515,7 +515,7 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                 ),
               ),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(isSmallScreen ? 6 : 8), // Mobilde padding azaltıldı
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -591,124 +591,150 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Ürün adı - Sabit yükseklik
+                    // Ürün adı - Sabit yükseklik (mobilde daha küçük)
                     SizedBox(
-                      height: 36, // 2 satır için yeterli alan
+                      height: isSmallScreen ? 32 : 36, // Mobilde daha az yükseklik
                       child: Text(
                         product.name,
                         style: TextStyle(
-                          fontSize: isSmallScreen ? 12 : 14,
+                          fontSize: isSmallScreen ? 11 : 14, // Mobilde font küçültüldü
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF0F0F0F),
+                          height: 1.2, // Line height azaltıldı
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 3 : 4),
                     
-                    // Rating badge (Trendyol tarzı)
+                    // Rating badge (Trendyol tarzı) - Mobilde daha kompakt
                     if (product.averageRating > 0)
                       Row(
                         children: [
                           Icon(
                             Icons.star,
-                            size: 14,
+                            size: isSmallScreen ? 12 : 14, // Mobilde ikon küçültüldü
                             color: Colors.amber[600],
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: isSmallScreen ? 2 : 4),
                           Text(
                             '${product.averageRating.toStringAsFixed(1)}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: isSmallScreen ? 10 : 12, // Mobilde font küçültüldü
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF0F0F0F),
                             ),
                           ),
                           if (product.reviewCount > 0) ...[
-                            const SizedBox(width: 4),
-                            Text(
-                              '(${product.reviewCount})',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: const Color(0xFF6A6A6A),
+                            SizedBox(width: isSmallScreen ? 2 : 4),
+                            Flexible(
+                              child: Text(
+                                '(${product.reviewCount})',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 10 : 11, // Mobilde font küçültüldü
+                                  color: const Color(0xFF6A6A6A),
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ],
                       ),
                     
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 3 : 4),
                     
-                    // Fiyat
+                    // Fiyat - Mobilde daha küçük
                     Row(
                       children: [
-                        Text(
-                          '${product.price.toStringAsFixed(2)} ₺',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 14 : 16,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF10B981),
+                        Flexible(
+                          child: Text(
+                            '${product.price.toStringAsFixed(2)} ₺',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 13 : 16, // Mobilde font küçültüldü
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF10B981),
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (product.discountPercentage > 0) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            '${(product.price * 1.11).toStringAsFixed(2)} ₺',
-                            style: TextStyle(
-                              fontSize: 12,
-                              decoration: TextDecoration.lineThrough,
-                              color: const Color(0xFF6A6A6A),
+                          SizedBox(width: isSmallScreen ? 4 : 8),
+                          Flexible(
+                            child: Text(
+                              '${(product.price * 1.11).toStringAsFixed(2)} ₺',
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 10 : 12, // Mobilde font küçültüldü
+                                decoration: TextDecoration.lineThrough,
+                                color: const Color(0xFF6A6A6A),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ],
                     ),
                     
-                    const SizedBox(height: 8),
+                    SizedBox(height: isSmallScreen ? 6 : 8),
                     
                     // Butonlar - Mobil uygulamadan
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Favori butonu
+                        // Favori butonu - Mobilde sadece ikon
                         Expanded(
                           child: SizedBox(
-                            height: isSmallScreen ? 28 : 32,
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                await widget.onFavoriteToggle(product);
-                                if (mounted) {
-                                  setState(() {}); // State'i güncelle
-                                }
-                              },
-                              icon: Icon(
-                                isFavorite ? Icons.favorite : Icons.favorite_border,
-                                size: isSmallScreen ? 14 : 16,
-                                color: isFavorite ? Colors.red : Colors.grey[700],
-                              ),
-                              label: Text(
-                                isFavorite ? 'Favoride' : 'Favori',
-                                style: TextStyle(fontSize: isSmallScreen ? 10 : 12),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isFavorite ? Colors.red[50] : Colors.grey[50],
-                                foregroundColor: isFavorite ? Colors.red : Colors.grey[700],
-                                elevation: 0,
-                                padding: EdgeInsets.zero,
-                              ),
-                            ),
+                            height: isSmallScreen ? 24 : 32, // Mobilde buton yüksekliği azaltıldı
+                            child: isSmallScreen
+                                ? IconButton(
+                                    onPressed: () async {
+                                      await widget.onFavoriteToggle(product);
+                                      if (mounted) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    icon: Icon(
+                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                      size: 18,
+                                      color: isFavorite ? Colors.red : Colors.grey[700],
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  )
+                                : ElevatedButton.icon(
+                                    onPressed: () async {
+                                      await widget.onFavoriteToggle(product);
+                                      if (mounted) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    icon: Icon(
+                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                      size: 16,
+                                      color: isFavorite ? Colors.red : Colors.grey[700],
+                                    ),
+                                    label: Text(
+                                      isFavorite ? 'Favoride' : 'Favori',
+                                      style: const TextStyle(fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isFavorite ? Colors.red[50] : Colors.grey[50],
+                                      foregroundColor: isFavorite ? Colors.red : Colors.grey[700],
+                                      elevation: 0,
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                  ),
                           ),
                         ),
                         
-                        const SizedBox(width: 4),
+                        SizedBox(width: isSmallScreen ? 3 : 4),
                         
                         // Sepete ekle butonu (profesyonel - loading state ile)
                         Expanded(
                           child: SizedBox(
-                            height: isSmallScreen ? 28 : 32,
+                            height: isSmallScreen ? 24 : 32, // Mobilde buton yüksekliği azaltıldı
                             child: Builder(
                               builder: (context) {
                                 final isAdding = widget.isAddingToCart?.call(product.id) ?? false;

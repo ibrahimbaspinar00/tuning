@@ -532,7 +532,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
             child: Padding(
               padding: ResponsiveHelper.responsivePadding(
                 context,
-                mobile: 8.0,
+                mobile: 6.0, // Mobilde padding azaltıldı
                 tablet: 10.0,
                 desktop: 12.0,
               ),
@@ -628,8 +628,8 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                       ),
                     ),
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
-                  // Ürün Adı - Ana sayfadaki gibi
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 10.0)),
+                  // Ürün Adı - Mobilde daha küçük
                   Text(
                     product.name,
                     maxLines: 2,
@@ -637,17 +637,17 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     style: GoogleFonts.inter(
                       fontSize: ResponsiveHelper.responsiveFontSize(
                         context,
-                        mobile: 12.0,
+                        mobile: 11.0, // Mobilde font küçültüldü
                         tablet: 13.0,
                         desktop: 14.0,
                       ),
                       fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A1A),
-                      height: 1.3,
+                      height: 1.2, // Line height azaltıldı
                     ),
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0)),
-                  // Değerlendirme - Ana sayfadaki gibi
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 6.0)),
+                  // Değerlendirme - Mobilde daha kompakt
                   Row(
                     children: [
                       Icon(
@@ -655,39 +655,42 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                         color: Colors.amber[700],
                         size: ResponsiveHelper.responsiveIconSize(
                           context,
-                          mobile: 14.0,
+                          mobile: 12.0, // Mobilde ikon küçültüldü
                           desktop: 16.0,
                         ),
                       ),
-                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 4.0)),
+                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
                       Text(
                         product.averageRating.toStringAsFixed(1),
                         style: GoogleFonts.inter(
                           fontSize: ResponsiveHelper.responsiveFontSize(
                             context,
-                            mobile: 11.0,
+                            mobile: 10.0, // Mobilde font küçültüldü
                             desktop: 12.0,
                           ),
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF1A1A1A),
                         ),
                       ),
-                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 4.0)),
-                      Text(
-                        '(${product.reviewCount})',
-                        style: GoogleFonts.inter(
-                          fontSize: ResponsiveHelper.responsiveFontSize(
-                            context,
-                            mobile: 11.0,
-                            desktop: 12.0,
+                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                      Flexible(
+                        child: Text(
+                          '(${product.reviewCount})',
+                          style: GoogleFonts.inter(
+                            fontSize: ResponsiveHelper.responsiveFontSize(
+                              context,
+                              mobile: 10.0, // Mobilde font küçültüldü
+                              desktop: 12.0,
+                            ),
+                            color: Colors.grey[600],
                           ),
-                          color: Colors.grey[600],
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 8.0)),
-                  // Fiyat - Ana sayfadaki gibi (indirimli fiyat göster)
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
+                  // Fiyat - Mobilde daha kompakt
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -698,7 +701,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                           style: GoogleFonts.inter(
                             fontSize: ResponsiveHelper.responsiveFontSize(
                               context,
-                              mobile: 11.0,
+                              mobile: 10.0, // Mobilde font küçültüldü
                               desktop: 12.0,
                             ),
                             decoration: TextDecoration.lineThrough,
@@ -711,7 +714,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                         style: GoogleFonts.inter(
                           fontSize: ResponsiveHelper.responsiveFontSize(
                             context,
-                            mobile: 16.0,
+                            mobile: 14.0, // Mobilde font küçültüldü
                             tablet: 17.0,
                             desktop: 18.0,
                           ),
@@ -721,13 +724,13 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                       ),
                     ],
                   ),
-                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
-                  // Sepete Ekle Butonu - Ana sayfadaki gibi
+                  SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 10.0)),
+                  // Sepete Ekle Butonu - Mobilde daha küçük
                   SizedBox(
                     width: double.infinity,
                     height: ResponsiveHelper.responsiveValue(
                       context,
-                      mobile: 28.0,
+                      mobile: 24.0, // Mobilde buton yüksekliği azaltıldı
                       tablet: 32.0,
                       desktop: 36.0,
                     ),
@@ -754,7 +757,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                         style: GoogleFonts.inter(
                           fontSize: ResponsiveHelper.responsiveFontSize(
                             context,
-                            mobile: 11.0,
+                            mobile: 10.0, // Mobilde font küçültüldü
                             tablet: 12.0,
                             desktop: 13.0,
                           ),

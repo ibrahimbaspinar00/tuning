@@ -169,6 +169,24 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
   }
 
   Future<void> _pickProfileImage() async {
+    // Cloudinary ayarları kontrolü
+    if (!ExternalImageStorageConfig.enabled ||
+        ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+        ExternalImageStorageConfig.cloudinaryCloudName.isEmpty ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profil fotoğrafı yükleme özelliği şu anda kullanılamıyor. Cloudinary ayarları yapılandırılmalıdır.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      return;
+    }
+    
     try {
       // Web için özel kontrol
       if (kIsWeb) {
@@ -452,44 +470,62 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
                       child: Column(
                         children: [
                           // Profil fotoğrafı
-                          GestureDetector(
-                            onTap: _pickProfileImage,
-                            child: Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Colors.grey[200],
-                                  backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
-                                      ? NetworkImage(_profileImageUrl!)
-                                      : null,
-                                  child: _profileImageUrl == null
-                                      ? const Icon(
-                                          Icons.person,
-                                          size: 50,
-                                          color: Colors.grey,
-                                        )
-                                      : null,
-                                ),
-                                // Kamera ikonu overlay
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF27A1A),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
-                                    ),
-                                    child: const Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.grey[200],
+                                backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                    ? NetworkImage(_profileImageUrl!)
+                                    : null,
+                                child: _profileImageUrl == null
+                                    ? const Icon(
+                                        Icons.person,
+                                        size: 50,
+                                        color: Colors.grey,
+                                      )
+                                    : null,
+                              ),
+                              // Kamera ikonu overlay (sadece Cloudinary ayarlıysa tıklanabilir)
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: (ExternalImageStorageConfig.enabled &&
+                                        ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                        ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET' &&
+                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty)
+                                    ? GestureDetector(
+                                        onTap: _pickProfileImage,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF27A1A),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Colors.white, width: 2),
+                                          ),
+                                          child: const Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[400],
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: Colors.white, width: 2),
+                                        ),
+                                        child: const Icon(
+                                          Icons.camera_alt,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           Text(

@@ -769,9 +769,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Sol taraf - Logo (sabit genişlik)
+                // Sol taraf - Logo (mobilde daha küçük)
                 SizedBox(
-                  width: isDesktop ? 280.0 : isTablet ? 240.0 : (screenWidth < 400 ? 120.0 : 160.0), // Mobilde logo genişliği azaltıldı
+                  width: isDesktop ? 280.0 : isTablet ? 240.0 : (screenWidth < 400 ? 100.0 : 140.0), // Mobilde logo genişliği daha da azaltıldı
                   child: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -801,82 +801,145 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                     ),
                   ),
                 ),
-                // Arama çubuğu - ortada
+                // Arama çubuğu - ortada (mobilde daha kompakt)
                 Expanded(
-                  child: Container(
-                    height: isDesktop ? 50 : isTablet ? 48 : 46, // Yükseklik azaltıldı
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFAFBFC),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFFE8E8E8),
-                        width: 1,
+                  child: screenWidth < 400 
+                    ? GestureDetector(
+                        onTap: () {
+                          // Mobilde arama çubuğuna tıklanınca arama sayfasına git veya dialog aç
+                          // Şimdilik sadece focus et
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        },
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFAFBFC),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFFE8E8E8),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 12),
+                                child: Icon(
+                                  Icons.search,
+                                  color: Color(0xFF6A6A6A),
+                                  size: 20,
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _headerSearchController,
+                                  onChanged: (value) {
+                                    final query = value.trim();
+                                    setState(() {
+                                      _headerSearchQuery = query.isEmpty ? null : query;
+                                      if (_selectedIndex != 0) {
+                                        _selectedIndex = 0;
+                                      }
+                                    });
+                                  },
+                                  onSubmitted: (value) {
+                                    final query = value.trim();
+                                    setState(() {
+                                      _headerSearchQuery = query.isEmpty ? null : query;
+                                      _selectedIndex = 0;
+                                    });
+                                  },
+                                  textInputAction: TextInputAction.search,
+                                  decoration: InputDecoration(
+                                    hintText: 'Ara...',
+                                    hintStyle: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: const Color(0xFF9CA3AF),
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color: const Color(0xFF0F0F0F),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        height: isDesktop ? 50 : isTablet ? 48 : 42,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFAFBFC),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFE8E8E8),
+                            width: 1,
+                          ),
+                        ),
+                        child: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _headerSearchController,
+                          builder: (context, value, child) {
+                            return TextField(
+                              controller: _headerSearchController,
+                              onChanged: (value) {
+                                final query = value.trim();
+                                setState(() {
+                                  _headerSearchQuery = query.isEmpty ? null : query;
+                                  if (_selectedIndex != 0) {
+                                    _selectedIndex = 0;
+                                  }
+                                });
+                              },
+                              onSubmitted: (value) {
+                                final query = value.trim();
+                                setState(() {
+                                  _headerSearchQuery = query.isEmpty ? null : query;
+                                  _selectedIndex = 0;
+                                });
+                              },
+                              textInputAction: TextInputAction.search,
+                              decoration: InputDecoration(
+                                hintText: screenWidth < 600 ? 'Ara...' : 'Aradığınız ürün, kategori veya markayı yazınız',
+                                hintStyle: GoogleFonts.inter(
+                                  fontSize: screenWidth < 600 ? 12 : 14,
+                                  color: const Color(0xFF9CA3AF),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: const Color(0xFF6A6A6A),
+                                  size: screenWidth < 600 ? 20 : 22,
+                                ),
+                                suffixIcon: value.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear, size: 18, color: Color(0xFF6A6A6A)),
+                                        onPressed: () {
+                                          setState(() {
+                                            _headerSearchController.clear();
+                                            _headerSearchQuery = null;
+                                          });
+                                        },
+                                      )
+                                    : null,
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth < 600 ? 12 : 16,
+                                  vertical: isDesktop ? 14 : isTablet ? 13 : 11,
+                                ),
+                              ),
+                              style: GoogleFonts.inter(
+                                fontSize: screenWidth < 600 ? 12 : 14,
+                                color: const Color(0xFF0F0F0F),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    child: ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _headerSearchController,
-                      builder: (context, value, child) {
-                        return TextField(
-                          controller: _headerSearchController,
-                          onChanged: (value) {
-                            // Arama sorgusunu güncelle ve ana sayfaya git
-                            final query = value.trim();
-                            setState(() {
-                              _headerSearchQuery = query.isEmpty ? null : query;
-                              // Ana sayfaya git ki filtreleme yapılsın
-                              if (_selectedIndex != 0) {
-                                _selectedIndex = 0;
-                              } else {
-                                // Zaten ana sayfadaysak, sadece rebuild et
-                                // ValueKey değiştiği için AnaSayfa yeniden oluşturulacak
-                              }
-                            });
-                          },
-                          onSubmitted: (value) {
-                            // Enter'a basıldığında ana sayfaya git ve ara
-                            final query = value.trim();
-                            setState(() {
-                              _headerSearchQuery = query.isEmpty ? null : query;
-                              _selectedIndex = 0; // Ana sayfaya git
-                            });
-                          },
-                          textInputAction: TextInputAction.search,
-                          decoration: InputDecoration(
-                            hintText: 'Aradığınız ürün, kategori veya markayı yazınız',
-                            hintStyle: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: const Color(0xFF9CA3AF),
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: Color(0xFF6A6A6A),
-                              size: 22,
-                            ),
-                            suffixIcon: value.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear, size: 18, color: Color(0xFF6A6A6A)),
-                                    onPressed: () {
-                                      setState(() {
-                                        _headerSearchController.clear();
-                                        _headerSearchQuery = null;
-                                      });
-                                    },
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: isDesktop ? 14 : isTablet ? 13 : 12, // Padding azaltıldı
-                            ),
-                          ),
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: const Color(0xFF0F0F0F),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
                 ),
                 // Sağ taraf - İkonlar (mobilde sadece ikonlar, label yok)
                 Flexible(
