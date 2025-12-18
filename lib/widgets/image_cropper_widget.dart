@@ -78,10 +78,10 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                 child: Crop(
                   image: widget.imageData,
                   controller: _cropController,
-                  onCropped: (image) {
+                  onCropped: (result) {
                     if (mounted) {
-                      // onCropped direkt Uint8List döndürüyor
-                      widget.onCropComplete(image);
+                      // CropResult yapısı: {data: Uint8List, rect: Rect}
+                      widget.onCropComplete(result.data);
                       Navigator.pop(context);
                     }
                   },
@@ -112,4 +112,3 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
     );
   }
 }
-
