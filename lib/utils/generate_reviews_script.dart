@@ -155,25 +155,57 @@ class GenerateReviewsScript {
     }
   }
 
-  /// Bir ürün için yorum oluştur
-  Future<void> generateReviewsForProduct(String productId, String productName) async {
+  /// Ürün için yorum oluştur (mevcut yorumların üzerine ekler)
+  /// Eğer üründe zaten 50 yorum varsa, 50 daha ekler (toplam 100 olur)
+  /// Returns: Eklenen yorum sayısı
+  Future<int> generateReviewsForProduct(String productId, String productName) async {
     try {
       debugPrint('📝 Ürün için yorumlar oluşturuluyor: $productName');
+      
+      // Mevcut yorum sayısını kontrol et
+      final existingReviewsSnapshot = await _firestore
+          .collection('product_reviews')
+          .where('productId', isEqualTo: productId)
+          .where('isApproved', isEqualTo: true)
+          .get();
+      
+      final existingCount = existingReviewsSnapshot.docs.length;
+      debugPrint('📊 Mevcut yorum sayısı: $existingCount');
+      
+      // Eğer zaten 50 veya daha fazla yorum varsa, 50 daha ekle
+      // Eğer 50'den az varsa, 50'ye tamamla
+      int reviewsToAdd;
+      if (existingCount >= 50) {
+        reviewsToAdd = 50; // 50 varsa 50 daha ekle (toplam 100)
+        debugPrint('ℹ️ Üründe zaten $existingCount yorum var, 50 daha eklenecek (toplam ${existingCount + 50})');
+      } else {
+        reviewsToAdd = 50 - existingCount; // 50'ye tamamla
+        debugPrint('ℹ️ Üründe $existingCount yorum var, ${reviewsToAdd} yorum eklenecek (toplam 50)');
+      }
+      
+      if (reviewsToAdd <= 0) {
+        debugPrint('ℹ️ Yorum eklenmesine gerek yok (zaten yeterli yorum var)');
+        return 0;
+      }
       
       final batch = _firestore.batch();
       final reviewsRef = _firestore.collection('product_reviews');
       
-      // 50 yorum oluştur
-      for (int i = 0; i < 50; i++) {
+      // Yorumları oluştur (mevcut sayıdan başlayarak)
+      for (int i = 0; i < reviewsToAdd; i++) {
+        final reviewIndex = existingCount + i; // Mevcut sayıdan başla
+        
         // Puan dağılımı: 1-5 arası, çoğu 3-5 arası
+        // reviewIndex kullanarak dağılımı koru
         int rating;
-        if (i < 5) {
+        final indexInBatch = reviewIndex % 50; // 50'lik gruplar halinde dağılım
+        if (indexInBatch < 5) {
           rating = 1; // 5 tane 1 yıldız
-        } else if (i < 10) {
+        } else if (indexInBatch < 10) {
           rating = 2; // 5 tane 2 yıldız
-        } else if (i < 20) {
+        } else if (indexInBatch < 20) {
           rating = 3; // 10 tane 3 yıldız
-        } else if (i < 35) {
+        } else if (indexInBatch < 35) {
           rating = 4; // 15 tane 4 yıldız
         } else {
           rating = 5; // 15 tane 5 yıldız
@@ -182,26 +214,26 @@ class GenerateReviewsScript {
         // Yorum metni seç
         String comment;
         if (rating >= 4) {
-          comment = _positiveComments[i % _positiveComments.length];
+          comment = _positiveComments[reviewIndex % _positiveComments.length];
         } else if (rating == 3) {
-          comment = _neutralComments[i % _neutralComments.length];
+          comment = _neutralComments[reviewIndex % _neutralComments.length];
         } else {
-          comment = _negativeComments[i % _negativeComments.length];
+          comment = _negativeComments[reviewIndex % _negativeComments.length];
         }
         
-        // Kullanıcı bilgileri
-        final userName = _userNames[i % _userNames.length];
-        final userEmail = '${userName.toLowerCase().replaceAll(' ', '.')}@gmail.com';
-        final userId = 'user_${i}_${productId.substring(0, 8)}';
+        // Kullanıcı bilgileri (reviewIndex kullanarak benzersizlik sağla)
+        final userName = _userNames[reviewIndex % _userNames.length];
+        final userEmail = '${userName.toLowerCase().replaceAll(' ', '.')}${reviewIndex}@gmail.com';
+        final userId = 'user_${reviewIndex}_${productId.substring(0, 8)}';
         
-        // İlk 10 yorum fotoğraflı
-        final List<String> imageUrls = (i < 10) 
-            ? [_imageUrls[i % _imageUrls.length]]
+        // Her 50 yorumun ilk 10'u fotoğraflı olacak
+        final List<String> imageUrls = (indexInBatch < 10) 
+            ? [_imageUrls[reviewIndex % _imageUrls.length]]
             : [];
         
         // Tarih (son 6 ay içinde rastgele)
         final now = DateTime.now();
-        final daysAgo = (i * 3) % 180; // Son 6 ay içinde
+        final daysAgo = (reviewIndex * 3) % 180; // Son 6 ay içinde
         final createdAt = now.subtract(Duration(days: daysAgo));
         final updatedAt = createdAt;
         
@@ -230,10 +262,12 @@ class GenerateReviewsScript {
       
       // Batch commit
       await batch.commit();
-      debugPrint('✅ $productName için 50 yorum oluşturuldu');
+      debugPrint('✅ $productName için $reviewsToAdd yorum eklendi (toplam: ${existingCount + reviewsToAdd})');
       
       // Rating'i güncelle
       await _updateProductRating(productId);
+      
+      return reviewsToAdd;
     } catch (e) {
       debugPrint('❌ Yorum oluşturma hatası ($productId): $e');
       rethrow;
@@ -289,15 +323,13 @@ class GenerateReviewsScript {
     }
   }
 
-  /// Tüm ürünler için yorum oluştur
+  /// Tüm ürünler için yorum oluştur (mevcut yorumların üzerine ekler)
   Future<void> generateAllReviews() async {
     try {
       debugPrint('🚀 Yorum oluşturma işlemi başlıyor...');
+      debugPrint('ℹ️ Mevcut yorumlar silinmeyecek, üzerine eklenecek');
       
-      // 1. Tüm yorumları sil
-      await deleteAllReviews();
-      
-      // 2. Tüm ürünleri al
+      // 1. Tüm ürünleri al
       debugPrint('📦 Ürünler getiriliyor...');
       final products = await _productService.getAllProductsForAdmin();
       debugPrint('📦 ${products.length} ürün bulundu');
@@ -307,12 +339,14 @@ class GenerateReviewsScript {
         return;
       }
       
-      // 3. Her ürün için yorum oluştur
+      // 2. Her ürün için yorum oluştur (mevcut yorumların üzerine ekler)
+      int totalReviewsAdded = 0;
       for (int i = 0; i < products.length; i++) {
         final product = products[i];
         debugPrint('📝 [${i + 1}/${products.length}] ${product.name} için yorumlar oluşturuluyor...');
         
-        await generateReviewsForProduct(product.id, product.name);
+        final addedCount = await generateReviewsForProduct(product.id, product.name);
+        totalReviewsAdded += addedCount;
         
         // Rate limiting (Firebase limitlerini aşmamak için)
         if (i < products.length - 1) {
@@ -321,7 +355,7 @@ class GenerateReviewsScript {
       }
       
       debugPrint('✅ Tüm yorumlar başarıyla oluşturuldu!');
-      debugPrint('📊 Toplam: ${products.length} ürün x 50 yorum = ${products.length * 50} yorum');
+      debugPrint('📊 Toplam eklenen yorum: $totalReviewsAdded');
       
       // Tüm ürünlerin rating'lerini güncelle (son bir kez daha - emin olmak için)
       debugPrint('🔄 Tüm ürünlerin rating\'leri güncelleniyor...');

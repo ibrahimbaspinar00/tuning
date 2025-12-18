@@ -103,7 +103,7 @@ class _AdminToolsSayfasiState extends State<AdminToolsSayfasi> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Her ürüne 50 yorum ekler (10 tanesi fotoğraflı)',
+              'Her ürüne 50 yorum ekler (10 tanesi fotoğraflı). Mevcut yorumların üzerine eklenir.',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -138,9 +138,9 @@ class _AdminToolsSayfasiState extends State<AdminToolsSayfasi> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '• Önceki tüm yorumlar silinecek\n'
-                    '• Her ürün için 50 yorum oluşturulacak\n'
-                    '• 10 yorum fotoğraflı olacak\n'
+                    '• Mevcut yorumlar silinmeyecek, üzerine eklenecek\n'
+                    '• Her ürün için 50 yorum eklenecek (50 varsa 50 daha = 100 olur)\n'
+                    '• Her 50 yorumun 10 tanesi fotoğraflı olacak\n'
                     '• Puanlar 1-5 arası farklı olacak\n'
                     '• Tüm yorumlar onaylı olacak\n'
                     '• Email adresleri gmail.com olacak',
