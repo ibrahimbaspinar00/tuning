@@ -487,14 +487,31 @@ class ReviewService {
       final averageRating = ProductReview.calculateAverageRating(reviews);
       final totalReviews = reviews.length;
 
-      // Ürünün rating bilgilerini güncelle
+      // Ürünün rating bilgilerini güncelle (hem reviewCount hem totalReviews)
       await _firestore.collection('products').doc(productId).update({
         'averageRating': averageRating,
-        'totalReviews': totalReviews,
+        'reviewCount': totalReviews, // Product modeli için
+        'totalReviews': totalReviews, // Uyumluluk için
         'lastRatingUpdate': DateTime.now().toIso8601String(),
       });
     } catch (e) {
       debugPrint('Ürün rating güncellenirken hata oluştu: $e');
+    }
+  }
+  
+  // Tüm ürünlerin rating'lerini güncelle (public method)
+  static Future<void> updateAllProductRatings() async {
+    try {
+      final productsSnapshot = await _firestore.collection('products').get();
+      debugPrint('📊 ${productsSnapshot.docs.length} ürün için rating güncelleniyor...');
+      
+      for (var doc in productsSnapshot.docs) {
+        await _updateProductRating(doc.id);
+      }
+      
+      debugPrint('✅ Tüm ürün rating\'leri güncellendi');
+    } catch (e) {
+      debugPrint('❌ Tüm ürün rating\'leri güncellenirken hata oluştu: $e');
     }
   }
 

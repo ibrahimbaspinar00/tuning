@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/product.dart';
 import '../services/product_service.dart';
 import '../widgets/optimized_image.dart';
@@ -66,17 +67,66 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
       final productService = ProductService();
       final products = await productService.getAllProducts();
       if (!mounted) return;
+      
+      // Ürünler yüklendikten sonra rating'leri güncelle (Firestore'dan güncel değerleri çek)
+      final updatedProducts = await _refreshProductRatings(products);
+      
       setState(() {
-        _allProducts = products;
+        _allProducts = updatedProducts;
         _filteredProducts = List.from(_allProducts);
         _isLoading = false;
       });
+      
+      // Filtreleme yap
+      _filterProducts();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
       // Firebase hatası durumunda boş liste
       _allProducts = [];
       _filteredProducts = [];
+    }
+  }
+  
+  /// Ürünlerin rating'lerini Firestore'dan güncel olarak çek ve güncelle
+  Future<List<Product>> _refreshProductRatings(List<Product> products) async {
+    if (products.isEmpty || !mounted) return products;
+    
+    try {
+      debugPrint('🔄 Kategoriler: Rating\'ler güncelleniyor...');
+      final firestore = FirebaseFirestore.instance;
+      
+      // Her ürün için rating'leri Firestore'dan çek
+      final updatedProducts = <Product>[];
+      for (final product in products) {
+        try {
+          final productDoc = await firestore.collection('products').doc(product.id).get();
+          if (productDoc.exists) {
+            final data = productDoc.data()!;
+            final newAverageRating = (data['averageRating'] as num?)?.toDouble() ?? product.averageRating;
+            final newReviewCount = (data['reviewCount'] ?? data['totalReviews'] ?? product.reviewCount) as int;
+            
+            // copyWith ile sadece rating'leri güncelle
+            final updatedProduct = product.copyWith(
+              averageRating: newAverageRating,
+              reviewCount: newReviewCount,
+            );
+            updatedProducts.add(updatedProduct);
+          } else {
+            updatedProducts.add(product);
+          }
+        } catch (e) {
+          debugPrint('⚠️ Ürün ${product.id} rating güncellenirken hata: $e');
+          updatedProducts.add(product); // Hata durumunda eski ürünü kullan
+        }
+      }
+      
+      debugPrint('✅ Kategoriler: Rating\'ler güncellendi: ${updatedProducts.length} ürün');
+      return updatedProducts;
+    } catch (e) {
+      debugPrint('❌ Kategoriler: Rating güncelleme hatası: $e');
+      // Hata durumunda orijinal ürünleri döndür
+      return products;
     }
   }
 
