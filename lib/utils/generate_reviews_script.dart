@@ -322,6 +322,17 @@ class GenerateReviewsScript {
       
       debugPrint('✅ Tüm yorumlar başarıyla oluşturuldu!');
       debugPrint('📊 Toplam: ${products.length} ürün x 50 yorum = ${products.length * 50} yorum');
+      
+      // Tüm ürünlerin rating'lerini güncelle (son bir kez daha - emin olmak için)
+      debugPrint('🔄 Tüm ürünlerin rating\'leri güncelleniyor...');
+      for (int i = 0; i < products.length; i++) {
+        final product = products[i];
+        await _updateProductRating(product.id);
+        if (i < products.length - 1) {
+          await Future.delayed(const Duration(milliseconds: 200));
+        }
+      }
+      debugPrint('✅ Tüm ürünlerin rating\'leri güncellendi!');
     } catch (e, stackTrace) {
       debugPrint('❌ Yorum oluşturma hatası: $e');
       debugPrint('Stack trace: $stackTrace');
