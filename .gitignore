@@ -45,4 +45,5 @@ app.*.map.json
 /android/app/release
 
 # API Keys and sensitive configuration
-lib/config/ai_chat_config.dart
+# Not: ai_chat_config.dart GitHub'da olmalı ama API key boş olmalı
+# Kullanıcılar kendi API key'lerini ekleyecek
