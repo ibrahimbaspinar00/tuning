@@ -481,4 +481,144 @@ class _OdemeYontemleriSayfasiState extends State<OdemeYontemleriSayfasi> {
       ),
     );
   }
+
+  void _showAddCardDialog() {
+    final nameController = TextEditingController();
+    final numberController = TextEditingController();
+    final expiryController = TextEditingController();
+    final cvvController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Yeni Kart Ekle'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Kart Üzerindeki İsim',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: numberController,
+                decoration: const InputDecoration(
+                  labelText: 'Kart Numarası',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                textCapitalization: TextCapitalization.none,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: expiryController,
+                      decoration: const InputDecoration(
+                        labelText: 'Son Kullanma (MM/YY)',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      textCapitalization: TextCapitalization.none,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: cvvController,
+                      decoration: const InputDecoration(
+                        labelText: 'CVV',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      textCapitalization: TextCapitalization.none,
+                      obscureText: true,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Kart bilgilerini kaydet
+              if (nameController.text.isNotEmpty && 
+                  numberController.text.isNotEmpty && 
+                  expiryController.text.isNotEmpty && 
+                  cvvController.text.isNotEmpty) {
+                
+                // Firestore'a kaydet
+                try {
+                  await _firebaseDataService.savePaymentMethod(
+                    name: nameController.text.trim(),
+                    cardNumber: numberController.text.trim(),
+                    expiryDate: expiryController.text.trim(),
+                    cvv: cvvController.text.trim(),
+                    isDefault: paymentMethods.isEmpty, // İlk kart varsayılan olsun
+                  );
+                  
+                  Navigator.of(context).pop();
+                  
+                  // Başarı mesajı göster
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text('Kart başarıyla kaydedildi!'),
+                          ],
+                        ),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                  
+                  // Kartları yeniden yükle
+                  await _loadPaymentMethods();
+                } catch (e) {
+                  Navigator.of(context).pop();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Kart kaydedilirken hata oluştu: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lütfen tüm alanları doldurun'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF27A1A),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+  }
 }
