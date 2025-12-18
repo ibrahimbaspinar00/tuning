@@ -647,48 +647,53 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     ),
                   ),
                   SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 6.0)),
-                  // Değerlendirme - Mobilde daha kompakt
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.star,
-                        color: Colors.amber[700],
-                        size: ResponsiveHelper.responsiveIconSize(
-                          context,
-                          mobile: 12.0, // Mobilde ikon küçültüldü
-                          desktop: 16.0,
-                        ),
-                      ),
-                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
-                      Text(
-                        product.averageRating.toStringAsFixed(1),
-                        style: GoogleFonts.inter(
-                          fontSize: ResponsiveHelper.responsiveFontSize(
+                  // Değerlendirme - Mobilde daha kompakt (Yorum varsa göster)
+                  if (product.reviewCount > 0 || product.averageRating > 0)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.amber[700],
+                          size: ResponsiveHelper.responsiveIconSize(
                             context,
-                            mobile: 10.0, // Mobilde font küçültüldü
-                            desktop: 12.0,
+                            mobile: 12.0, // Mobilde ikon küçültüldü
+                            desktop: 16.0,
                           ),
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A1A),
                         ),
-                      ),
-                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
-                      Flexible(
-                        child: Text(
-                          '(${product.reviewCount})',
+                        SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                        Text(
+                          product.averageRating > 0 
+                              ? product.averageRating.toStringAsFixed(1)
+                              : '0.0',
                           style: GoogleFonts.inter(
                             fontSize: ResponsiveHelper.responsiveFontSize(
                               context,
                               mobile: 10.0, // Mobilde font küçültüldü
                               desktop: 12.0,
                             ),
-                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1A1A1A),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
+                        if (product.reviewCount > 0) ...[
+                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                          Flexible(
+                            child: Text(
+                            '(${product.reviewCount})',
+                            style: GoogleFonts.inter(
+                              fontSize: ResponsiveHelper.responsiveFontSize(
+                                context,
+                                  mobile: 10.0, // Mobilde font küçültüldü
+                                desktop: 12.0,
+                              ),
+                              color: Colors.grey[600],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
                   // Fiyat - Mobilde daha kompakt
                   Column(
