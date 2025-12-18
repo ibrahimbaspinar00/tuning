@@ -107,18 +107,18 @@ class GenerateReviewsScript {
     'Zara Özer',
   ];
 
-  // Fotoğraflı yorumlar için placeholder URL'ler (Cloudinary veya başka bir servis)
+  // Fotoğraflı yorumlar için gerçek placeholder URL'ler (Picsum Photos - ürün fotoğrafları için uygun)
   final List<String> _imageUrls = [
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_1.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_2.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_3.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_4.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_5.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_6.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_7.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_8.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_9.jpg',
-    'https://res.cloudinary.com/dobjrnkea/image/upload/v1/reviews/review_10.jpg',
+    'https://picsum.photos/seed/review1/400/400', // Ürün fotoğrafı benzeri
+    'https://picsum.photos/seed/review2/400/400',
+    'https://picsum.photos/seed/review3/400/400',
+    'https://picsum.photos/seed/review4/400/400',
+    'https://picsum.photos/seed/review5/400/400',
+    'https://picsum.photos/seed/review6/400/400',
+    'https://picsum.photos/seed/review7/400/400',
+    'https://picsum.photos/seed/review8/400/400',
+    'https://picsum.photos/seed/review9/400/400',
+    'https://picsum.photos/seed/review10/400/400',
   ];
 
   /// Tüm yorumları sil
