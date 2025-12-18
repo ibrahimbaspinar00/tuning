@@ -610,41 +610,40 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                     SizedBox(height: isSmallScreen ? 3 : 4),
                     
                     // Rating badge (Trendyol tarzı) - Mobilde daha kompakt
-                    // Yorum varsa rating'i göster (0 olsa bile)
-                    if (product.reviewCount > 0 || product.averageRating > 0)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star,
-                            size: isSmallScreen ? 12 : 14, // Mobilde ikon küçültüldü
-                            color: Colors.amber[600],
+                    // Rating'i her zaman göster
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          size: isSmallScreen ? 12 : 14, // Mobilde ikon küçültüldü
+                          color: Colors.amber[600],
+                        ),
+                        SizedBox(width: isSmallScreen ? 2 : 4),
+                        Text(
+                          product.averageRating > 0 
+                              ? product.averageRating.toStringAsFixed(1)
+                              : '0.0',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 10 : 12, // Mobilde font küçültüldü
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF0F0F0F),
                           ),
+                        ),
+                        if (product.reviewCount > 0) ...[
                           SizedBox(width: isSmallScreen ? 2 : 4),
-                          Text(
-                            product.averageRating > 0 
-                                ? product.averageRating.toStringAsFixed(1)
-                                : '0.0',
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 10 : 12, // Mobilde font küçültüldü
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF0F0F0F),
+                          Flexible(
+                            child: Text(
+                              '(${product.reviewCount})',
+                              style: TextStyle(
+                                  fontSize: isSmallScreen ? 10 : 11, // Mobilde font küçültüldü
+                              color: const Color(0xFF6A6A6A),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (product.reviewCount > 0) ...[
-                            SizedBox(width: isSmallScreen ? 2 : 4),
-                            Flexible(
-                              child: Text(
-                                '(${product.reviewCount})',
-                                style: TextStyle(
-                                    fontSize: isSmallScreen ? 10 : 11, // Mobilde font küçültüldü
-                                color: const Color(0xFF6A6A6A),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
                         ],
-                      ),
+                      ],
+                    ),
                     
                     SizedBox(height: isSmallScreen ? 3 : 4),
                     
@@ -1416,36 +1415,35 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                       ],
                     ),
                     const SizedBox(height: AppDesignSystem.spacingXS),
-                    // Yıldız puanı - Yorum varsa göster
-                    if (product.reviewCount > 0 || product.averageRating > 0)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star,
-                            size: 12,
-                            color: AppDesignSystem.accent,
+                    // Yıldız puanı - Her zaman göster
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          size: 12,
+                          color: AppDesignSystem.accent,
+                        ),
+                        const SizedBox(width: AppDesignSystem.spacingXS),
+                        Text(
+                          product.averageRating > 0 
+                              ? product.averageRating.toStringAsFixed(1)
+                              : '0.0',
+                          style: AppDesignSystem.bodySmall.copyWith(
+                            color: AppDesignSystem.textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
+                        ),
+                        if (product.reviewCount > 0) ...[
                           const SizedBox(width: AppDesignSystem.spacingXS),
                           Text(
-                            product.averageRating > 0 
-                                ? product.averageRating.toStringAsFixed(1)
-                                : '0.0',
+                            '(${product.reviewCount})',
                             style: AppDesignSystem.bodySmall.copyWith(
                               color: AppDesignSystem.textSecondary,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          if (product.reviewCount > 0) ...[
-                            const SizedBox(width: AppDesignSystem.spacingXS),
-                            Text(
-                              '(${product.reviewCount})',
-                              style: AppDesignSystem.bodySmall.copyWith(
-                                color: AppDesignSystem.textSecondary,
-                              ),
-                            ),
-                          ],
                         ],
-                      ),
+                      ],
+                    ),
                     // Sepete ekle butonu - Spacer yerine sabit boşluk
                     const SizedBox(height: 4),
                     Builder(
