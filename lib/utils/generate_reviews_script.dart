@@ -145,7 +145,7 @@ class GenerateReviewsScript {
         }
         
         await batch.commit();
-        debugPrint('✅ ${end} yorum silindi...');
+        debugPrint('✅ $end yorum silindi...');
       }
       
       debugPrint('✅ Tüm yorumlar başarıyla silindi!');

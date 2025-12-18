@@ -20,8 +20,6 @@ class _AdminToolsSayfasiState extends State<AdminToolsSayfasi> {
     setState(() {
       _isRunning = true;
       _status = 'Yorumlar oluşturuluyor...';
-      _progress = 0;
-      _total = 0;
     });
 
     try {
