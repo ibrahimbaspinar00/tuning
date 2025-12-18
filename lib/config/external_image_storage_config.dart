@@ -9,12 +9,15 @@
 /// preset settings (max file size, allowed formats, folder, moderation).
 class ExternalImageStorageConfig {
   /// Master flag for external image uploads.
-  static const bool enabled = true;
+  /// Cloudinary ayarları yapılmadıysa false yapın
+  static const bool enabled = false; // Cloudinary ayarları yapılana kadar false
 
   /// Cloudinary "cloud name" from the dashboard.
+  /// https://console.cloudinary.com/ adresinden alın
   static const String cloudinaryCloudName = 'YOUR_CLOUD_NAME';
 
   /// Cloudinary unsigned upload preset name.
+  /// Cloudinary dashboard'da Settings > Upload > Upload presets'ten oluşturun
   static const String cloudinaryUnsignedUploadPreset = 'YOUR_UPLOAD_PRESET';
 
   /// Folder where product images are stored in Cloudinary.

@@ -262,17 +262,17 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
 
       // Cloudinary ayarları kontrolü
       if (!ExternalImageStorageConfig.enabled) {
-        throw Exception('Profil fotoğrafı yükleme özelliği şu anda devre dışı. Lütfen yöneticiye başvurun.');
+        throw Exception('Profil fotoğrafı yükleme özelliği şu anda devre dışı. Cloudinary ayarları yapılandırılmalıdır.');
       }
 
       if (ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
           ExternalImageStorageConfig.cloudinaryCloudName.isEmpty) {
-        throw Exception('Cloudinary cloud name ayarlı değil. `ExternalImageStorageConfig.cloudinaryCloudName` doldurun.');
+        throw Exception('Cloudinary ayarları eksik. Lütfen https://console.cloudinary.com/ adresinden ücretsiz hesap oluşturup cloud name alın ve `lib/config/external_image_storage_config.dart` dosyasına ekleyin.');
       }
 
       if (ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
           ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
-        throw Exception('Cloudinary upload preset ayarlı değil. `ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset` doldurun.');
+        throw Exception('Cloudinary upload preset ayarlı değil. Cloudinary dashboard\'da Settings > Upload > Upload presets bölümünden unsigned preset oluşturun ve `lib/config/external_image_storage_config.dart` dosyasına ekleyin.');
       }
 
       // Cloudinary'ye yükle

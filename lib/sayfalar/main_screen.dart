@@ -756,7 +756,7 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
           // Ana header
           Container(
             height: headerHeight,
-            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : isTablet ? 10 : 6), // Padding daha da azaltıldı - arama çubuğu için maksimum genişlik
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : isTablet ? 10 : (screenWidth < 400 ? 4 : 6)), // Çok küçük ekranlarda padding daha da az
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(
@@ -771,7 +771,7 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
               children: [
                 // Sol taraf - Logo (sabit genişlik)
                 SizedBox(
-                  width: isDesktop ? 280.0 : isTablet ? 240.0 : 200.0, // Logo için sabit genişlik
+                  width: isDesktop ? 280.0 : isTablet ? 240.0 : (screenWidth < 400 ? 120.0 : 160.0), // Mobilde logo genişliği azaltıldı
                   child: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -878,11 +878,11 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                     ),
                   ),
                 ),
-                // Sağ taraf - İkonlar (sabit genişlik, logo ile eşit)
-                SizedBox(
-                  width: isDesktop ? 280.0 : isTablet ? 240.0 : 200.0, // Logo ile aynı genişlik - tam ortalama için
+                // Sağ taraf - İkonlar (mobilde sadece ikonlar, label yok)
+                Flexible(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                 // Hesabım
                 _buildHeaderIcon(
@@ -893,8 +893,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                       _selectedIndex = 3;
                     });
                   },
+                  showLabel: isDesktop || isTablet, // Mobilde label gizle
                 ),
-                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : 14), // İkonlar arası boşluk
+                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : (screenWidth < 400 ? 8 : 12)), // Mobilde boşluk azaltıldı
                 // Favoriler
                 _buildHeaderIcon(
                   icon: Icons.favorite_outline_rounded,
@@ -904,8 +905,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                       _selectedIndex = 1;
                     });
                   },
+                  showLabel: isDesktop || isTablet, // Mobilde label gizle
                 ),
-                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : 14), // İkonlar arası boşluk
+                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : (screenWidth < 400 ? 8 : 12)), // Mobilde boşluk azaltıldı
                 // Sepet
                 Stack(
                   clipBehavior: Clip.none,
@@ -918,10 +920,11 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                           _selectedIndex = 2;
                         });
                       },
+                      showLabel: isDesktop || isTablet, // Mobilde label gizle
                     ),
                     if (cartProducts.isNotEmpty)
                       Positioned(
-                        right: 8,
+                        right: screenWidth < 400 ? 4 : 8,
                         top: -4,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -1003,8 +1006,12 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    bool showLabel = true,
   }) {
-    return GestureDetector(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    
+    final iconWidget = GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1012,20 +1019,34 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
           Icon(
             icon,
             color: const Color(0xFF0F0F0F),
-            size: 24, // İkon boyutu küçültüldü - sağ taraf küçültüldü
+            size: isMobile ? 22 : 24, // Mobilde ikon biraz daha küçük
           ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10, // Font boyutu küçültüldü
-              color: const Color(0xFF6A6A6A),
-              fontWeight: FontWeight.w400,
+          if (showLabel) ...[
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: isMobile ? 9 : 10, // Mobilde font daha küçük
+                color: const Color(0xFF6A6A6A),
+                fontWeight: FontWeight.w400,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
+          ],
         ],
       ),
     );
+    
+    // Mobilde tooltip ekle (label yoksa)
+    if (!showLabel) {
+      return Tooltip(
+        message: label,
+        child: iconWidget,
+      );
+    }
+    
+    return iconWidget;
   }
 
   /// Kategoriye yönlendirme
