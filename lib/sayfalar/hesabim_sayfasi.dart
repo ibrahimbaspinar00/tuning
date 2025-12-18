@@ -22,6 +22,7 @@ import 'degerlendirmelerim_sayfasi.dart';
 import 'satici_mesajlarim_sayfasi.dart';
 import 'krediler_sayfasi.dart';
 import 'indirim_kuponlarim_sayfasi.dart';
+import 'admin_tools_sayfasi.dart';
 import '../theme/app_design_system.dart';
 
 class HesabimSayfasi extends StatefulWidget {
@@ -823,6 +824,20 @@ class _HesabimSayfasiState extends State<HesabimSayfasi> with WidgetsBindingObse
             context,
             MaterialPageRoute(
               builder: (context) => const BildirimAyarlariSayfasi(),
+            ),
+          );
+        },
+      ),
+      _MenuItem(
+        title: 'Admin Araçları',
+        subtitle: 'Yorum Oluşturma',
+        icon: Icons.admin_panel_settings,
+        color: const Color(0xFF6366F1),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AdminToolsSayfasi(),
             ),
           );
         },
