@@ -80,9 +80,21 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                   controller: _cropController,
                   onCropped: (result) {
                     if (mounted) {
-                      // CropResult yapısı: {data: Uint8List, rect: Rect}
-                      widget.onCropComplete(result.data);
-                      Navigator.pop(context);
+                      // CropResult bir sealed class, CropSuccess veya CropFailure olabilir
+                      // CropSuccess'in image property'si var
+                      if (result is CropSuccess) {
+                        widget.onCropComplete(result.image);
+                        Navigator.pop(context);
+                      } else {
+                        // CropFailure durumunda hata göster
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Fotoğraf kırpılırken bir hata oluştu.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        setState(() => _isProcessing = false);
+                      }
                     }
                   },
                   radius: 200, // Yuvarlak crop için
