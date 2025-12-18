@@ -34,6 +34,7 @@ class HesabimSayfasi extends StatefulWidget {
 class _HesabimSayfasiState extends State<HesabimSayfasi> with WidgetsBindingObserver {
   String _userName = 'Kullanıcı';
   String _userEmail = 'kullanici@example.com';
+  String? _profileImageUrl;
   double _walletBalance = 0.0;
   int _orderCount = 0;
   int _favoriteCount = 0;
@@ -134,9 +135,17 @@ class _HesabimSayfasiState extends State<HesabimSayfasi> with WidgetsBindingObse
             email = 'kullanici@example.com';
           }
           
+          // Profil fotoğrafı URL'i
+          String? profileImageUrl;
+          if (userProfile != null && userProfile['profileImageUrl'] != null) {
+            profileImageUrl = userProfile['profileImageUrl'].toString().trim();
+            if (profileImageUrl.isEmpty) profileImageUrl = null;
+          }
+          
           setState(() {
             _userName = fullName;
             _userEmail = email;
+            _profileImageUrl = profileImageUrl;
             _orderCount = userStats['totalOrders'] ?? 0;
             _favoriteCount = userStats['favoriteCount'] ?? 0;
           });
@@ -410,14 +419,54 @@ class _HesabimSayfasiState extends State<HesabimSayfasi> with WidgetsBindingObse
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: AppDesignSystem.primaryContainer,
-            child: Text(
-              _userName.isNotEmpty ? _userName[0].toUpperCase() : 'K',
-              style: AppDesignSystem.heading3.copyWith(
-                color: AppDesignSystem.primary,
-              ),
+          GestureDetector(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfilDuzenlemeSayfasi(),
+                ),
+              );
+              if (result == true && mounted) {
+                await Future.delayed(const Duration(milliseconds: 500));
+                await _loadUserData();
+              }
+            },
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: AppDesignSystem.primaryContainer,
+                  backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                      ? NetworkImage(_profileImageUrl!)
+                      : null,
+                  child: _profileImageUrl == null
+                      ? Text(
+                          _userName.isNotEmpty ? _userName[0].toUpperCase() : 'K',
+                          style: AppDesignSystem.heading3.copyWith(
+                            color: AppDesignSystem.primary,
+                          ),
+                        )
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppDesignSystem.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppDesignSystem.spacingM),
@@ -469,6 +518,8 @@ class _HesabimSayfasiState extends State<HesabimSayfasi> with WidgetsBindingObse
                 // Profil güncellendi, kısa bir bekleme sonrası verileri yeniden yükle
                 await Future.delayed(const Duration(milliseconds: 500));
                 await _loadUserData();
+                // State'i güncelle
+                setState(() {});
               }
             },
             icon: const Icon(Icons.edit, color: AppDesignSystem.textSecondary),

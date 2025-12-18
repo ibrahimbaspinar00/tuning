@@ -47,6 +47,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
   
   // Network durumu
   bool _isOnline = true;
+  
+  // Profil fotoğrafı
+  String? _profileImageUrl;
 
   @override
   bool get wantKeepAlive => true;
@@ -65,6 +68,7 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
         Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted) {
             _initializeApp();
+            _loadProfileImage();
           }
         });
       }
@@ -181,6 +185,28 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
     } catch (e) {
       // Hata durumunda sessizce devam et
       debugPrint('Initialize app error: $e');
+    }
+  }
+  
+  /// Profil fotoğrafını yükle
+  Future<void> _loadProfileImage() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      
+      final dataService = FirebaseDataService();
+      final userProfile = await dataService.getUserProfile();
+      
+      if (mounted && userProfile != null && userProfile['profileImageUrl'] != null) {
+        final imageUrl = userProfile['profileImageUrl'].toString().trim();
+        if (imageUrl.isNotEmpty) {
+          setState(() {
+            _profileImageUrl = imageUrl;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading profile image: $e');
     }
   }
 
@@ -753,25 +779,26 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                 ],
               ),
             ),
-          // Ana header
+          // Ana header - Modern tasarım
           Container(
             height: headerHeight,
-            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : isTablet ? 10 : (screenWidth < 400 ? 4 : 6)), // Çok küçük ekranlarda padding daha da az
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : isTablet ? 16 : (screenWidth < 400 ? 8 : 12)),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFFE8E8E8),
-                  width: 1,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-              ),
+              ],
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Sol taraf - Logo (mobilde daha küçük)
                 SizedBox(
-                  width: isDesktop ? 280.0 : isTablet ? 240.0 : (screenWidth < 400 ? 100.0 : 140.0), // Mobilde logo genişliği daha da azaltıldı
+                  width: isDesktop ? 280.0 : isTablet ? 240.0 : (screenWidth < 400 ? 110.0 : 150.0),
                   child: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -941,77 +968,76 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                         ),
                       ),
                 ),
-                // Sağ taraf - İkonlar (mobilde sadece ikonlar, label yok)
+                // Sağ taraf - İkonlar (modern ve düzenli tasarım)
                 Flexible(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                // Hesabım
-                _buildHeaderIcon(
-                  icon: Icons.person_outline_rounded,
-                  label: 'Hesabım',
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 3;
-                    });
-                  },
-                  showLabel: isDesktop || isTablet, // Mobilde label gizle
-                ),
-                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : (screenWidth < 400 ? 8 : 12)), // Mobilde boşluk azaltıldı
-                // Favoriler
-                _buildHeaderIcon(
-                  icon: Icons.favorite_outline_rounded,
-                  label: 'Favorilerim',
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                    });
-                  },
-                  showLabel: isDesktop || isTablet, // Mobilde label gizle
-                ),
-                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : (screenWidth < 400 ? 8 : 12)), // Mobilde boşluk azaltıldı
-                // Sepet
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    _buildHeaderIcon(
-                      icon: Icons.shopping_cart_outlined,
-                      label: 'Sepetim',
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 2;
-                        });
-                      },
-                      showLabel: isDesktop || isTablet, // Mobilde label gizle
-                    ),
-                    if (cartProducts.isNotEmpty)
-                      Positioned(
-                        right: screenWidth < 400 ? 4 : 8,
-                        top: -4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEF4444),
-                            shape: BoxShape.circle,
+                      // Favoriler
+                      _buildHeaderIcon(
+                        icon: Icons.favorite_outline_rounded,
+                        label: 'Favorilerim',
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = 1;
+                          });
+                        },
+                        showLabel: isDesktop || isTablet,
+                      ),
+                      SizedBox(width: isDesktop ? 16 : isTablet ? 12 : (screenWidth < 400 ? 8 : 10)),
+                      // Sepet
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _buildHeaderIcon(
+                            icon: Icons.shopping_cart_outlined,
+                            label: 'Sepetim',
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = 2;
+                              });
+                            },
+                            showLabel: isDesktop || isTablet,
                           ),
-                          constraints: const BoxConstraints(
-                            minWidth: 18,
-                            minHeight: 18,
-                          ),
-                          child: Center(
-                            child: Text(
-                              cartProducts.length > 99 ? '99+' : '${cartProducts.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                          if (cartProducts.isNotEmpty)
+                            Positioned(
+                              right: screenWidth < 400 ? 2 : 6,
+                              top: -2,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFEF4444),
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    cartProducts.length > 99 ? '99+' : '${cartProducts.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                        ],
                       ),
-                  ],
+                      SizedBox(width: isDesktop ? 16 : isTablet ? 12 : (screenWidth < 400 ? 8 : 10)),
+                      // Hesabım - Profil fotoğrafı veya ikon
+                      _buildProfileIcon(
+                        profileImageUrl: _profileImageUrl,
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = 3;
+                          });
+                        },
+                        showLabel: isDesktop || isTablet,
                       ),
                     ],
                   ),
@@ -1110,6 +1136,107 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
     }
     
     return iconWidget;
+  }
+  
+  /// Profil ikonu - Profil fotoğrafı varsa göster, yoksa ikon göster
+  Widget _buildProfileIcon({
+    String? profileImageUrl,
+    required VoidCallback onTap,
+    bool showLabel = true,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final iconSize = isMobile ? 22.0 : 24.0;
+    
+    final user = FirebaseAuth.instance.currentUser;
+    final userName = user?.displayName ?? user?.email?.split('@')[0] ?? 'K';
+    final firstLetter = userName.isNotEmpty ? userName[0].toUpperCase() : 'K';
+    
+    Widget avatarWidget;
+    
+    if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+      // Profil fotoğrafı varsa göster
+      avatarWidget = ClipOval(
+        child: Image.network(
+          profileImageUrl,
+          width: iconSize,
+          height: iconSize,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            // Hata durumunda harf göster
+            return Container(
+              width: iconSize,
+              height: iconSize,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8E8E8),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  firstLetter,
+                  style: GoogleFonts.inter(
+                    fontSize: iconSize * 0.5,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF6A6A6A),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    } else {
+      // Profil fotoğrafı yoksa ikon göster
+      avatarWidget = Icon(
+        Icons.person_outline_rounded,
+        color: const Color(0xFF0F0F0F),
+        size: iconSize,
+      );
+    }
+    
+    final profileWidget = GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: iconSize,
+            height: iconSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFE8E8E8),
+                width: 1,
+              ),
+            ),
+            child: avatarWidget,
+          ),
+          if (showLabel) ...[
+            const SizedBox(height: 3),
+            Text(
+              'Hesabım',
+              style: GoogleFonts.inter(
+                fontSize: isMobile ? 9 : 10,
+                color: const Color(0xFF6A6A6A),
+                fontWeight: FontWeight.w400,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+    
+    // Mobilde tooltip ekle (label yoksa)
+    if (!showLabel) {
+      return Tooltip(
+        message: 'Hesabım',
+        child: profileWidget,
+      );
+    }
+    
+    return profileWidget;
   }
 
   /// Kategoriye yönlendirme

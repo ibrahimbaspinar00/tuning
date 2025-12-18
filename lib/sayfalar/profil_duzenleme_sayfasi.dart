@@ -331,6 +331,9 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
             duration: Duration(seconds: 2),
           ),
         );
+        
+        // Profil bilgilerini kaydet
+        await _saveProfileImageUrl(url);
       }
     } catch (e) {
       if (mounted) {
@@ -342,6 +345,21 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
           ),
         );
       }
+    }
+  }
+  
+  /// Sadece profil fotoğrafı URL'ini kaydet
+  Future<void> _saveProfileImageUrl(String url) async {
+    try {
+      await _dataService.saveUserProfile(
+        fullName: '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim(),
+        username: '',
+        email: _emailController.text.trim(),
+        phone: null,
+        profileImageUrl: url,
+      );
+    } catch (e) {
+      debugPrint('Error saving profile image URL: $e');
     }
   }
 
