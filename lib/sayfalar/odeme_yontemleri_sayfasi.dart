@@ -136,6 +136,13 @@ class _OdemeYontemleriSayfasiState extends State<OdemeYontemleriSayfasi> {
         foregroundColor: Colors.black87,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Color(0xFFF27A1A)),
+            onPressed: _showAddCardDialog,
+            tooltip: 'Yeni Kart Ekle',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
