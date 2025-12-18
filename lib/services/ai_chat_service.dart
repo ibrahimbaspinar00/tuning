@@ -38,7 +38,8 @@ class AIChatService {
     List<Map<String, String>>? conversationHistory,
     String? context,
   }) async {
-    if (AIChatConfig.groqApiKey == 'YOUR_GROQ_API_KEY') {
+    final apiKey = AIChatConfig.groqApiKey;
+    if (apiKey == 'YOUR_GROQ_API_KEY' || apiKey.isEmpty) {
       return '⚠️ Lütfen Groq API anahtarınızı `lib/config/ai_chat_config.dart` dosyasına ekleyin.\n\n1. https://console.groq.com/ adresine gidin\n2. Ücretsiz hesap oluşturun\n3. API Key oluşturun\n4. `groqApiKey` değişkenine ekleyin';
     }
 
@@ -75,7 +76,7 @@ class AIChatService {
     final response = await http.post(
       Uri.parse(AIChatConfig.groqApiUrl),
       headers: {
-        'Authorization': 'Bearer ${AIChatConfig.groqApiKey}',
+        'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
