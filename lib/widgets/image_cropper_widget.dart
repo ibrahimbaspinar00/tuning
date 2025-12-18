@@ -81,9 +81,9 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                   onCropped: (result) {
                     if (mounted) {
                       // CropResult bir sealed class, CropSuccess veya CropFailure olabilir
-                      // CropSuccess'in image property'si var
+                      // CropSuccess'in croppedImage property'si var (Uint8List)
                       if (result is CropSuccess) {
-                        widget.onCropComplete(result.image);
+                        widget.onCropComplete(result.croppedImage);
                         Navigator.pop(context);
                       } else {
                         // CropFailure durumunda hata göster
