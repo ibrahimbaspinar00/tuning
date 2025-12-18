@@ -13,6 +13,19 @@ class _AdminToolsSayfasiState extends State<AdminToolsSayfasi> {
   final GenerateReviewsScript _script = GenerateReviewsScript();
   bool _isRunning = false;
   String _status = '';
+  bool _hasRunOnce = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sayfa açıldığında otomatik çalıştır
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_hasRunOnce) {
+        _hasRunOnce = true;
+        _generateReviews();
+      }
+    });
+  }
 
   Future<void> _generateReviews() async {
     if (_isRunning) return;
