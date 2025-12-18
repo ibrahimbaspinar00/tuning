@@ -220,9 +220,17 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
       
       if (mounted && userProfile != null && userProfile['profileImageUrl'] != null) {
         final imageUrl = userProfile['profileImageUrl'].toString().trim();
-        if (imageUrl.isNotEmpty) {
+        if (imageUrl.isNotEmpty && imageUrl != _profileImageUrl) {
+          // Sadece farklıysa güncelle (gereksiz rebuild'leri önle)
           setState(() {
             _profileImageUrl = imageUrl;
+          });
+        }
+      } else if (mounted && (userProfile == null || userProfile['profileImageUrl'] == null)) {
+        // Profil fotoğrafı yoksa temizle
+        if (_profileImageUrl != null) {
+          setState(() {
+            _profileImageUrl = null;
           });
         }
       }
