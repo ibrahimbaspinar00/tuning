@@ -144,6 +144,7 @@ class TuningWebApp extends StatelessWidget {
       builder: (context, widget) {
         Widget errorWidget = widget!;
         if (widget is ErrorWidget) {
+          // Hata durumunda sayfayı otomatik yenileme - kullanıcı manuel yenilesin
           errorWidget = Scaffold(
             backgroundColor: const Color(0xFFFAFBFC),
             body: Center(
@@ -152,7 +153,7 @@ class TuningWebApp extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const Icon(Icons.error_outline, size: 64, color: Colors.orange),
                     const SizedBox(height: 16),
                     const Text(
                       'Bir hata oluştu',
@@ -160,18 +161,37 @@ class TuningWebApp extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Lütfen sayfayı yenileyin',
+                      'Lütfen sayfayı manuel olarak yenileyin',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Sayfayı yenile
-                        if (kIsWeb) {
-                          html.window.location.reload();
-                        }
-                      },
-                      child: const Text('Sayfayı Yenile'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Ana sayfaya dön
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              AppRoutes.main,
+                              (route) => false,
+                            );
+                          },
+                          icon: const Icon(Icons.home),
+                          label: const Text('Ana Sayfaya Dön'),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Sayfayı yenile (sadece kullanıcı isterse)
+                            if (kIsWeb) {
+                              html.window.location.reload();
+                            }
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Sayfayı Yenile'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -171,10 +171,10 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
   Future<void> _pickProfileImage() async {
     // Cloudinary ayarları kontrolü
     if (!ExternalImageStorageConfig.enabled ||
-        ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
         ExternalImageStorageConfig.cloudinaryCloudName.isEmpty ||
-        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
-        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
+        ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET') {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -494,40 +494,34 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
                               Positioned(
                                 bottom: 0,
                                 right: 0,
-                                child: (ExternalImageStorageConfig.enabled &&
-                                        ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
-                                        ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
-                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET' &&
-                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty)
-                                    ? GestureDetector(
-                                        onTap: _pickProfileImage,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFF27A1A),
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.white, width: 2),
-                                          ),
-                                          child: const Icon(
-                                            Icons.camera_alt,
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
-                                        ),
-                                      )
-                                    : Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[400],
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.white, width: 2),
-                                        ),
-                                        child: const Icon(
-                                          Icons.camera_alt,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      ),
+                                child: GestureDetector(
+                                  onTap: (ExternalImageStorageConfig.enabled &&
+                                          ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                          ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty &&
+                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET')
+                                      ? _pickProfileImage
+                                      : null,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: (ExternalImageStorageConfig.enabled &&
+                                              ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                              ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                              ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty &&
+                                              ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET')
+                                          ? const Color(0xFFF27A1A)
+                                          : Colors.grey[400],
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),

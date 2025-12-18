@@ -377,80 +377,61 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                             ),
                             child: Stack(
                               children: [
-                                (ExternalImageStorageConfig.enabled &&
-                                        ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
-                                        ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
-                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET' &&
-                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty)
-                                    ? GestureDetector(
-                                        onTap: _pickProfileImage,
-                                        child: CircleAvatar(
-                                          radius: 50,
-                                          backgroundColor: Colors.grey[100],
-                                          backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
-                                              ? NetworkImage(_profileImageUrl!) 
-                                              : null,
-                                          child: _profileImageUrl == null 
-                                              ? Icon(
-                                                  Icons.person,
-                                                  size: 50,
-                                                  color: Colors.grey[400],
-                                                )
-                                              : null,
-                                        ),
-                                      )
-                                    : CircleAvatar(
-                                        radius: 50,
-                                        backgroundColor: Colors.grey[100],
-                                        backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
-                                            ? NetworkImage(_profileImageUrl!) 
-                                            : null,
-                                        child: _profileImageUrl == null 
-                                            ? Icon(
-                                                Icons.person,
-                                                size: 50,
-                                                color: Colors.grey[400],
-                                              )
-                                            : null,
-                                      ),
+                                GestureDetector(
+                                  onTap: (ExternalImageStorageConfig.enabled &&
+                                          ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                          ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty &&
+                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET')
+                                      ? _pickProfileImage
+                                      : null,
+                                  child: CircleAvatar(
+                                    radius: 50,
+                                    backgroundColor: Colors.grey[100],
+                                    backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                        ? NetworkImage(_profileImageUrl!) 
+                                        : null,
+                                    child: _profileImageUrl == null 
+                                        ? Icon(
+                                            Icons.person,
+                                            size: 50,
+                                            color: Colors.grey[400],
+                                          )
+                                        : null,
+                                  ),
+                                ),
                                 // Kamera ikonu overlay (sadece Cloudinary ayarlıysa tıklanabilir)
                                 Positioned(
                                   bottom: 0,
                                   right: 0,
-                                  child: (ExternalImageStorageConfig.enabled &&
-                                          ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
-                                          ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
-                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET' &&
-                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty)
-                                      ? GestureDetector(
-                                          onTap: _pickProfileImage,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue[600],
-                                              shape: BoxShape.circle,
-                                              border: Border.all(color: Colors.white, width: 2),
-                                            ),
-                                            child: const Icon(
-                                              Icons.camera_alt,
-                                              color: Colors.white,
-                                              size: 18,
-                                            ),
-                                          ),
-                                        )
-                                      : Container(
-                                          padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[400],
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.white, width: 2),
-                                          ),
-                                          child: const Icon(
-                                            Icons.camera_alt,
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
-                                        ),
+                                  child: GestureDetector(
+                                    onTap: (ExternalImageStorageConfig.enabled &&
+                                            ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                            ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                            ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty &&
+                                            ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET')
+                                        ? _pickProfileImage
+                                        : null,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: (ExternalImageStorageConfig.enabled &&
+                                                ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                                ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                                ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty &&
+                                                ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET')
+                                            ? Colors.blue[600]
+                                            : Colors.grey[400],
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 2),
+                                      ),
+                                      child: const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
