@@ -192,7 +192,7 @@ class GenerateReviewsScript {
         // Kullanıcı bilgileri
         final userName = _userNames[i % _userNames.length];
         final userEmail = '${userName.toLowerCase().replaceAll(' ', '.')}@gmail.com';
-        final userId = 'user_$i_${productId.substring(0, 8)}';
+        final userId = 'user_${i}_${productId.substring(0, 8)}';
         
         // İlk 10 yorum fotoğraflı
         final List<String> imageUrls = (i < 10) 
