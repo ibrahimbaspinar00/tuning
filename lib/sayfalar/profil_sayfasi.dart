@@ -413,26 +413,44 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                                               )
                                             : null,
                                       ),
-                                // Kamera ikonu overlay
+                                // Kamera ikonu overlay (sadece Cloudinary ayarlıysa tıklanabilir)
                                 Positioned(
                                   bottom: 0,
                                   right: 0,
-                                  child: GestureDetector(
-                                    onTap: _pickProfileImage,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue[600],
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white, width: 2),
-                                      ),
-                                      child: const Icon(
-                                        Icons.camera_alt,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
+                                  child: (ExternalImageStorageConfig.enabled &&
+                                          ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                          ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET' &&
+                                          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty)
+                                      ? GestureDetector(
+                                          onTap: _pickProfileImage,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue[600],
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.white, width: 2),
+                                            ),
+                                            child: const Icon(
+                                              Icons.camera_alt,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                          ),
+                                        )
+                                      : Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[400],
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Colors.white, width: 2),
+                                          ),
+                                          child: const Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                        ),
                                 ),
                               ],
                             ),
