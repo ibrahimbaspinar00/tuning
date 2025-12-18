@@ -712,26 +712,47 @@ class _OdemeSayfasiState extends State<OdemeSayfasi> {
               child: const Text('İptal'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Kart bilgilerini kaydet
                 if (nameController.text.isNotEmpty && 
                     numberController.text.isNotEmpty && 
                     expiryController.text.isNotEmpty && 
                     cvvController.text.isNotEmpty) {
                   
-                  // Mevcut form alanlarını doldur
-                  _cardNameController.text = nameController.text;
-                  _cardNumberController.text = numberController.text;
-                  _expiryController.text = expiryController.text;
-                  _cvvController.text = cvvController.text;
-                  
-                  Navigator.of(context).pop();
-                  // Dialog context deaktive olacağı için parent context ile göster
-                  Future.microtask(() {
-                    if (mounted) {
-                      ErrorHandler.showSuccess(parentContext, 'Kart başarıyla kaydedildi!');
-                    }
-                  });
+                  // Firestore'a kaydet
+                  try {
+                    await _firebaseDataService.savePaymentMethod(
+                      name: nameController.text.trim(),
+                      cardNumber: numberController.text.trim(),
+                      expiryDate: expiryController.text.trim(),
+                      cvv: cvvController.text.trim(),
+                      isDefault: false, // İlk kart varsayılan olabilir
+                    );
+                    
+                    // Mevcut form alanlarını doldur
+                    _cardNameController.text = nameController.text;
+                    _cardNumberController.text = numberController.text;
+                    _expiryController.text = expiryController.text;
+                    _cvvController.text = cvvController.text;
+                    
+                    Navigator.of(context).pop();
+                    
+                    // Dialog context deaktive olacağı için parent context ile göster
+                    Future.microtask(() {
+                      if (mounted) {
+                        ErrorHandler.showSuccess(parentContext, 'Kart başarıyla kaydedildi!');
+                        // Ödeme yöntemlerini yeniden yükle
+                        _loadSavedPaymentMethods();
+                      }
+                    });
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    Future.microtask(() {
+                      if (mounted) {
+                        ErrorHandler.showError(parentContext, 'Kart kaydedilirken hata oluştu: ${e.toString()}');
+                      }
+                    });
+                  }
                 } else {
                   ErrorHandler.showError(parentContext, 'Lütfen tüm alanları doldurun');
                 }

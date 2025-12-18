@@ -395,5 +395,113 @@ class FirebaseDataService {
       return [];
     }
   }
+
+  /// Ödeme yöntemi ekle (kart kaydet)
+  Future<void> savePaymentMethod({
+    required String name,
+    required String cardNumber,
+    required String expiryDate,
+    String? cvv,
+    bool isDefault = false,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      // Kart numarasını temizle (sadece rakamlar)
+      final cleanCardNumber = cardNumber.replaceAll(RegExp(r'[^0-9]'), '');
+      
+      // Eğer varsayılan kart yapılıyorsa, diğer kartların isDefault'ını false yap
+      if (isDefault) {
+        final existingMethods = await getPaymentMethods();
+        for (final method in existingMethods) {
+          if (method['isDefault'] == true) {
+            await _firestore
+                .collection('users')
+                .doc(user.uid)
+                .collection('paymentMethods')
+                .doc(method['id'])
+                .update({'isDefault': false});
+          }
+        }
+      }
+
+      // Yeni kartı kaydet
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('paymentMethods')
+          .add({
+        'name': name,
+        'cardNumber': cleanCardNumber, // Tam kart numarası (güvenlik için şifrelenebilir)
+        'expiryDate': expiryDate,
+        'isDefault': isDefault,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error saving payment method: $e');
+      rethrow;
+    }
+  }
+
+  /// Ödeme yöntemini sil
+  Future<void> deletePaymentMethod(String methodId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('paymentMethods')
+          .doc(methodId)
+          .delete();
+    } catch (e) {
+      debugPrint('Error deleting payment method: $e');
+      rethrow;
+    }
+  }
+
+  /// Ödeme yöntemini varsayılan yap
+  Future<void> setDefaultPaymentMethod(String methodId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    try {
+      // Önce tüm kartların isDefault'ını false yap
+      final existingMethods = await getPaymentMethods();
+      for (final method in existingMethods) {
+        if (method['isDefault'] == true) {
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .collection('paymentMethods')
+              .doc(method['id'])
+              .update({'isDefault': false});
+        }
+      }
+
+      // Seçilen kartı varsayılan yap
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('paymentMethods')
+          .doc(methodId)
+          .update({
+        'isDefault': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error setting default payment method: $e');
+      rethrow;
+    }
+  }
 }
 
