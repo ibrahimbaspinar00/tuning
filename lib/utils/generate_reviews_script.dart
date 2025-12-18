@@ -231,9 +231,61 @@ class GenerateReviewsScript {
       // Batch commit
       await batch.commit();
       debugPrint('✅ $productName için 50 yorum oluşturuldu');
+      
+      // Rating'i güncelle
+      await _updateProductRating(productId);
     } catch (e) {
       debugPrint('❌ Yorum oluşturma hatası ($productId): $e');
       rethrow;
+    }
+  }
+
+  /// Ürünün rating'ini güncelle
+  Future<void> _updateProductRating(String productId) async {
+    try {
+      // Tüm onaylı yorumları al
+      final reviewsSnapshot = await _firestore
+          .collection('product_reviews')
+          .where('productId', isEqualTo: productId)
+          .where('isApproved', isEqualTo: true)
+          .get();
+      
+      if (reviewsSnapshot.docs.isEmpty) {
+        // Yorum yoksa rating'i 0 yap
+        await _firestore.collection('products').doc(productId).update({
+          'averageRating': 0.0,
+          'reviewCount': 0,
+          'totalReviews': 0,
+        });
+        return;
+      }
+      
+      // Ortalama rating hesapla
+      double totalRating = 0.0;
+      int approvedCount = 0;
+      
+      for (var doc in reviewsSnapshot.docs) {
+        final data = doc.data();
+        if (data['isApproved'] == true && data['isDemo'] != true) {
+          final rating = (data['rating'] as num?)?.toDouble() ?? 0.0;
+          totalRating += rating;
+          approvedCount++;
+        }
+      }
+      
+      final averageRating = approvedCount > 0 ? totalRating / approvedCount : 0.0;
+      
+      // Ürünün rating bilgilerini güncelle (hem reviewCount hem totalReviews)
+      await _firestore.collection('products').doc(productId).update({
+        'averageRating': averageRating,
+        'reviewCount': approvedCount,
+        'totalReviews': approvedCount, // Uyumluluk için
+      });
+      
+      debugPrint('✅ $productId için rating güncellendi: $averageRating (${approvedCount} yorum)');
+    } catch (e) {
+      debugPrint('❌ Rating güncelleme hatası ($productId): $e');
+      // Hata olsa bile devam et
     }
   }
 

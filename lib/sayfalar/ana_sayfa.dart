@@ -610,7 +610,8 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                     SizedBox(height: isSmallScreen ? 3 : 4),
                     
                     // Rating badge (Trendyol tarzı) - Mobilde daha kompakt
-                    if (product.averageRating > 0)
+                    // Yorum varsa rating'i göster (0 olsa bile)
+                    if (product.reviewCount > 0 || product.averageRating > 0)
                       Row(
                         children: [
                           Icon(
@@ -620,7 +621,9 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                           ),
                           SizedBox(width: isSmallScreen ? 2 : 4),
                           Text(
-                            '${product.averageRating.toStringAsFixed(1)}',
+                            product.averageRating > 0 
+                                ? product.averageRating.toStringAsFixed(1)
+                                : '0.0',
                             style: TextStyle(
                               fontSize: isSmallScreen ? 10 : 12, // Mobilde font küçültüldü
                               fontWeight: FontWeight.w600,
@@ -633,8 +636,8 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                               child: Text(
                                 '(${product.reviewCount})',
                                 style: TextStyle(
-                                  fontSize: isSmallScreen ? 10 : 11, // Mobilde font küçültüldü
-                                  color: const Color(0xFF6A6A6A),
+                                    fontSize: isSmallScreen ? 10 : 11, // Mobilde font küçültüldü
+                                color: const Color(0xFF6A6A6A),
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -650,11 +653,11 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                       children: [
                         Flexible(
                           child: Text(
-                            '${product.price.toStringAsFixed(2)} ₺',
-                            style: TextStyle(
+                          '${product.price.toStringAsFixed(2)} ₺',
+                          style: TextStyle(
                               fontSize: isSmallScreen ? 13 : 16, // Mobilde font küçültüldü
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF10B981),
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF10B981),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -663,11 +666,11 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                           SizedBox(width: isSmallScreen ? 4 : 8),
                           Flexible(
                             child: Text(
-                              '${(product.price * 1.11).toStringAsFixed(2)} ₺',
-                              style: TextStyle(
+                            '${(product.price * 1.11).toStringAsFixed(2)} ₺',
+                            style: TextStyle(
                                 fontSize: isSmallScreen ? 10 : 12, // Mobilde font küçültüldü
-                                decoration: TextDecoration.lineThrough,
-                                color: const Color(0xFF6A6A6A),
+                              decoration: TextDecoration.lineThrough,
+                              color: const Color(0xFF6A6A6A),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -688,14 +691,14 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                             height: isSmallScreen ? 24 : 32, // Mobilde buton yüksekliği azaltıldı
                             child: isSmallScreen
                                 ? IconButton(
-                                    onPressed: () async {
-                                      await widget.onFavoriteToggle(product);
-                                      if (mounted) {
+                              onPressed: () async {
+                                await widget.onFavoriteToggle(product);
+                                if (mounted) {
                                         setState(() {});
-                                      }
-                                    },
-                                    icon: Icon(
-                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                }
+                              },
+                              icon: Icon(
+                                isFavorite ? Icons.favorite : Icons.favorite_border,
                                       size: 18,
                                       color: isFavorite ? Colors.red : Colors.grey[700],
                                     ),
@@ -712,20 +715,20 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                                     icon: Icon(
                                       isFavorite ? Icons.favorite : Icons.favorite_border,
                                       size: 16,
-                                      color: isFavorite ? Colors.red : Colors.grey[700],
-                                    ),
-                                    label: Text(
-                                      isFavorite ? 'Favoride' : 'Favori',
+                                color: isFavorite ? Colors.red : Colors.grey[700],
+                              ),
+                              label: Text(
+                                isFavorite ? 'Favoride' : 'Favori',
                                       style: const TextStyle(fontSize: 12),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isFavorite ? Colors.red[50] : Colors.grey[50],
-                                      foregroundColor: isFavorite ? Colors.red : Colors.grey[700],
-                                      elevation: 0,
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                  ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isFavorite ? Colors.red[50] : Colors.grey[50],
+                                foregroundColor: isFavorite ? Colors.red : Colors.grey[700],
+                                elevation: 0,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
                           ),
                         ),
                         
@@ -1413,24 +1416,36 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                       ],
                     ),
                     const SizedBox(height: AppDesignSystem.spacingXS),
-                    // Yıldız puanı
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 12,
-                          color: AppDesignSystem.accent,
-                        ),
-                        const SizedBox(width: AppDesignSystem.spacingXS),
-                        Text(
-                          product.averageRating.toStringAsFixed(1),
-                          style: AppDesignSystem.bodySmall.copyWith(
-                            color: AppDesignSystem.textSecondary,
-                            fontWeight: FontWeight.w500,
+                    // Yıldız puanı - Yorum varsa göster
+                    if (product.reviewCount > 0 || product.averageRating > 0)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star,
+                            size: 12,
+                            color: AppDesignSystem.accent,
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: AppDesignSystem.spacingXS),
+                          Text(
+                            product.averageRating > 0 
+                                ? product.averageRating.toStringAsFixed(1)
+                                : '0.0',
+                            style: AppDesignSystem.bodySmall.copyWith(
+                              color: AppDesignSystem.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (product.reviewCount > 0) ...[
+                            const SizedBox(width: AppDesignSystem.spacingXS),
+                            Text(
+                              '(${product.reviewCount})',
+                              style: AppDesignSystem.bodySmall.copyWith(
+                                color: AppDesignSystem.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     // Sepete ekle butonu - Spacer yerine sabit boşluk
                     const SizedBox(height: 4),
                     Builder(

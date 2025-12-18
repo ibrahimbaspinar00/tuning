@@ -215,7 +215,7 @@ class Product {
       quantity: safeToInt(map['quantity']) > 0 ? safeToInt(map['quantity']) : 1,
       discountPercentage: safeToDouble(map['discountPercentage']),
       averageRating: safeToDouble(map['averageRating']),
-      reviewCount: safeToInt(map['reviewCount']),
+      reviewCount: safeToInt(map['reviewCount'] ?? map['totalReviews']), // totalReviews desteği eklendi
       salesCount: safeToInt(map['salesCount']),
       createdAt: map['createdAt'] != null 
           ? parseDateTime(map['createdAt'])
