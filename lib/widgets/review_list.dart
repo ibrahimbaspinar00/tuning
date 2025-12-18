@@ -349,52 +349,107 @@ class _ReviewListState extends State<ReviewList> {
           
           // Fotoğraflar
           if (review.imageUrls.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              'Fotoğraflar:',
-              style: TextStyle(
-                fontSize: isSmallScreen ? 12 : 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
               ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 80,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: review.imageUrls.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => _showImageFullScreen(context, review.imageUrls[index]),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: review.imageUrls[index],
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            width: 80,
-                            height: 80,
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            width: 80,
-                            height: 80,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.image_not_supported),
-                          ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.photo_library, size: 16, color: Colors.blue[700]),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Fotoğraflar (${review.imageUrls.length})',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 12 : 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: review.imageUrls.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.only(right: 10),
+                          child: GestureDetector(
+                            onTap: () => _showImageGallery(context, review.imageUrls, index),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: CachedNetworkImage(
+                                      imageUrl: review.imageUrls[index],
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        width: 100,
+                                        height: 100,
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 100,
+                                        height: 100,
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Fotoğraf sayısı badge (birden fazla fotoğraf varsa)
+                                if (review.imageUrls.length > 1 && index == 0)
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        '+${review.imageUrls.length}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
           ],
@@ -464,23 +519,145 @@ class _ReviewListState extends State<ReviewList> {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
         child: Stack(
           children: [
             Center(
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.contain,
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => Container(
+                    color: Colors.black87,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.black87,
+                    child: const Center(
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(
               top: 8,
               right: 8,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                onPressed: () => Navigator.pop(context),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showImageGallery(BuildContext context, List<String> imageUrls, int initialIndex) {
+    int currentIndex = initialIndex;
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          backgroundColor: Colors.black87,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              PageView.builder(
+                controller: PageController(initialPage: initialIndex),
+                itemCount: imageUrls.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return InteractiveViewer(
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrls[index],
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Container(
+                          color: Colors.black87,
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.black87,
+                          child: const Center(
+                            child: Icon(
+                              Icons.error_outline,
+                              color: Colors.white,
+                              size: 50,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ),
+              if (imageUrls.length > 1)
+                Positioned(
+                  bottom: 20,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${currentIndex + 1} / ${imageUrls.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

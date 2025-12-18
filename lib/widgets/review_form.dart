@@ -827,40 +827,92 @@ class _ReviewFormState extends State<ReviewForm> {
           const SizedBox(height: 16),
           
           // Fotoğraf seçimi
-          Text(
-            'Fotoğraf Ekle (İsteğe bağlı):',
-            style: TextStyle(
-              fontSize: isSmallScreen ? 14 : 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[300]!),
             ),
-          ),
-          const SizedBox(height: 8),
-          
-          // Fotoğraf seçme butonu
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _selectedImages.length < 5 ? _pickImages : null,
-                  icon: const Icon(Icons.add_photo_alternate),
-                  label: Text('Fotoğraf Ekle${_selectedImages.length > 0 ? " (${_selectedImages.length}/5)" : ""}'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[50],
-                    foregroundColor: Colors.blue[700],
-                    elevation: 0,
-                  ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.photo_library, size: 18, color: Colors.blue[700]),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Fotoğraf Ekle',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 14 : 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_selectedImages.length > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${_selectedImages.length}/5',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue[700],
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-              if (_selectedImages.length >= 5)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Tooltip(
-                    message: 'Maksimum 5 fotoğraf eklenebilir',
-                    child: Icon(Icons.info_outline, color: Colors.orange[600], size: 20),
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _selectedImages.length < 5 ? _pickImages : null,
+                        icon: Icon(
+                          Icons.add_photo_alternate,
+                          size: 20,
+                          color: _selectedImages.length < 5 ? Colors.blue[700] : Colors.grey,
+                        ),
+                        label: Text(
+                          _selectedImages.length < 5 
+                            ? 'Fotoğraf Seç' 
+                            : 'Maksimum 5 fotoğraf',
+                          style: TextStyle(
+                            color: _selectedImages.length < 5 ? Colors.blue[700] : Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: _selectedImages.length < 5 
+                              ? Colors.blue[300]! 
+                              : Colors.grey[300]!,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-            ],
+                if (_selectedImages.length > 0) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Fotoğraflarınızı ekleyerek yorumunuzu daha etkili hale getirin',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
           
           // Mevcut fotoğraflar (düzenleme modunda)
