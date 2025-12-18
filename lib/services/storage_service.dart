@@ -1,16 +1,48 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:image_picker/image_picker.dart';
+import 'external_image_upload_service.dart';
+import '../config/external_image_storage_config.dart';
 
-/// Firebase Storage yönetimi için servis
+/// Cloudinary image storage yönetimi için servis
+/// Firebase Storage kullanılmaz, sadece Cloudinary kullanılır
 class StorageService {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Fotoğrafı Firebase Storage'a yükle (bytes'tan - web için)
+  String _safeId(String value) => value.replaceAll(RegExp(r'[^\w\-]'), '_');
+
+  String _guessExtension(String? name) {
+    final lower = (name ?? '').toLowerCase();
+    if (lower.endsWith('.png')) return '.png';
+    if (lower.endsWith('.webp')) return '.webp';
+    if (lower.endsWith('.gif')) return '.gif';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return '.jpg';
+    return '.jpg';
+  }
+
+  String _reviewFolder(String userId, String reviewId) {
+    final cleanUser = _safeId(userId);
+    final cleanReview = _safeId(reviewId);
+    return '${ExternalImageStorageConfig.cloudinaryReviewFolder}/$cleanUser/$cleanReview';
+  }
+
+  void _validateCloudinaryConfig() {
+    if (!ExternalImageStorageConfig.enabled) {
+      throw Exception('Cloudinary yükleme özelliği devre dışı. `ExternalImageStorageConfig.enabled = true` yapın.');
+    }
+    if (ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+        ExternalImageStorageConfig.cloudinaryCloudName.isEmpty) {
+      throw Exception('Cloudinary cloud name ayarlı değil. `ExternalImageStorageConfig.cloudinaryCloudName` doldurun.');
+    }
+    if (ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
+      throw Exception('Cloudinary upload preset ayarlı değil. `ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset` doldurun.');
+    }
+  }
+
+  /// Fotoğrafı yükle (bytes'tan - web için)
   Future<String> uploadReviewImageBytes(
     List<int> imageBytes,
     String reviewId, {
@@ -23,6 +55,8 @@ class StorageService {
         throw Exception('Kullanıcı giriş yapmamış');
       }
 
+      _validateCloudinaryConfig();
+
       // Dosya boyutunu kontrol et (max 10MB)
       final fileSize = imageBytes.length;
       const maxSize = 10 * 1024 * 1024; // 10MB
@@ -30,66 +64,16 @@ class StorageService {
         throw Exception('Fotoğraf çok büyük (Maksimum 10MB). Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
       }
 
-      // Dosya uzantısını belirle
-      String contentType = 'image/jpeg';
-      String fileExtension = '.jpg';
-      if (fileName != null) {
-        final lowerName = fileName.toLowerCase();
-        if (lowerName.contains('.png')) {
-          contentType = 'image/png';
-          fileExtension = '.png';
-        } else if (lowerName.contains('.jpg') || lowerName.contains('.jpeg')) {
-          contentType = 'image/jpeg';
-          fileExtension = '.jpg';
-        } else if (lowerName.contains('.webp')) {
-          contentType = 'image/webp';
-          fileExtension = '.webp';
-        } else if (lowerName.contains('.gif')) {
-          contentType = 'image/gif';
-          fileExtension = '.gif';
-        }
-      }
-
-      // Dosya adı oluştur
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final finalFileName = index != null ? '${timestamp}_$index$fileExtension' : '$timestamp$fileExtension';
-      final cleanReviewId = reviewId.replaceAll(RegExp(r'[^\w\-]'), '_');
-      final path = 'reviews/${user.uid}/$cleanReviewId/$finalFileName';
-      final cleanPath = path.replaceAll(RegExp(r'[^\w\-/.]'), '_');
-
-      // Fotoğrafı yükle
-      final ref = _storage.ref().child(cleanPath);
-      final uploadTask = ref.putData(
-        Uint8List.fromList(imageBytes),
-        SettableMetadata(
-          contentType: contentType,
-          customMetadata: {
-            'uploadedBy': user.uid,
-            'uploadedAt': DateTime.now().toIso8601String(),
-            'originalFileName': fileName ?? 'image',
-          },
-        ),
+      final bytes = Uint8List.fromList(imageBytes);
+      final ext = _guessExtension(fileName);
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final uploadName = 'review_${_safeId(reviewId)}_$ts${index != null ? '_$index' : ''}$ext';
+      final external = ExternalImageUploadService();
+      return await external.uploadImageBytes(
+        bytes: bytes,
+        fileName: uploadName,
+        folder: _reviewFolder(user.uid, reviewId),
       );
-
-      await uploadTask.timeout(
-        const Duration(seconds: 60),
-        onTimeout: () {
-          throw Exception('Fotoğraf yükleme zaman aşımına uğradı. Lütfen tekrar deneyin.');
-        },
-      );
-
-      final downloadUrl = await ref.getDownloadURL().timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          throw Exception('Fotoğraf URL alınamadı. Lütfen tekrar deneyin.');
-        },
-      );
-
-      if (downloadUrl.isEmpty) {
-        throw Exception('Geçersiz fotoğraf URL\'si alındı');
-      }
-
-      return downloadUrl;
     } catch (e, stackTrace) {
       debugPrint('✗ Fotoğraf yükleme hatası: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -97,7 +81,7 @@ class StorageService {
     }
   }
 
-  /// Fotoğrafı Firebase Storage'a yükle
+  /// Fotoğrafı yükle (File ile)
   Future<String> uploadReviewImage(File imageFile, String reviewId, {int? index}) async {
     try {
       final user = _auth.currentUser;
@@ -110,6 +94,8 @@ class StorageService {
         throw Exception('Fotoğraf dosyası bulunamadı');
       }
 
+      _validateCloudinaryConfig();
+
       // Dosya boyutunu kontrol et (max 10MB)
       final fileSize = await imageFile.length();
       const maxSize = 10 * 1024 * 1024; // 10MB
@@ -117,106 +103,16 @@ class StorageService {
         throw Exception('Fotoğraf çok büyük (Maksimum 10MB). Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
       }
 
-      // Dosya uzantısını kontrol et
-      final fileName = imageFile.path.split('/').last.toLowerCase();
-      String contentType = 'image/jpeg'; // Varsayılan
-      String fileExtension = '.jpg';
-      
-      // Dosya uzantısını belirle (daha güvenli)
-      if (fileName.contains('.png')) {
-        contentType = 'image/png';
-        fileExtension = '.png';
-      } else if (fileName.contains('.jpg') || fileName.contains('.jpeg')) {
-        contentType = 'image/jpeg';
-        fileExtension = '.jpg';
-      } else if (fileName.contains('.webp')) {
-        contentType = 'image/webp';
-        fileExtension = '.webp';
-      } else if (fileName.contains('.gif')) {
-        contentType = 'image/gif';
-        fileExtension = '.gif';
-      }
-      
-      debugPrint('Dosya uzantısı tespit edildi: $fileExtension, Content Type: $contentType');
-
-      // Dosya adı oluştur: reviews/{userId}/{reviewId}/{timestamp}_{index}.{ext}
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final finalFileName = index != null ? '${timestamp}_$index$fileExtension' : '$timestamp$fileExtension';
-      
-      // ReviewId'yi temizle (özel karakterleri kaldır)
-      final cleanReviewId = reviewId.replaceAll(RegExp(r'[^\w\-]'), '_');
-      
-      final path = 'reviews/${user.uid}/$cleanReviewId/$finalFileName';
-      
-      // Path'teki özel karakterleri temizle (sadece güvenli karakterler kalmalı)
-      final cleanPath = path.replaceAll(RegExp(r'[^\w\-/.]'), '_');
-      
-      debugPrint('Review ID temizleme: $reviewId -> $cleanReviewId');
-
-      debugPrint('=== FOTOĞRAF YÜKLEME BAŞLIYOR ===');
-      debugPrint('Dosya: ${imageFile.path}');
-      debugPrint('Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
-      debugPrint('Orijinal Path: $path');
-      debugPrint('Temizlenmiş Path: $cleanPath');
-      debugPrint('Content Type: $contentType');
-
-      // Fotoğrafı yükle (temizlenmiş path ile)
-      final ref = _storage.ref().child(cleanPath);
-      
-      debugPrint('Firebase Storage referansı oluşturuldu: $cleanPath');
-      
-      // Upload task'ı başlat
-      final uploadTask = ref.putFile(
-        imageFile,
-        SettableMetadata(
-          contentType: contentType,
-          customMetadata: {
-            'uploadedBy': user.uid,
-            'uploadedAt': DateTime.now().toIso8601String(),
-            'originalFileName': fileName,
-          },
-        ),
+      final bytes = await imageFile.readAsBytes();
+      final ext = _guessExtension(imageFile.path.split('/').last);
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final uploadName = 'review_${_safeId(reviewId)}_$ts${index != null ? '_$index' : ''}$ext';
+      final external = ExternalImageUploadService();
+      return await external.uploadImageBytes(
+        bytes: bytes,
+        fileName: uploadName,
+        folder: _reviewFolder(user.uid, reviewId),
       );
-
-      // Upload progress'i bekle (timeout ile)
-      debugPrint('Upload task başlatıldı, bekleniyor...');
-      try {
-        // Timeout: 60 saniye
-        await uploadTask.timeout(
-          const Duration(seconds: 60),
-          onTimeout: () {
-            debugPrint('✗ Upload timeout (60 saniye)');
-            throw Exception('Fotoğraf yükleme zaman aşımına uğradı. Lütfen tekrar deneyin.');
-          },
-        );
-        debugPrint('✓ Upload task tamamlandı');
-      } catch (e) {
-        debugPrint('✗ Upload task hatası: $e');
-        rethrow;
-      }
-
-      // Download URL'yi al (timeout ile)
-      debugPrint('Download URL alınıyor...');
-      try {
-        final downloadUrl = await ref.getDownloadURL().timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            debugPrint('✗ Download URL timeout (30 saniye)');
-            throw Exception('Fotoğraf URL alınamadı. Lütfen tekrar deneyin.');
-          },
-        );
-        debugPrint('✓ Download URL alındı: $downloadUrl');
-        
-        // URL'nin geçerli olduğunu kontrol et
-        if (downloadUrl.isEmpty) {
-          throw Exception('Geçersiz fotoğraf URL\'si alındı');
-        }
-        
-        return downloadUrl;
-      } catch (e) {
-        debugPrint('✗ Download URL alma hatası: $e');
-        rethrow;
-      }
     } catch (e, stackTrace) {
       debugPrint('✗ Fotoğraf yükleme hatası: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -239,6 +135,8 @@ class StorageService {
       debugPrint('Fotoğraf sayısı: ${imageFiles.length}');
       debugPrint('Review ID: $reviewId');
 
+      _validateCloudinaryConfig();
+
       final urls = <String>[];
       int successCount = 0;
       int failCount = 0;
@@ -249,44 +147,24 @@ class StorageService {
           
           // XFile veya File'ı işle
           dynamic imageFile = imageFiles[i];
-          File? file;
+          Uint8List bytes;
           
           if (imageFile is XFile) {
-            // XFile'dan File'a çevir (web'de çalışmaz, ama mobil için)
-            if (!kIsWeb) {
-              file = File(imageFile.path);
-              // Dosya varlığını kontrol et
-              if (!await file.exists()) {
-                debugPrint('✗ Fotoğraf ${i + 1} dosyası bulunamadı: ${imageFile.path}');
-                failCount++;
-                continue;
-              }
-            } else {
-              // Web'de XFile'dan bytes oku ve upload et
-              final bytes = await imageFile.readAsBytes();
-              final url = await uploadReviewImageBytes(bytes, reviewId, index: i, fileName: imageFile.name);
-              urls.add(url);
-              successCount++;
-              debugPrint('✓ Fotoğraf ${i + 1} başarıyla yüklendi: $url');
-              continue;
-            }
+            bytes = await imageFile.readAsBytes();
           } else if (imageFile is File) {
-            file = imageFile;
-            // Dosya varlığını kontrol et
-            if (!await file.exists()) {
-              debugPrint('✗ Fotoğraf ${i + 1} dosyası bulunamadı: ${file.path}');
+            if (!await imageFile.exists()) {
+              debugPrint('✗ Fotoğraf ${i + 1} dosyası bulunamadı: ${imageFile.path}');
               failCount++;
               continue;
             }
+            bytes = await imageFile.readAsBytes();
           } else {
             debugPrint('✗ Fotoğraf ${i + 1} geçersiz tip: ${imageFile.runtimeType}');
             failCount++;
             continue;
           }
           
-          // At this point, file is guaranteed to be non-null
-          // (either assigned from XFile on non-web, or from File)
-          final url = await uploadReviewImage(file, reviewId, index: i);
+          final url = await uploadReviewImageBytes(bytes, reviewId, index: i);
           urls.add(url);
           successCount++;
           debugPrint('✓ Fotoğraf ${i + 1} başarıyla yüklendi: $url');
@@ -294,8 +172,6 @@ class StorageService {
           debugPrint('✗ Fotoğraf ${i + 1} yüklenemedi: $e');
           debugPrint('Stack trace: $stackTrace');
           failCount++;
-          // Bir fotoğraf yüklenemezse diğerlerini denemeye devam et
-          // Tüm fotoğraflar başarısız olursa hata fırlat
         }
       }
 
@@ -303,19 +179,14 @@ class StorageService {
       debugPrint('Başarılı: $successCount/${imageFiles.length}');
       debugPrint('Başarısız: $failCount/${imageFiles.length}');
       
-      // Eğer hiç fotoğraf yüklenemediyse hata fırlat
       if (urls.isEmpty && imageFiles.isNotEmpty) {
         throw Exception('Tüm fotoğraflar yüklenemedi. Lütfen tekrar deneyin.');
       }
       
-      // Eğer bazı fotoğraflar yüklenemediyse uyarı ver ama devam et
       if (failCount > 0 && urls.isNotEmpty) {
         debugPrint('⚠ UYARI: $failCount fotoğraf yüklenemedi ama $successCount fotoğraf başarıyla yüklendi');
       }
 
-      debugPrint('=== TOPLU FOTOĞRAF YÜKLEME TAMAMLANDI ===');
-      debugPrint('Başarıyla yüklenen: ${urls.length}/${imageFiles.length}');
-      
       return urls;
     } catch (e, stackTrace) {
       debugPrint('✗ Toplu fotoğraf yükleme hatası: $e');
@@ -324,14 +195,14 @@ class StorageService {
     }
   }
 
-  /// Fotoğrafı sil
+  /// Fotoğrafı sil (Cloudinary'de silme işlemi client-side'dan yapılamaz)
   Future<void> deleteImage(String imageUrl) async {
     try {
-      final ref = _storage.refFromURL(imageUrl);
-      await ref.delete();
+      debugPrint('Cloudinary image delete: Client-side silme desteklenmiyor. URL: $imageUrl');
+      // Cloudinary unsigned upload preset ile client-side'dan silme yapılamaz
+      // Bu işlem backend'de yapılmalı
     } catch (e) {
       debugPrint('Error deleting image: $e');
-      // Hata durumunda sessizce devam et
     }
   }
 
@@ -346,13 +217,15 @@ class StorageService {
     }
   }
 
-  /// Ürün resmini Firebase Storage'a yükle (Byte data ile)
+  /// Ürün resmini Cloudinary'ye yükle (Byte data ile)
   Future<String> uploadProductImage(Uint8List imageBytes, String fileName) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
         throw Exception('Kullanıcı giriş yapmamış');
       }
+
+      _validateCloudinaryConfig();
 
       // Dosya boyutunu kontrol et (max 10MB)
       final fileSize = imageBytes.length;
@@ -361,103 +234,12 @@ class StorageService {
         throw Exception('Resim çok büyük (Maksimum 10MB). Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
       }
 
-      // Dosya uzantısını kontrol et
-      final fileNameLower = fileName.toLowerCase();
-      String contentType = 'image/jpeg'; // Varsayılan
-      String fileExtension = '.jpg';
-      
-      // Dosya uzantısını belirle
-      if (fileNameLower.endsWith('.png')) {
-        contentType = 'image/png';
-        fileExtension = '.png';
-      } else if (fileNameLower.endsWith('.jpg') || fileNameLower.endsWith('.jpeg')) {
-        contentType = 'image/jpeg';
-        fileExtension = '.jpg';
-      } else if (fileNameLower.endsWith('.webp')) {
-        contentType = 'image/webp';
-        fileExtension = '.webp';
-      } else if (fileNameLower.endsWith('.gif')) {
-        contentType = 'image/gif';
-        fileExtension = '.gif';
-      }
-
-      debugPrint('=== ÜRÜN RESMİ YÜKLEME BAŞLIYOR ===');
-      debugPrint('Dosya adı: $fileName');
-      debugPrint('Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
-      debugPrint('Content Type: $contentType');
-
-      // Dosya adını temizle ve benzersiz yap
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final cleanFileName = fileName.replaceAll(RegExp(r'[^\w\-.]'), '_');
-      final finalFileName = cleanFileName.endsWith(fileExtension) 
-          ? '${timestamp}_$cleanFileName'
-          : '${timestamp}_$cleanFileName$fileExtension';
-      
-      final path = 'product_images/$finalFileName';
-      
-      // Path'teki özel karakterleri temizle
-      final cleanPath = path.replaceAll(RegExp(r'[^\w\-/.]'), '_');
-
-      debugPrint('Orijinal Path: $path');
-      debugPrint('Temizlenmiş Path: $cleanPath');
-
-      // Firebase Storage referansı oluştur
-      final ref = _storage.ref().child(cleanPath);
-      
-      debugPrint('Firebase Storage referansı oluşturuldu: $cleanPath');
-
-      // Upload task'ı başlat (putData kullan)
-      final uploadTask = ref.putData(
-        imageBytes,
-        SettableMetadata(
-          contentType: contentType,
-          customMetadata: {
-            'uploadedBy': user.uid,
-            'uploadedAt': DateTime.now().toIso8601String(),
-            'originalFileName': fileName,
-          },
-        ),
+      final external = ExternalImageUploadService();
+      return await external.uploadImageBytes(
+        bytes: imageBytes,
+        fileName: fileName,
+        folder: ExternalImageStorageConfig.cloudinaryProductFolder,
       );
-
-      // Upload progress'i bekle (timeout ile)
-      debugPrint('Upload task başlatıldı, bekleniyor...');
-      try {
-        // Timeout: 60 saniye
-        await uploadTask.timeout(
-          const Duration(seconds: 60),
-          onTimeout: () {
-            debugPrint('✗ Upload timeout (60 saniye)');
-            throw Exception('Resim yükleme zaman aşımına uğradı. Lütfen tekrar deneyin.');
-          },
-        );
-        debugPrint('✓ Upload task tamamlandı');
-      } catch (e) {
-        debugPrint('✗ Upload task hatası: $e');
-        rethrow;
-      }
-
-      // Download URL'yi al (timeout ile)
-      debugPrint('Download URL alınıyor...');
-      try {
-        final downloadUrl = await ref.getDownloadURL().timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            debugPrint('✗ Download URL timeout (30 saniye)');
-            throw Exception('Resim URL alınamadı. Lütfen tekrar deneyin.');
-          },
-        );
-        debugPrint('✓ Download URL alındı: $downloadUrl');
-        
-        // URL'nin geçerli olduğunu kontrol et
-        if (downloadUrl.isEmpty) {
-          throw Exception('Geçersiz resim URL\'si alındı');
-        }
-        
-        return downloadUrl;
-      } catch (e) {
-        debugPrint('✗ Download URL alma hatası: $e');
-        rethrow;
-      }
     } catch (e, stackTrace) {
       debugPrint('✗ Ürün resmi yükleme hatası: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -465,7 +247,7 @@ class StorageService {
     }
   }
 
-  /// Ürün resmini Firebase Storage'a yükle (File ile)
+  /// Ürün resmini Cloudinary'ye yükle (File ile)
   Future<String> uploadProductImageFile(File imageFile) async {
     try {
       final user = _auth.currentUser;
@@ -478,6 +260,8 @@ class StorageService {
         throw Exception('Resim dosyası bulunamadı');
       }
 
+      _validateCloudinaryConfig();
+
       // Dosya boyutunu kontrol et (max 10MB)
       final fileSize = await imageFile.length();
       const maxSize = 10 * 1024 * 1024; // 10MB
@@ -485,102 +269,14 @@ class StorageService {
         throw Exception('Resim çok büyük (Maksimum 10MB). Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
       }
 
-      // Dosya uzantısını kontrol et
-      final fileName = imageFile.path.split('/').last.toLowerCase();
-      String contentType = 'image/jpeg'; // Varsayılan
-      String fileExtension = '.jpg';
-      
-      // Dosya uzantısını belirle
-      if (fileName.endsWith('.png')) {
-        contentType = 'image/png';
-        fileExtension = '.png';
-      } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
-        contentType = 'image/jpeg';
-        fileExtension = '.jpg';
-      } else if (fileName.endsWith('.webp')) {
-        contentType = 'image/webp';
-        fileExtension = '.webp';
-      } else if (fileName.endsWith('.gif')) {
-        contentType = 'image/gif';
-        fileExtension = '.gif';
-      }
-
-      debugPrint('=== ÜRÜN RESMİ YÜKLEME BAŞLIYOR ===');
-      debugPrint('Dosya: ${imageFile.path}');
-      debugPrint('Boyut: ${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB');
-      debugPrint('Content Type: $contentType');
-
-      // Dosya adını temizle ve benzersiz yap
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final cleanFileName = fileName.replaceAll(RegExp(r'[^\w\-.]'), '_');
-      final finalFileName = cleanFileName.endsWith(fileExtension) 
-          ? '${timestamp}_$cleanFileName'
-          : '${timestamp}_$cleanFileName$fileExtension';
-      
-      final path = 'product_images/$finalFileName';
-      
-      // Path'teki özel karakterleri temizle
-      final cleanPath = path.replaceAll(RegExp(r'[^\w\-/.]'), '_');
-
-      debugPrint('Temizlenmiş Path: $cleanPath');
-
-      // Firebase Storage referansı oluştur
-      final ref = _storage.ref().child(cleanPath);
-      
-      debugPrint('Firebase Storage referansı oluşturuldu: $cleanPath');
-
-      // Upload task'ı başlat
-      final uploadTask = ref.putFile(
-        imageFile,
-        SettableMetadata(
-          contentType: contentType,
-          customMetadata: {
-            'uploadedBy': user.uid,
-            'uploadedAt': DateTime.now().toIso8601String(),
-            'originalFileName': fileName,
-          },
-        ),
+      final bytes = await imageFile.readAsBytes();
+      final fileName = imageFile.path.split('/').last;
+      final external = ExternalImageUploadService();
+      return await external.uploadImageBytes(
+        bytes: bytes,
+        fileName: fileName,
+        folder: ExternalImageStorageConfig.cloudinaryProductFolder,
       );
-
-      // Upload progress'i bekle (timeout ile)
-      debugPrint('Upload task başlatıldı, bekleniyor...');
-      try {
-        // Timeout: 60 saniye
-        await uploadTask.timeout(
-          const Duration(seconds: 60),
-          onTimeout: () {
-            debugPrint('✗ Upload timeout (60 saniye)');
-            throw Exception('Resim yükleme zaman aşımına uğradı. Lütfen tekrar deneyin.');
-          },
-        );
-        debugPrint('✓ Upload task tamamlandı');
-      } catch (e) {
-        debugPrint('✗ Upload task hatası: $e');
-        rethrow;
-      }
-
-      // Download URL'yi al (timeout ile)
-      debugPrint('Download URL alınıyor...');
-      try {
-        final downloadUrl = await ref.getDownloadURL().timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            debugPrint('✗ Download URL timeout (30 saniye)');
-            throw Exception('Resim URL alınamadı. Lütfen tekrar deneyin.');
-          },
-        );
-        debugPrint('✓ Download URL alındı: $downloadUrl');
-        
-        // URL'nin geçerli olduğunu kontrol et
-        if (downloadUrl.isEmpty) {
-          throw Exception('Geçersiz resim URL\'si alındı');
-        }
-        
-        return downloadUrl;
-      } catch (e) {
-        debugPrint('✗ Download URL alma hatası: $e');
-        rethrow;
-      }
     } catch (e, stackTrace) {
       debugPrint('✗ Ürün resmi yükleme hatası: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -588,4 +284,3 @@ class StorageService {
     }
   }
 }
-

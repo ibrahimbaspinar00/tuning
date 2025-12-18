@@ -66,7 +66,10 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
   List<String> get _productImages {
     final imageUrl = widget.product.imageUrl.trim();
     // Eğer görsel URL'i boş veya geçersizse, boş liste döndür
-    if (imageUrl.isEmpty || (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://'))) {
+    if (imageUrl.isEmpty ||
+        (!imageUrl.startsWith('http://') &&
+            !imageUrl.startsWith('https://') &&
+            !imageUrl.startsWith('assets/'))) {
       return [];
     }
     return [
@@ -1092,12 +1095,19 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      reviewWithImage.imageUrls.first,
+                                    child: OptimizedImage(
+                                      imageUrl: reviewWithImage.imageUrls.first,
+                                      width: 80,
+                                      height: 80,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => Container(
+                                      borderRadius: BorderRadius.circular(8),
+                                      errorWidget: Container(
                                         color: Colors.grey[200],
                                         child: const Icon(Icons.image_not_supported),
+                                      ),
+                                      placeholder: Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.image),
                                       ),
                                     ),
                                   ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/product.dart';
 import '../config/app_routes.dart';
+import '../widgets/optimized_image.dart';
 
 class SiparisOnaySayfasi extends StatefulWidget {
   final String orderId;
@@ -191,27 +193,50 @@ class _SiparisOnaySayfasiState extends State<SiparisOnaySayfasi>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.blue[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue[200]!),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.receipt_long, color: Colors.blue[700], size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Sipariş No: ${widget.orderNumber}',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue[900],
+        GestureDetector(
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: widget.orderNumber));
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text('Sipariş numarası kopyalandı!'),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
                 ),
-              ),
-            ],
+              );
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue[200]!),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.receipt_long, color: Colors.blue[700], size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Sipariş No: ${widget.orderNumber}',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[900],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.copy, color: Colors.blue[700], size: 18),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -533,19 +558,23 @@ class _SiparisOnaySayfasiState extends State<SiparisOnaySayfasi>
       ),
       child: Row(
         children: [
-          ClipRRect(
+          OptimizedImage(
+            imageUrl: product.imageUrl,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              product.imageUrl,
+            placeholder: Container(
               width: 60,
               height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                width: 60,
-                height: 60,
-                color: Colors.grey[300],
-                child: Icon(Icons.image, color: Colors.grey[400]),
-              ),
+              color: Colors.grey[200],
+              child: Icon(Icons.image, color: Colors.grey[400]),
+            ),
+            errorWidget: Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[300],
+              child: Icon(Icons.image, color: Colors.grey[400]),
             ),
           ),
           const SizedBox(width: 12),

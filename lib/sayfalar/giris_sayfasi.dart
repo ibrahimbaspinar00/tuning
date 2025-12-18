@@ -596,14 +596,13 @@ class _GirisSayfasiState extends State<GirisSayfasi> with AutomaticKeepAliveClie
                       mainAxisSize: MainAxisSize.min,
                       children: [
                       // Logo
-                      Text(
-                        'tuning.',
-                        style: GoogleFonts.poppins(
-                          fontSize: 56,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -2,
-                          height: 1.1,
+                      SizedBox(
+                        height: 190,
+                        width: 420,
+                        child: Image.asset(
+                          'assets/images/baspinar_wordmark_elite_white.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 ),
                       ),
                       const SizedBox(height: 16),
@@ -642,7 +641,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> with AutomaticKeepAliveClie
                       const SizedBox(height: 32),
                       // Main heading
                       Text(
-                        'Otomobil Tuning\nDünyasına Hoş Geldiniz',
+                        'Başpınar Auto Garage’a\nHoş Geldiniz',
                         style: GoogleFonts.poppins(
                           fontSize: 42,
                           fontWeight: FontWeight.w800,
@@ -1290,13 +1289,12 @@ class _GirisSayfasiState extends State<GirisSayfasi> with AutomaticKeepAliveClie
         children: [
           SizedBox(height: isTablet ? 60 : 40),
           // Logo
-          Text(
-            'tuning.',
-            style: GoogleFonts.poppins(
-              fontSize: isTablet ? 64 : 48,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F0F0F),
-              letterSpacing: -2,
+          SizedBox(
+            height: isTablet ? 160 : 140,
+            child: Image.asset(
+              'assets/images/baspinar_wordmark_elite.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             ),
           ),
           SizedBox(height: isTablet ? 16 : 12),

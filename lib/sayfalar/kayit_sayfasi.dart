@@ -137,13 +137,12 @@ class _KayitSayfasiState extends State<KayitSayfasi> {
             children: [
               const SizedBox(height: 40),
               // Logo
-              Text(
-                'tuning.',
-                style: GoogleFonts.poppins(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1A1A1A),
-                  letterSpacing: -1,
+              SizedBox(
+                height: 110,
+                child: Image.asset(
+                  'assets/images/baspinar_wordmark_elite.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 ),
               ),
               const SizedBox(height: 8),

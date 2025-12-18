@@ -13,10 +13,22 @@ import 'services/product_service.dart';
 import 'config/app_routes.dart';
 import 'sayfalar/main_screen.dart';
 import 'sayfalar/giris_sayfasi.dart';
+import 'sayfalar/profil_sayfasi.dart';
 import 'utils/responsive_helper.dart';
+import 'widgets/optimized_image.dart';
 
 /// Global navigator key for navigation from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+/// App brand icon (square logo).
+const String kBrandIconAsset = 'assets/images/Baspinar_auto_garge.png';
+
+/// Wide wordmark logo used where the old "tuning." text appeared.
+/// Place the provided image here (recommended).
+const String kBrandWordmarkAsset = 'assets/images/baspinar_wordmark_elite.png';
+
+/// White wordmark for dark hero sections.
+const String kBrandWordmarkWhiteAsset = 'assets/images/baspinar_wordmark_elite_white.png';
 
 // Sepet yönetimi
 class CartItem {
@@ -127,7 +139,7 @@ class TuningWebApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Tuning Web',
+      title: 'Başpınar Auto Garage',
       // Error handling - Beyaz ekran sorununu önlemek için
       builder: (context, widget) {
         Widget errorWidget = widget!;
@@ -676,11 +688,25 @@ class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin
   }
 
   Widget _buildHeroSection(bool isDesktop, bool isTablet, TextTheme textTheme) {
-    return Container(
+    final safe = MediaQuery.of(context).padding;
+    final viewportHeight = MediaQuery.of(context).size.height;
+    final availableHeight = viewportHeight - safe.top - safe.bottom;
+    final minHeroHeight = availableHeight < 520 ? 520.0 : availableHeight;
+
+    final horizontalPadding = isDesktop ? 100.0 : isTablet ? 60.0 : 24.0;
+    final verticalPadding = isDesktop ? 72.0 : isTablet ? 60.0 : 44.0;
+    final logoHeight = isDesktop ? 300.0 : isTablet ? 240.0 : 190.0;
+    final gapS = isDesktop ? 16.0 : isTablet ? 14.0 : 12.0;
+    final gapM = isDesktop ? 24.0 : isTablet ? 20.0 : 16.0;
+    final gapL = isDesktop ? 40.0 : isTablet ? 32.0 : 26.0;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: minHeroHeight),
+      child: Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 100 : isTablet ? 60 : 24,
-        vertical: isDesktop ? 120 : isTablet ? 80 : 60,
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -736,33 +762,27 @@ class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin
               ),
             ),
           ),
-          SizedBox(height: isDesktop ? 48 : isTablet ? 40 : 32),
+          SizedBox(height: gapM),
           
-          // Main Title - Ultra Modern
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFFFFFFF),
-                Color(0xFFD4AF37),
-                Color(0xFFFFFFFF),
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ).createShader(bounds),
-            child: Text(
-              'ELİTE\nTUNİNG',
+          // Brand wordmark (replaces "ELİTE TUNİNG")
+          SizedBox(
+            height: logoHeight,
+            child: Image.asset(
+              kBrandWordmarkWhiteAsset,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Text(
+                'BAŞPINAR AUTO GARAGE',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                fontSize: isDesktop ? 96 : isTablet ? 72 : 48,
-                fontWeight: FontWeight.w900,
+                  fontSize: isDesktop ? 56 : isTablet ? 44 : 34,
+                  fontWeight: FontWeight.w800,
                 color: Colors.white,
-                letterSpacing: -3,
-                height: 1.0,
+                  letterSpacing: -1.5,
               ),
             ),
           ),
-          SizedBox(height: isDesktop ? 32 : isTablet ? 24 : 20),
+          ),
+          SizedBox(height: gapM),
           
           // Subtitle - Minimal
           Text(
@@ -776,7 +796,7 @@ class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin
               fontWeight: FontWeight.w400,
             ),
           ),
-          SizedBox(height: isDesktop ? 16 : isTablet ? 12 : 10),
+          SizedBox(height: gapS),
           Text(
             'Premium otomotiv parçaları ve aksesuarları',
             textAlign: TextAlign.center,
@@ -788,7 +808,7 @@ class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin
               fontWeight: FontWeight.w400,
             ),
           ),
-          SizedBox(height: isDesktop ? 56 : isTablet ? 44 : 36),
+          SizedBox(height: gapL),
           
           // Premium CTA Buttons
           Wrap(
@@ -919,6 +939,7 @@ class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin
             ],
           ),
         ],
+        ),
       ),
     );
   }
@@ -2069,24 +2090,29 @@ class _TopActionBar extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => LinearGradient(
-                            colors: [
-                              const Color(0xFF0A0A0A),
-                              const Color(0xFFD4AF37),
-                              const Color(0xFF0A0A0A),
-                            ],
-                            stops: const [0.0, 0.5, 1.0],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ).createShader(bounds),
-                          child: Text(
-                            'tuning.',
+                        SizedBox(
+                          height: 54,
+                          child: OptimizedImage(
+                            imageUrl: kBrandWordmarkAsset,
+                            fit: BoxFit.contain,
+                            borderRadius: BorderRadius.circular(8),
+                            placeholder: Text(
+                              'BAŞPINAR',
                             style: GoogleFonts.playfairDisplay(
-                              fontSize: 26,
+                                fontSize: 22,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: -1,
-                              color: Colors.white,
+                                letterSpacing: -0.5,
+                                color: const Color(0xFF0A0A0A),
+                              ),
+                            ),
+                            errorWidget: Text(
+                              'BAŞPINAR',
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                                color: const Color(0xFF0A0A0A),
+                              ),
                             ),
                           ),
                         ),
@@ -2177,24 +2203,29 @@ class _TopActionBar extends StatelessWidget {
               : Row(
                   children: [
                     // Logo
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          const Color(0xFF0A0A0A),
-                          const Color(0xFFD4AF37),
-                          const Color(0xFF0A0A0A),
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds),
-                      child: Text(
-                        'tuning.',
+                    SizedBox(
+                      height: 60,
+                      child: OptimizedImage(
+                        imageUrl: kBrandWordmarkAsset,
+                        fit: BoxFit.contain,
+                        borderRadius: BorderRadius.circular(10),
+                        placeholder: Text(
+                          'BAŞPINAR AUTO GARAGE',
                         style: GoogleFonts.playfairDisplay(
-                          fontSize: 30,
+                            fontSize: 24,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: -1.2,
-                          color: Colors.white,
+                            letterSpacing: -0.8,
+                            color: const Color(0xFF0A0A0A),
+                          ),
+                        ),
+                        errorWidget: Text(
+                          'BAŞPINAR AUTO GARAGE',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                            color: const Color(0xFF0A0A0A),
+                          ),
                         ),
                       ),
                     ),
@@ -3325,26 +3356,21 @@ class ProductCard extends StatelessWidget {
                     ),
                     child: Stack(
                       children: [
-                        Center(
-                          child: product.imageUrl.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.network(
-                                    product.imageUrl,
+                        Positioned.fill(
+                          child: OptimizedImage(
+                            imageUrl: product.imageUrl,
                                     fit: BoxFit.contain,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    errorBuilder: (_, __, ___) => Icon(
+                            borderRadius: BorderRadius.circular(6),
+                            placeholder: Icon(
                                       Icons.image,
                                       size: 48,
-                                      color: Colors.grey[400],
+                              color: Colors.grey[300],
                                     ),
-                                  ),
-                                )
-                              : Icon(
+                            errorWidget: Icon(
                                   Icons.image,
                                   size: 48,
                                   color: Colors.grey[400],
+                            ),
                                 ),
                         ),
                         // İndirim Badge
@@ -3582,7 +3608,13 @@ class _MobileNavigationBarState extends State<_MobileNavigationBar> {
             break;
           case 3:
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => AccountPage()),
+              MaterialPageRoute(
+                builder: (_) => const ProfilSayfasi(
+                  favoriteProducts: [],
+                  cartProducts: [],
+                  orders: [],
+                ),
+              ),
             );
             break;
         }
@@ -4457,15 +4489,15 @@ class _CartItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               color: Colors.grey.shade100,
             ),
-            child: item.product.imageUrl.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      item.product.imageUrl,
+            child: OptimizedImage(
+              imageUrl: item.product.imageUrl,
+              width: isDesktop ? 100 : isTablet ? 90 : 80,
+              height: isDesktop ? 100 : isTablet ? 90 : 80,
                       fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(16),
+              placeholder: const Icon(Icons.image_outlined, size: 40),
+              errorWidget: const Icon(Icons.image_outlined, size: 40),
                     ),
-                  )
-                : const Icon(Icons.image_outlined, size: 40),
           ),
           const SizedBox(width: 16),
           Expanded(

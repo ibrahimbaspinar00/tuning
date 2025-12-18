@@ -61,6 +61,7 @@ class OrderService {
         'id': orderId,
         'orderNumber': orderNumber, // Gerçekçi sipariş numarası
         'userId': _currentUserId,
+        // Ürünler sipariş anındaki fiyatlarıyla kaydediliyor - ürün fiyatı değişse bile siparişteki fiyat korunur
         'products': products.map((p) => p.toMap()).toList(),
         'totalAmount': totalAmount,
         'subtotal': totalAmount, // Ara toplam

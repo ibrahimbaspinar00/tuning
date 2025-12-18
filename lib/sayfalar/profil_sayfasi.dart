@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../model/product.dart';
 import '../model/order.dart';
 import '../providers/theme_provider.dart';
 import '../services/firebase_data_service.dart';
 import '../services/order_service.dart';
+import '../services/external_image_upload_service.dart';
+import '../config/external_image_storage_config.dart';
 import 'adres_yonetimi_sayfasi.dart';
 import 'odeme_yontemleri_sayfasi.dart';
 import 'bildirim_ayarlari_sayfasi.dart';
@@ -92,39 +93,60 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
   
   Future<void> _pickProfileImage() async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 300,
-        maxHeight: 300,
-        imageQuality: 80,
-      );
-      
-      if (image != null) {
-        // Firebase Storage'a yükle
-        final String? downloadUrl = await _uploadImageToFirebase(image);
+      // Web için özel kontrol
+      if (kIsWeb) {
+        // Web'de image picker kullan
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 800,
+          maxHeight: 800,
+          imageQuality: 85,
+        );
         
-        if (downloadUrl != null) {
-          // Kullanıcı profilini güncelle
-          await _dataService.saveUserProfile(
-            fullName: _fullName ?? '',
-            username: _username ?? '',
-            email: _email ?? '',
-            phone: _phone,
-            address: _address,
-            profileImageUrl: downloadUrl,
+        if (image != null) {
+          await _processAndUploadImage(image);
+        }
+      } else {
+        // Mobil platformlar için
+        ImageSource? source;
+        
+        // Kullanıcıya seçenek sun (sadece mobilde)
+        if (!kIsWeb) {
+          source = await showModalBottomSheet<ImageSource>(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.photo_library),
+                    title: const Text('Galeriden Seç'),
+                    onTap: () => Navigator.pop(context, ImageSource.gallery),
+                  ),
+                  if (!kIsWeb)
+                    ListTile(
+                      leading: const Icon(Icons.camera_alt),
+                      title: const Text('Kamera ile Çek'),
+                      onTap: () => Navigator.pop(context, ImageSource.camera),
+                    ),
+                ],
+              ),
+            ),
+          );
+        } else {
+          source = ImageSource.gallery;
+        }
+        
+        if (source != null) {
+          final XFile? image = await _picker.pickImage(
+            source: source,
+            maxWidth: 800,
+            maxHeight: 800,
+            imageQuality: 85,
           );
           
-          if (mounted) {
-            setState(() {
-              _profileImageUrl = downloadUrl;
-            });
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Profil fotoğrafı başarıyla güncellendi!'),
-                backgroundColor: Colors.green,
-              ),
-            );
+          if (image != null) {
+            await _processAndUploadImage(image);
           }
         }
       }
@@ -132,7 +154,91 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Profil fotoğrafı yüklenirken hata: $e'),
+            content: Text('Profil fotoğrafı yüklenirken hata: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+  
+  Future<void> _processAndUploadImage(XFile image) async {
+    try {
+      // Yükleme başladı mesajı
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text('Profil fotoğrafı yükleniyor...'),
+              ],
+            ),
+            duration: Duration(seconds: 30),
+          ),
+        );
+      }
+      
+      // Cloudinary (external) upload
+      final String? downloadUrl = await _uploadProfileImage(image);
+      
+      if (downloadUrl != null) {
+        // Kullanıcı profilini güncelle
+        await _dataService.saveUserProfile(
+          fullName: _fullName ?? '',
+          username: _username ?? '',
+          email: _email ?? '',
+          phone: _phone,
+          address: _address,
+          profileImageUrl: downloadUrl,
+        );
+        
+        if (mounted) {
+          setState(() {
+            _profileImageUrl = downloadUrl;
+          });
+          
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Profil fotoğrafı başarıyla güncellendi!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profil fotoğrafı yüklenemedi. Lütfen tekrar deneyin.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -140,28 +246,47 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
     }
   }
   
-  Future<String?> _uploadImageToFirebase(XFile image) async {
+  Future<String?> _uploadProfileImage(XFile image) async {
     try {
       final user = _auth.currentUser;
       if (user == null) return null;
       
-      // Firebase Storage referansı oluştur
-      final Reference ref = FirebaseStorage.instance
-          .ref()
-          .child('profile_images')
-          .child('${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final bytes = await image.readAsBytes();
+      if (bytes.isEmpty) return null;
+
+      // Basic size guard (3MB)
+      const maxSize = 3 * 1024 * 1024;
+      if (bytes.length > maxSize) {
+        throw Exception('Dosya boyutu çok büyük. Maksimum 3MB olmalıdır.');
+      }
+
+      // Cloudinary ayarları kontrolü
+      if (!ExternalImageStorageConfig.enabled) {
+        throw Exception('Profil fotoğrafı yükleme özelliği şu anda devre dışı. Lütfen yöneticiye başvurun.');
+      }
+
+      if (ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+          ExternalImageStorageConfig.cloudinaryCloudName.isEmpty) {
+        throw Exception('Cloudinary cloud name ayarlı değil. `ExternalImageStorageConfig.cloudinaryCloudName` doldurun.');
+      }
+
+      if (ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
+          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
+        throw Exception('Cloudinary upload preset ayarlı değil. `ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset` doldurun.');
+      }
+
+      // Cloudinary'ye yükle
+      final external = ExternalImageUploadService();
+      final url = await external.uploadImageBytes(
+        bytes: bytes,
+        fileName: image.name.isNotEmpty ? image.name : 'profile_${user.uid}.jpg',
+        folder: ExternalImageStorageConfig.cloudinaryProfileFolder,
+      );
       
-      // Dosyayı yükle
-      final UploadTask uploadTask = ref.putFile(File(image.path));
-      final TaskSnapshot snapshot = await uploadTask;
-      
-      // Download URL'ini al
-      final String downloadUrl = await snapshot.ref.getDownloadURL();
-      
-      return downloadUrl;
+      return url;
     } catch (e) {
-      // print('Firebase Storage yükleme hatası: $e');
-      return null;
+      debugPrint('Profil fotoğrafı upload hatası: $e');
+      rethrow; // Hata mesajını yukarı fırlat
     }
   }
   
@@ -210,24 +335,47 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                                 colors: [Colors.purple[400]!, Colors.blue[400]!],
                               ),
                             ),
-                            child: GestureDetector(
-                              onTap: _pickProfileImage,
-                              child: CircleAvatar(
-                                radius: 50,
-                                backgroundColor: Colors.grey[100],
-                                backgroundImage: _profileImageUrl != null 
-                                    ? (_profileImageUrl!.startsWith('http') 
-                                        ? NetworkImage(_profileImageUrl!) 
-                                        : FileImage(File(_profileImageUrl!)) as ImageProvider)
-                                    : null,
-                                child: _profileImageUrl == null 
-                                    ? Icon(
-                                        Icons.person,
-                                        size: 50,
-                                        color: Colors.grey[400],
-                                      )
-                                    : null,
-                              ),
+                            child: Stack(
+                              children: [
+                                GestureDetector(
+                                  onTap: _pickProfileImage,
+                                  child: CircleAvatar(
+                                    radius: 50,
+                                    backgroundColor: Colors.grey[100],
+                                    backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                            ? NetworkImage(_profileImageUrl!) 
+                                        : null,
+                                    child: _profileImageUrl == null 
+                                        ? Icon(
+                                            Icons.person,
+                                            size: 50,
+                                            color: Colors.grey[400],
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                                // Kamera ikonu overlay
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: _pickProfileImage,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue[600],
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 2),
+                                      ),
+                                      child: const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 20),

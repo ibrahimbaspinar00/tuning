@@ -18,6 +18,7 @@ import '../utils/network_manager.dart';
 import '../services/firebase_data_service.dart';
 import '../services/product_service.dart';
 import '../services/order_service.dart';
+import '../widgets/ai_chat_widget.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -690,7 +691,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
     
     return Scaffold(
       backgroundColor: const Color(0xFFFAFBFC),
-      body: Column(
+      body: Stack(
+        children: [
+          Column(
         children: [
           // Trendyol tarzı header
           _buildTrendyolHeader(context),
@@ -701,6 +704,10 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
               children: _getPages(), // Her seferinde yeniden oluştur (kategori değişiklikleri için)
             ),
           ),
+            ],
+          ),
+          // AI Chat Widget (sağ alt köşe)
+          const AIChatWidget(),
         ],
       ),
     );
@@ -710,6 +717,15 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
   Widget _buildTrendyolHeader(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1200;
+    final isTablet = screenWidth >= 768 && screenWidth < 1200;
+    // Header yüksekliği arama çubuğu yüksekliğine göre ayarlandı
+    final headerHeight = isDesktop ? 88.0 : isTablet ? 86.0 : 82.0;
+    // The wordmark image has large transparent padding. We lightly crop from the
+    // CENTER (not left) + scale so it looks bigger without cutting the text.
+    final logoHeight = isDesktop ? 82.0 : isTablet ? 78.0 : 72.0;
+    final logoScale = isDesktop ? 1.35 : isTablet ? 1.30 : 1.25;
+    final cropWidthFactor = isDesktop ? 0.94 : isTablet ? 0.95 : 0.96;
+    final cropHeightFactor = isDesktop ? 0.78 : isTablet ? 0.80 : 0.82;
     
     return Container(
       color: Colors.white,
@@ -739,7 +755,8 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
             ),
           // Ana header
           Container(
-            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 80 : 24, vertical: 16),
+            height: headerHeight,
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : isTablet ? 10 : 6), // Padding daha da azaltıldı - arama çubuğu için maksimum genişlik
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(
@@ -750,29 +767,44 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo
-                GestureDetector(
+                // Sol taraf - Logo (sabit genişlik)
+                SizedBox(
+                  width: isDesktop ? 280.0 : isTablet ? 240.0 : 200.0, // Logo için sabit genişlik
+                  child: GestureDetector(
                   onTap: () {
                     setState(() {
                       _selectedIndex = 0;
                     });
                   },
-                  child: Text(
-                    'tuning.',
-                    style: GoogleFonts.poppins(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0F0F0F),
-                      letterSpacing: -1,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ClipRect(
+                        child: Align(
+                          alignment: Alignment.center,
+                          widthFactor: cropWidthFactor,
+                          heightFactor: cropHeightFactor,
+                          child: Transform.scale(
+                            alignment: Alignment.center,
+                            scale: logoScale,
+                            child: Image.asset(
+                              'assets/images/baspinar_wordmark_elite.png',
+                              height: logoHeight,
+                              fit: BoxFit.contain,
+                              alignment: Alignment.centerLeft,
+                              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                     ),
                   ),
                 ),
-                const SizedBox(width: 32),
-                // Arama çubuğu
+                      ),
+                    ),
+                  ),
+                ),
+                // Arama çubuğu - ortada
                 Expanded(
                   child: Container(
-                    height: 48,
+                    height: isDesktop ? 50 : isTablet ? 48 : 46, // Yükseklik azaltıldı
                     decoration: BoxDecoration(
                       color: const Color(0xFFFAFBFC),
                       borderRadius: BorderRadius.circular(8),
@@ -818,11 +850,11 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                             prefixIcon: const Icon(
                               Icons.search,
                               color: Color(0xFF6A6A6A),
-                              size: 24,
+                              size: 22,
                             ),
                             suffixIcon: value.text.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear, size: 20, color: Color(0xFF6A6A6A)),
+                                    icon: const Icon(Icons.clear, size: 18, color: Color(0xFF6A6A6A)),
                                     onPressed: () {
                                       setState(() {
                                         _headerSearchController.clear();
@@ -832,7 +864,10 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                                   )
                                 : null,
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: isDesktop ? 14 : isTablet ? 13 : 12, // Padding azaltıldı
+                            ),
                           ),
                           style: GoogleFonts.inter(
                             fontSize: 14,
@@ -843,7 +878,12 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                     ),
                   ),
                 ),
-                const SizedBox(width: 24),
+                // Sağ taraf - İkonlar (sabit genişlik, logo ile eşit)
+                SizedBox(
+                  width: isDesktop ? 280.0 : isTablet ? 240.0 : 200.0, // Logo ile aynı genişlik - tam ortalama için
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
                 // Hesabım
                 _buildHeaderIcon(
                   icon: Icons.person_outline_rounded,
@@ -854,7 +894,7 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                     });
                   },
                 ),
-                const SizedBox(width: 16),
+                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : 14), // İkonlar arası boşluk
                 // Favoriler
                 _buildHeaderIcon(
                   icon: Icons.favorite_outline_rounded,
@@ -865,7 +905,7 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                     });
                   },
                 ),
-                const SizedBox(width: 16),
+                      SizedBox(width: isDesktop ? 20 : isTablet ? 16 : 14), // İkonlar arası boşluk
                 // Sepet
                 Stack(
                   clipBehavior: Clip.none,
@@ -906,6 +946,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                         ),
                       ),
                   ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -969,13 +1012,13 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
           Icon(
             icon,
             color: const Color(0xFF0F0F0F),
-            size: 28,
+            size: 24, // İkon boyutu küçültüldü - sağ taraf küçültüldü
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             label,
             style: GoogleFonts.inter(
-              fontSize: 11,
+              fontSize: 10, // Font boyutu küçültüldü
               color: const Color(0xFF6A6A6A),
               fontWeight: FontWeight.w400,
             ),

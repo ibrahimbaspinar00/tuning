@@ -4,6 +4,7 @@ import '../model/order.dart';
 import '../model/product.dart';
 import '../services/order_service.dart';
 import 'siparis_detay_sayfasi.dart';
+import '../widgets/optimized_image.dart';
 import '../theme/app_design_system.dart';
 import '../utils/responsive_helper.dart';
 
@@ -552,25 +553,37 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(AppDesignSystem.radiusS - 1),
-                            child: (product.imageUrl.isNotEmpty && product.imageUrl != '')
-                                ? Image.network(
-                                    product.imageUrl,
+                            child: OptimizedImage(
+                              imageUrl: product.imageUrl,
+                              width: ResponsiveHelper.responsiveValue(
+                                context,
+                                mobile: 50.0,
+                                tablet: 55.0,
+                                desktop: 60.0,
+                              ),
+                              height: ResponsiveHelper.responsiveValue(
+                                context,
+                                mobile: 50.0,
+                                tablet: 55.0,
+                                desktop: 60.0,
+                              ),
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stack) => Container(
+                              borderRadius: BorderRadius.circular(AppDesignSystem.radiusS - 1),
+                              placeholder: Container(
+                                color: AppDesignSystem.surfaceVariant,
+                                child: Icon(
+                                  Icons.image,
+                                  color: AppDesignSystem.textTertiary,
+                                  size: ResponsiveHelper.responsiveIconSize(context, mobile: 16.0, desktop: 20.0),
+                                ),
+                              ),
+                              errorWidget: Container(
                                       color: AppDesignSystem.surfaceVariant,
                                       child: Icon(
                                         Icons.image_not_supported, 
                                         color: AppDesignSystem.textTertiary,
                                         size: ResponsiveHelper.responsiveIconSize(context, mobile: 16.0, desktop: 20.0),
                                       ),
-                                    ),
-                                  )
-                                : Container(
-                                    color: AppDesignSystem.surfaceVariant,
-                                    child: Icon(
-                                      Icons.image,
-                                      color: AppDesignSystem.textTertiary,
-                                      size: ResponsiveHelper.responsiveIconSize(context, mobile: 16.0, desktop: 20.0),
                                     ),
                                   ),
                           ),

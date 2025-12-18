@@ -848,54 +848,84 @@ class _BildirimlerSayfasiState extends State<BildirimlerSayfasi>
   }
 
   Widget _buildOrderInfoCard(String? orderId, String? orderNumber, dynamic amount) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green[200]!, width: 1),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.receipt_long, color: Colors.green[700], size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (orderNumber != null) ...[
-                  Text(
-                    'Sipariş No: $orderNumber',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green[900],
-                    ),
-                  ),
-                ] else if (orderId != null) ...[
-                  Text(
-                    'Sipariş ID: ${orderId.length > 8 ? orderId.substring(0, 8) : orderId}...',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green[900],
-                    ),
-                  ),
+    final String displayText;
+    final String copyText;
+    
+    if (orderNumber != null) {
+      displayText = 'Sipariş No: $orderNumber';
+      copyText = orderNumber;
+    } else if (orderId != null) {
+      displayText = 'Sipariş ID: ${orderId.length > 8 ? orderId.substring(0, 8) : orderId}...';
+      copyText = orderId;
+    } else {
+      return const SizedBox.shrink();
+    }
+    
+    return GestureDetector(
+      onTap: () async {
+        await Clipboard.setData(ClipboardData(text: copyText));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text('Sipariş numarası kopyalandı!'),
                 ],
-                if (amount != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Tutar: ${amount.toStringAsFixed(2)} ₺',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.green[700],
-                    ),
-                  ),
-                ],
-              ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
             ),
-          ),
-        ],
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.green[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.green[200]!, width: 1),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.receipt_long, color: Colors.green[700], size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayText,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[900],
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.copy, size: 16, color: Colors.green[700]),
+                    ],
+                  ),
+                  if (amount != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Tutar: ${amount.toStringAsFixed(2)} ₺',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.green[700],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

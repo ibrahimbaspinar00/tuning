@@ -6,6 +6,7 @@ import '../model/product.dart';
 import '../services/collection_service.dart';
 import '../services/product_service.dart';
 import '../widgets/error_handler.dart';
+import '../widgets/optimized_image.dart';
 import '../config/app_routes.dart';
 import '../utils/responsive_helper.dart';
 
@@ -563,16 +564,19 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                     child: Stack(
                       children: [
-                        Image.network(
-                          product.imageUrl.isNotEmpty
-                              ? product.imageUrl
-                              : 'https://via.placeholder.com/300',
-                          width: double.infinity,
-                          height: double.infinity,
+                        Positioned.fill(
+                          child: OptimizedImage(
+                            imageUrl: product.imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
+                            borderRadius: BorderRadius.zero,
+                            placeholder: Container(
+                              color: Colors.grey[200],
+                              child: Icon(Icons.image, color: Colors.grey[400]),
+                            ),
+                            errorWidget: Container(
                             color: Colors.grey[200],
                             child: Icon(Icons.image_not_supported, color: Colors.grey[400]),
+                            ),
                           ),
                         ),
                         // Rating badge
@@ -917,21 +921,26 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
                                                   ),
                                                   child: Stack(
                                                     children: [
-                                                      Image.network(
-                                                        product.imageUrl.isNotEmpty
-                                                            ? product.imageUrl
-                                                            : 'https://via.placeholder.com/200',
-                                                        width: double.infinity,
-                                                        height: double.infinity,
+                                                      Positioned.fill(
+                                                        child: OptimizedImage(
+                                                          imageUrl: product.imageUrl,
                                                         fit: BoxFit.cover,
-                                                        errorBuilder: (context, error, stackTrace) => Container(
-                                                          width: double.infinity,
-                                                          height: double.infinity,
+                                                          borderRadius: BorderRadius.zero,
+                                                          placeholder: Container(
+                                                            color: Colors.grey[200],
+                                                            child: Icon(
+                                                              Icons.image,
+                                                              color: Colors.grey[400],
+                                                              size: 40,
+                                                            ),
+                                                          ),
+                                                          errorWidget: Container(
                                                           color: Colors.grey[200],
                                                           child: Icon(
                                                             Icons.image_not_supported,
                                                             color: Colors.grey[400],
                                                             size: 40,
+                                                            ),
                                                           ),
                                                         ),
                                                       ),

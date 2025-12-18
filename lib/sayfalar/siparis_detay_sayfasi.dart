@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/order.dart';
@@ -186,11 +187,39 @@ class _SiparisDetaySayfasiState extends State<SiparisDetaySayfasi> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Sipariş No: #${widget.order.id}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                      GestureDetector(
+                        onTap: () async {
+                          await Clipboard.setData(ClipboardData(text: widget.order.id));
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Row(
+                                  children: [
+                                    Icon(Icons.check_circle, color: Colors.white, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Sipariş numarası kopyalandı!'),
+                                  ],
+                                ),
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Sipariş No: #${widget.order.id}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.copy, size: 16, color: Colors.grey[600]),
+                          ],
                         ),
                       ),
                     ],

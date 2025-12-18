@@ -101,10 +101,7 @@ class _OptimizedImageState extends State<OptimizedImage> with AutomaticKeepAlive
         cacheHeight: widget.height != null && widget.height!.isFinite ? widget.height!.toInt() : null,
       );
     } else if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
-      // Firebase Storage URL'lerini özel olarak handle et
-      final isFirebaseStorage = trimmedUrl.contains('firebasestorage.googleapis.com');
-      
-      debugPrint('🖼️ Loading image from: ${isFirebaseStorage ? "Firebase Storage" : "Network"}');
+      debugPrint('🖼️ Loading image from Network');
       debugPrint('URL: $trimmedUrl');
       
       // Önce CachedNetworkImage ile dene
@@ -135,10 +132,6 @@ class _OptimizedImageState extends State<OptimizedImage> with AutomaticKeepAlive
         maxWidthDiskCache: 800,
         maxHeightDiskCache: 800,
         useOldImageOnUrlChange: true,
-        // Firebase Storage için özel ayarlar
-        httpHeaders: isFirebaseStorage ? {
-          'Accept': 'image/*',
-        } : null,
       );
     } else {
       // Geçersiz URL formatı

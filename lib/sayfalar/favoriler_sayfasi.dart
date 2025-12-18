@@ -1093,13 +1093,27 @@ class _FavorilerSayfasiState extends State<FavorilerSayfasi> with TickerProvider
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(3),
                             child: snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty
-                                ? Image.network(
-                                    snapshot.data!,
+                                ? OptimizedImage(
+                                    imageUrl: snapshot.data!,
+                                    width: 80,
+                                    height: 80,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stack) => Container(
+                                    borderRadius: BorderRadius.circular(3),
+                                    errorWidget: Container(
                                       color: Colors.grey[200],
-                                      child: Icon(Icons.image_not_supported, 
-                                          color: Colors.grey[400], size: 16),
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey[400],
+                                        size: 16,
+                                      ),
+                                    ),
+                                    placeholder: Container(
+                                      color: Colors.grey[200],
+                                      child: Icon(
+                                        Icons.image,
+                                        color: Colors.grey[400],
+                                        size: 16,
+                                      ),
                                     ),
                                   )
                                 : Container(

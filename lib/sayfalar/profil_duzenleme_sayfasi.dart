@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/firebase_data_service.dart';
 import '../services/user_auth_service.dart';
+import '../services/external_image_upload_service.dart';
+import '../config/external_image_storage_config.dart';
 import '../widgets/error_handler.dart';
 import '../config/app_routes.dart';
 
@@ -17,6 +21,7 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
   final FirebaseDataService _dataService = FirebaseDataService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserAuthService _userAuthService = UserAuthService();
+  final ImagePicker _picker = ImagePicker();
   
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
@@ -30,6 +35,7 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
   int? _selectedYear;
   bool _isCorporate = false;
   
+  String? _profileImageUrl;
   bool _isLoading = false;
   bool _isSaving = false;
 
@@ -118,6 +124,12 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
           isCorporate = userData['isCorporate'] as bool;
         }
         
+        // Profil fotoğrafı
+        String? profileImageUrl;
+        if (userData != null && userData['profileImageUrl'] != null) {
+          profileImageUrl = userData['profileImageUrl'].toString();
+        }
+        
         setState(() {
           _firstNameController.text = firstName;
           _lastNameController.text = lastName;
@@ -128,6 +140,7 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
           _selectedMonth = month;
           _selectedYear = year;
           _isCorporate = isCorporate;
+          _profileImageUrl = profileImageUrl;
           _isLoading = false;
         });
       }
@@ -151,6 +164,161 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
           setState(() => _isLoading = false);
           ErrorHandler.showError(context, 'Profil bilgileri yüklenirken hata: $e');
         }
+      }
+    }
+  }
+
+  Future<void> _pickProfileImage() async {
+    try {
+      // Web için özel kontrol
+      if (kIsWeb) {
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 800,
+          maxHeight: 800,
+          imageQuality: 85,
+        );
+        
+        if (image != null) {
+          await _processAndUploadImage(image);
+        }
+      } else {
+        // Mobil platformlar için
+        final ImageSource? source = await showModalBottomSheet<ImageSource>(
+          context: context,
+          builder: (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Galeriden Seç'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                if (!kIsWeb)
+                  ListTile(
+                    leading: const Icon(Icons.camera_alt),
+                    title: const Text('Kamera ile Çek'),
+                    onTap: () => Navigator.pop(context, ImageSource.camera),
+                  ),
+              ],
+            ),
+          ),
+        );
+        
+        if (source != null) {
+          final XFile? image = await _picker.pickImage(
+            source: source,
+            maxWidth: 800,
+            maxHeight: 800,
+            imageQuality: 85,
+          );
+          
+          if (image != null) {
+            await _processAndUploadImage(image);
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Profil fotoğrafı yüklenirken hata: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+  
+  Future<void> _processAndUploadImage(XFile image) async {
+    try {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text('Profil fotoğrafı yükleniyor...'),
+              ],
+            ),
+            duration: Duration(seconds: 30),
+          ),
+        );
+      }
+      
+      final user = _auth.currentUser;
+      if (user == null) return;
+      
+      final bytes = await image.readAsBytes();
+      if (bytes.isEmpty) return;
+
+      const maxSize = 3 * 1024 * 1024; // 3MB
+      if (bytes.length > maxSize) {
+        throw Exception('Dosya boyutu çok büyük. Maksimum 3MB olmalıdır.');
+      }
+
+      // Cloudinary ayarları kontrolü
+      if (!ExternalImageStorageConfig.enabled) {
+        throw Exception('Profil fotoğrafı yükleme özelliği şu anda devre dışı. Lütfen yöneticiye başvurun.');
+      }
+
+      if (ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+          ExternalImageStorageConfig.cloudinaryCloudName.isEmpty) {
+        throw Exception('Cloudinary cloud name ayarlı değil. `ExternalImageStorageConfig.cloudinaryCloudName` doldurun.');
+      }
+
+      if (ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
+          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
+        throw Exception('Cloudinary upload preset ayarlı değil. `ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset` doldurun.');
+      }
+
+      // Cloudinary'ye yükle
+      final external = ExternalImageUploadService();
+      final url = await external.uploadImageBytes(
+        bytes: bytes,
+        fileName: image.name.isNotEmpty ? image.name : 'profile_${user.uid}.jpg',
+        folder: ExternalImageStorageConfig.cloudinaryProfileFolder,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _profileImageUrl = url;
+        });
+        
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Profil fotoğrafı başarıyla yüklendi!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -185,6 +353,7 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         username: existingUsername.toString(),
         email: _emailController.text.trim(),
         phone: phone,
+        profileImageUrl: _profileImageUrl,
       );
       
       // Doğum tarihi ve kurumsal bilgisini kaydet
@@ -275,18 +444,63 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Başlık
+                    // Başlık ve Profil Fotoğrafı
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       color: Colors.white,
-                      child: Text(
-                        'Kişisel Bilgilerim',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                      child: Column(
+                        children: [
+                          // Profil fotoğrafı
+                          GestureDetector(
+                            onTap: _pickProfileImage,
+                            child: Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                      ? NetworkImage(_profileImageUrl!)
+                                      : null,
+                                  child: _profileImageUrl == null
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 50,
+                                          color: Colors.grey,
+                                        )
+                                      : null,
+                                ),
+                                // Kamera ikonu overlay
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF27A1A),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Kişisel Bilgilerim',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 1),
