@@ -89,9 +89,19 @@ void main() async {
   
   // Global error handler - Beyaz ekran sorununu önlemek için
   FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint('Flutter Error: ${details.exception}');
-    debugPrint('Stack trace: ${details.stack}');
+    // Web'de presentError sorun çıkarabilir, sadece log yap
+    try {
+      debugPrint('Flutter Error: ${details.exception}');
+      debugPrint('Error Summary: ${details.summary}');
+      if (details.stack != null) {
+        debugPrint('Stack trace: ${details.stack}');
+      }
+      // Web'de presentError'u try-catch ile sarmala
+      FlutterError.presentError(details);
+    } catch (e) {
+      // presentError hatası olsa bile devam et
+      debugPrint('Error handler exception: $e');
+    }
   };
   
   // Platform error handler
