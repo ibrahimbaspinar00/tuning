@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app_links/app_links.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -750,19 +751,25 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
     );
   }
 
-  // Trendyol tarzı header
+  // Trendyol tarzı header - Web ve Mobil için ayrı tasarımlar
   Widget _buildTrendyolHeader(BuildContext context) {
+    // Web ve mobil için tamamen farklı AppBar tasarımları
+    if (kIsWeb) {
+      return _buildWebHeader(context);
+    } else {
+      return _buildMobileHeader(context);
+    }
+  }
+
+  // Web için AppBar - Geniş, detaylı tasarım
+  Widget _buildWebHeader(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1200;
-    final isTablet = screenWidth >= 768 && screenWidth < 1200;
-    // Header yüksekliği arama çubuğu yüksekliğine göre ayarlandı
-    final headerHeight = isDesktop ? 88.0 : isTablet ? 86.0 : 82.0;
-    // The wordmark image has large transparent padding. We lightly crop from the
-    // CENTER (not left) + scale so it looks bigger without cutting the text.
-    final logoHeight = isDesktop ? 82.0 : isTablet ? 78.0 : 72.0;
-    final logoScale = isDesktop ? 1.35 : isTablet ? 1.30 : 1.25;
-    final cropWidthFactor = isDesktop ? 0.94 : isTablet ? 0.95 : 0.96;
-    final cropHeightFactor = isDesktop ? 0.78 : isTablet ? 0.80 : 0.82;
+    final headerHeight = isDesktop ? 88.0 : 86.0;
+    final logoHeight = isDesktop ? 82.0 : 78.0;
+    final logoScale = isDesktop ? 1.35 : 1.30;
+    final cropWidthFactor = isDesktop ? 0.94 : 0.95;
+    final cropHeightFactor = isDesktop ? 0.78 : 0.80;
     
     return Container(
       color: Colors.white,
@@ -790,10 +797,10 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                 ],
               ),
             ),
-          // Ana header - Modern tasarım
+          // Ana header - Web için geniş tasarım
           Container(
             height: headerHeight,
-            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : isTablet ? 16 : (screenWidth < 400 ? 8 : 12)),
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 80 : 40),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -807,15 +814,15 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Sol taraf - Logo (mobilde daha küçük)
+                // Sol taraf - Logo (web için geniş)
                 SizedBox(
-                  width: isDesktop ? 280.0 : isTablet ? 240.0 : (screenWidth < 400 ? 110.0 : 150.0),
+                  width: isDesktop ? 280.0 : 240.0,
                   child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 0;
-                    });
-                  },
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                      });
+                    },
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: ClipRect(
@@ -832,249 +839,176 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                               fit: BoxFit.contain,
                               alignment: Alignment.centerLeft,
                               errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                    ),
-                  ),
-                ),
-                      ),
-                    ),
-                  ),
-                ),
-                // Arama çubuğu - ortada (mobilde daha kompakt)
-                Expanded(
-                  child: screenWidth < 400 
-                    ? GestureDetector(
-                        onTap: () {
-                          // Mobilde arama çubuğuna tıklanınca arama sayfasına git veya dialog aç
-                          // Şimdilik sadece focus et
-                          FocusScope.of(context).requestFocus(FocusNode());
-                        },
-                        child: Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFAFBFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFFE8E8E8),
-                              width: 1,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 12),
-                                child: Icon(
-                                  Icons.search,
-                                  color: Color(0xFF6A6A6A),
-                                  size: 20,
-                                ),
-                              ),
-                              Expanded(
-                                child: TextField(
-                                  controller: _headerSearchController,
-                                  onChanged: (value) {
-                                    final query = value.trim();
-                                    setState(() {
-                                      _headerSearchQuery = query.isEmpty ? null : query;
-                                      if (_selectedIndex != 0) {
-                                        _selectedIndex = 0;
-                                      }
-                                    });
-                                  },
-                                  onSubmitted: (value) {
-                                    final query = value.trim();
-                                    setState(() {
-                                      _headerSearchQuery = query.isEmpty ? null : query;
-                                      _selectedIndex = 0;
-                                    });
-                                  },
-                                  textInputAction: TextInputAction.search,
-                                  decoration: InputDecoration(
-                                    hintText: 'Ara...',
-                                    hintStyle: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: const Color(0xFF9CA3AF),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 10,
-                                    ),
-                                  ),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color: const Color(0xFF0F0F0F),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Container(
-                        height: isDesktop ? 50 : isTablet ? 48 : 42,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFAFBFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFFE8E8E8),
-                            width: 1,
-                          ),
-                        ),
-                        child: ValueListenableBuilder<TextEditingValue>(
-                          valueListenable: _headerSearchController,
-                          builder: (context, value, child) {
-                            return TextField(
-                              controller: _headerSearchController,
-                              onChanged: (value) {
-                                final query = value.trim();
-                                setState(() {
-                                  _headerSearchQuery = query.isEmpty ? null : query;
-                                  if (_selectedIndex != 0) {
-                                    _selectedIndex = 0;
-                                  }
-                                });
-                              },
-                              onSubmitted: (value) {
-                                final query = value.trim();
-                                setState(() {
-                                  _headerSearchQuery = query.isEmpty ? null : query;
-                                  _selectedIndex = 0;
-                                });
-                              },
-                              textInputAction: TextInputAction.search,
-                              decoration: InputDecoration(
-                                hintText: screenWidth < 600 ? 'Ara...' : 'Aradığınız ürün, kategori veya markayı yazınız',
-                                hintStyle: GoogleFonts.inter(
-                                  fontSize: screenWidth < 600 ? 12 : 14,
-                                  color: const Color(0xFF9CA3AF),
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: const Color(0xFF6A6A6A),
-                                  size: screenWidth < 600 ? 20 : 22,
-                                ),
-                                suffixIcon: value.text.isNotEmpty
-                                    ? IconButton(
-                                        icon: const Icon(Icons.clear, size: 18, color: Color(0xFF6A6A6A)),
-                                        onPressed: () {
-                                          setState(() {
-                                            _headerSearchController.clear();
-                                            _headerSearchQuery = null;
-                                          });
-                                        },
-                                      )
-                                    : null,
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth < 600 ? 12 : 16,
-                                  vertical: isDesktop ? 14 : isTablet ? 13 : 11,
-                                ),
-                              ),
-                              style: GoogleFonts.inter(
-                                fontSize: screenWidth < 600 ? 12 : 14,
-                                color: const Color(0xFF0F0F0F),
-                              ),
-                            );
-                          },
                         ),
                       ),
+                    ),
+                  ),
                 ),
-                // Sağ taraf - İkonlar (modern ve düzenli tasarım)
-                Flexible(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Favoriler
-                      _buildHeaderIcon(
-                        icon: Icons.favorite_outline_rounded,
-                        label: 'Favorilerim',
-                        onTap: () {
-                          setState(() {
-                            _selectedIndex = 1;
-                          });
-                        },
-                        showLabel: isDesktop || isTablet,
+                // Arama çubuğu - Web için tam genişlikte
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: isDesktop ? 40 : 24),
+                    child: Container(
+                      height: isDesktop ? 50 : 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAFBFC),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFE8E8E8),
+                          width: 1,
+                        ),
                       ),
-                      SizedBox(width: isDesktop ? 16 : isTablet ? 12 : (screenWidth < 400 ? 8 : 10)),
-                      // Sepet
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          _buildHeaderIcon(
-                            icon: Icons.shopping_cart_outlined,
-                            label: 'Sepetim',
-                            onTap: () {
+                      child: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _headerSearchController,
+                        builder: (context, value, child) {
+                          return TextField(
+                            controller: _headerSearchController,
+                            onChanged: (value) {
+                              final query = value.trim();
                               setState(() {
-                                _selectedIndex = 2;
+                                _headerSearchQuery = query.isEmpty ? null : query;
+                                if (_selectedIndex != 0) {
+                                  _selectedIndex = 0;
+                                }
                               });
                             },
-                            showLabel: isDesktop || isTablet,
-                          ),
-                          if (cartProducts.isNotEmpty)
-                            Positioned(
-                              right: screenWidth < 400 ? 2 : 6,
-                              top: -2,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFEF4444),
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    cartProducts.length > 99 ? '99+' : '${cartProducts.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                            onSubmitted: (value) {
+                              final query = value.trim();
+                              setState(() {
+                                _headerSearchQuery = query.isEmpty ? null : query;
+                                _selectedIndex = 0;
+                              });
+                            },
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              hintText: 'Aradığınız ürün, kategori veya markayı yazınız',
+                              hintStyle: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: const Color(0xFF9CA3AF),
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.search,
+                                color: Color(0xFF6A6A6A),
+                                size: 22,
+                              ),
+                              suffixIcon: value.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 18, color: Color(0xFF6A6A6A)),
+                                      onPressed: () {
+                                        setState(() {
+                                          _headerSearchController.clear();
+                                          _headerSearchQuery = null;
+                                        });
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: isDesktop ? 14 : 13,
+                              ),
+                            ),
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: const Color(0xFF0F0F0F),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                // Sağ taraf - İkonlar (web için label'ları göster)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildHeaderIcon(
+                      icon: Icons.favorite_outline_rounded,
+                      label: 'Favorilerim',
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1;
+                        });
+                      },
+                      showLabel: true,
+                    ),
+                    SizedBox(width: isDesktop ? 20 : 16),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        _buildHeaderIcon(
+                          icon: Icons.shopping_cart_outlined,
+                          label: 'Sepetim',
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 2;
+                            });
+                          },
+                          showLabel: true,
+                        ),
+                        if (cartProducts.isNotEmpty)
+                          Positioned(
+                            right: 6,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEF4444),
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 18,
+                                minHeight: 18,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  cartProducts.length > 99 ? '99+' : '${cartProducts.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                      SizedBox(width: isDesktop ? 16 : isTablet ? 12 : (screenWidth < 400 ? 8 : 10)),
-                      // Hesabım - Profil fotoğrafı veya ikon
-                      _buildProfileIcon(
-                        profileImageUrl: _profileImageUrl,
-                        onTap: () {
-                          setState(() {
-                            _selectedIndex = 3;
-                          });
-                        },
-                        showLabel: isDesktop || isTablet,
-                      ),
-                    ],
-                  ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(width: isDesktop ? 20 : 16),
+                    _buildProfileIcon(
+                      profileImageUrl: _profileImageUrl,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                      showLabel: true,
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          // Kategoriler bar
+          // Kategoriler bar - Web için
           Container(
             height: 48,
             color: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 80 : 24),
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 80 : 40),
             child: Row(
               children: [
-                // Tüm Kategoriler butonu
                 _AllCategoriesButton(
                   onTap: () {
                     HapticFeedback.lightImpact();
                     setState(() {
-                      _selectedCategoryForNavigation = null; // Tüm kategoriler
-                      _selectedIndex = 4; // Kategoriler sayfası
+                      _selectedCategoryForNavigation = null;
+                      _selectedIndex = 4;
                     });
                   },
                 ),
                 const SizedBox(width: 24),
-                // Kategori linkleri
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -1090,6 +1024,247 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                         _buildCategoryLink('Süspansiyon', () => _navigateToCategory('Süspansiyon')),
                         _buildCategoryLink('Çok Satanlar', () => _navigateToCategory('Tümü'), isNew: true),
                         _buildCategoryLink('Yeni Ürünler', () => _navigateToCategory('Tümü'), isNew: true),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Mobil için AppBar - Kompakt, minimal tasarım
+  Widget _buildMobileHeader(BuildContext context) {
+    final headerHeight = 70.0;
+    final logoHeight = 50.0;
+    
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          // Offline durumu banner'ı
+          if (!_isOnline)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              color: const Color(0xFFFF6000),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.wifi_off, color: Colors.white, size: 18),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'İnternet bağlantınız yok.',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Ana header - Mobil için kompakt tasarım
+          Container(
+            height: headerHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Sol taraf - Logo (mobil için küçük)
+                SizedBox(
+                  width: 100,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                      });
+                    },
+                    child: Image.asset(
+                      'assets/images/baspinar_wordmark_elite.png',
+                      height: logoHeight,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
+                // Arama çubuğu - Mobil için kompakt
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Container(
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAFBFC),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFFE8E8E8),
+                          width: 1,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _headerSearchController,
+                        onChanged: (value) {
+                          final query = value.trim();
+                          setState(() {
+                            _headerSearchQuery = query.isEmpty ? null : query;
+                            if (_selectedIndex != 0) {
+                              _selectedIndex = 0;
+                            }
+                          });
+                        },
+                        onSubmitted: (value) {
+                          final query = value.trim();
+                          setState(() {
+                            _headerSearchQuery = query.isEmpty ? null : query;
+                            _selectedIndex = 0;
+                          });
+                        },
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          hintText: 'Ara...',
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: const Color(0xFF9CA3AF),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Color(0xFF6A6A6A),
+                            size: 18,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                        ),
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: const Color(0xFF0F0F0F),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Sağ taraf - İkonlar (mobil için sadece ikonlar, label yok)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildHeaderIcon(
+                      icon: Icons.favorite_outline_rounded,
+                      label: 'Favorilerim',
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1;
+                        });
+                      },
+                      showLabel: false,
+                    ),
+                    const SizedBox(width: 8),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        _buildHeaderIcon(
+                          icon: Icons.shopping_cart_outlined,
+                          label: 'Sepetim',
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 2;
+                            });
+                          },
+                          showLabel: false,
+                        ),
+                        if (cartProducts.isNotEmpty)
+                          Positioned(
+                            right: 0,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEF4444),
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 14,
+                                minHeight: 14,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  cartProducts.length > 99 ? '99+' : '${cartProducts.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(width: 8),
+                    _buildProfileIcon(
+                      profileImageUrl: _profileImageUrl,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                      showLabel: false,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Kategoriler bar - Mobil için (scrollable)
+          Container(
+            height: 40,
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                _AllCategoriesButton(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() {
+                      _selectedCategoryForNavigation = null;
+                      _selectedIndex = 4;
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildCategoryLink('Motor Parçaları', () => _navigateToCategory('Motor Parçaları')),
+                        _buildCategoryLink('Egzoz Sistemleri', () => _navigateToCategory('Egzoz Sistemleri')),
+                        _buildCategoryLink('Jant & Lastik', () => _navigateToCategory('Jant & Lastik')),
+                        _buildCategoryLink('Görünüm & Body Kit', () => _navigateToCategory('Görünüm & Body Kit')),
+                        _buildCategoryLink('İç Donanım', () => _navigateToCategory('İç Donanım')),
+                        _buildCategoryLink('Elektronik & ECU', () => _navigateToCategory('Elektronik & ECU')),
+                        _buildCategoryLink('Fren Sistemleri', () => _navigateToCategory('Fren Sistemleri')),
+                        _buildCategoryLink('Süspansiyon', () => _navigateToCategory('Süspansiyon')),
                       ],
                     ),
                   ),
