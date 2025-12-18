@@ -92,6 +92,24 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
   }
   
   Future<void> _pickProfileImage() async {
+    // Cloudinary ayarları kontrolü - erken çıkış
+    if (!ExternalImageStorageConfig.enabled ||
+        ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+        ExternalImageStorageConfig.cloudinaryCloudName.isEmpty ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
+        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profil fotoğrafı yükleme özelliği şu anda kullanılamıyor. Cloudinary ayarları yapılandırılmalıdır.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+      return;
+    }
+    
     try {
       // Web için özel kontrol
       if (kIsWeb) {
@@ -152,11 +170,21 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       }
     } catch (e) {
       if (mounted) {
+        // Hata mesajını daha kullanıcı dostu yap
+        String errorMessage = 'Profil fotoğrafı yüklenirken bir hata oluştu.';
+        if (e.toString().contains('Cloudinary')) {
+          errorMessage = 'Cloudinary ayarları eksik. Lütfen yöneticiye başvurun.';
+        } else if (e.toString().contains('boyutu')) {
+          errorMessage = e.toString();
+        } else {
+          errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Profil fotoğrafı yüklenirken hata: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            content: Text(errorMessage),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -236,10 +264,22 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
+        // Hata mesajını daha kullanıcı dostu yap
+        String errorMessage = 'Profil fotoğrafı yüklenirken bir hata oluştu.';
+        if (e.toString().contains('Cloudinary')) {
+          errorMessage = 'Cloudinary ayarları eksik. Lütfen yöneticiye başvurun.';
+        } else if (e.toString().contains('boyutu')) {
+          errorMessage = e.toString().replaceAll('Exception: ', '');
+        } else {
+          errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Hata: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(errorMessage),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -337,23 +377,42 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                             ),
                             child: Stack(
                               children: [
-                                GestureDetector(
-                                  onTap: _pickProfileImage,
-                                  child: CircleAvatar(
-                                    radius: 50,
-                                    backgroundColor: Colors.grey[100],
-                                    backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                (ExternalImageStorageConfig.enabled &&
+                                        ExternalImageStorageConfig.cloudinaryCloudName != 'YOUR_CLOUD_NAME' &&
+                                        ExternalImageStorageConfig.cloudinaryCloudName.isNotEmpty &&
+                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset != 'YOUR_UPLOAD_PRESET' &&
+                                        ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isNotEmpty)
+                                    ? GestureDetector(
+                                        onTap: _pickProfileImage,
+                                        child: CircleAvatar(
+                                          radius: 50,
+                                          backgroundColor: Colors.grey[100],
+                                          backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
+                                              ? NetworkImage(_profileImageUrl!) 
+                                              : null,
+                                          child: _profileImageUrl == null 
+                                              ? Icon(
+                                                  Icons.person,
+                                                  size: 50,
+                                                  color: Colors.grey[400],
+                                                )
+                                              : null,
+                                        ),
+                                      )
+                                    : CircleAvatar(
+                                        radius: 50,
+                                        backgroundColor: Colors.grey[100],
+                                        backgroundImage: (_profileImageUrl != null && _profileImageUrl!.isNotEmpty)
                                             ? NetworkImage(_profileImageUrl!) 
-                                        : null,
-                                    child: _profileImageUrl == null 
-                                        ? Icon(
-                                            Icons.person,
-                                            size: 50,
-                                            color: Colors.grey[400],
-                                          )
-                                        : null,
-                                  ),
-                                ),
+                                            : null,
+                                        child: _profileImageUrl == null 
+                                            ? Icon(
+                                                Icons.person,
+                                                size: 50,
+                                                color: Colors.grey[400],
+                                              )
+                                            : null,
+                                      ),
                                 // Kamera ikonu overlay
                                 Positioned(
                                   bottom: 0,

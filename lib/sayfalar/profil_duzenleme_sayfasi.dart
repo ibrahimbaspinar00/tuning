@@ -239,11 +239,21 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
       }
     } catch (e) {
       if (mounted) {
+        // Hata mesajını daha kullanıcı dostu yap
+        String errorMessage = 'Profil fotoğrafı yüklenirken bir hata oluştu.';
+        if (e.toString().contains('Cloudinary')) {
+          errorMessage = 'Cloudinary ayarları eksik. Lütfen yöneticiye başvurun.';
+        } else if (e.toString().contains('boyutu')) {
+          errorMessage = e.toString().replaceAll('Exception: ', '');
+        } else {
+          errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Profil fotoğrafı yüklenirken hata: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            content: Text(errorMessage),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -285,19 +295,13 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         throw Exception('Dosya boyutu çok büyük. Maksimum 3MB olmalıdır.');
       }
 
-      // Cloudinary ayarları kontrolü
-      if (!ExternalImageStorageConfig.enabled) {
-        throw Exception('Profil fotoğrafı yükleme özelliği şu anda devre dışı. Cloudinary ayarları yapılandırılmalıdır.');
-      }
-
-      if (ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
-          ExternalImageStorageConfig.cloudinaryCloudName.isEmpty) {
-        throw Exception('Cloudinary ayarları eksik. Lütfen https://console.cloudinary.com/ adresinden ücretsiz hesap oluşturup cloud name alın ve `lib/config/external_image_storage_config.dart` dosyasına ekleyin.');
-      }
-
-      if (ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
+      // Cloudinary ayarları kontrolü (zaten _pickProfileImage'da kontrol edildi ama yine de kontrol)
+      if (!ExternalImageStorageConfig.enabled ||
+          ExternalImageStorageConfig.cloudinaryCloudName == 'YOUR_CLOUD_NAME' ||
+          ExternalImageStorageConfig.cloudinaryCloudName.isEmpty ||
+          ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset == 'YOUR_UPLOAD_PRESET' ||
           ExternalImageStorageConfig.cloudinaryUnsignedUploadPreset.isEmpty) {
-        throw Exception('Cloudinary upload preset ayarlı değil. Cloudinary dashboard\'da Settings > Upload > Upload presets bölümünden unsigned preset oluşturun ve `lib/config/external_image_storage_config.dart` dosyasına ekleyin.');
+        throw Exception('Cloudinary ayarları eksik. Lütfen yöneticiye başvurun.');
       }
 
       // Cloudinary'ye yükle
