@@ -87,6 +87,15 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
     });
   }
   
+  /// Profil fotoğrafını hemen güncelle (callback ile)
+  void updateProfileImage(String? imageUrl) {
+    if (mounted) {
+      setState(() {
+        _profileImageUrl = imageUrl;
+      });
+    }
+  }
+  
   void _initializeNetworkListener() {
     // Network durumunu kontrol et ve dinle
     NetworkManager.instance.addCallback((isOnline, connection) {

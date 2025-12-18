@@ -515,11 +515,15 @@ class _HesabimSayfasiState extends State<HesabimSayfasi> with WidgetsBindingObse
                 ),
               );
               if (result == true && mounted) {
-                // Profil güncellendi, kısa bir bekleme sonrası verileri yeniden yükle
-                await Future.delayed(const Duration(milliseconds: 500));
-                await _loadUserData();
-                // State'i güncelle
+                // Hemen setState ile güncelle
                 setState(() {});
+                // Sonra verileri yeniden yükle
+                await Future.delayed(const Duration(milliseconds: 300));
+                await _loadUserData();
+                // Tekrar setState ile güncelle
+                if (mounted) {
+                  setState(() {});
+                }
               }
             },
             icon: const Icon(Icons.edit, color: AppDesignSystem.textSecondary),

@@ -256,6 +256,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
         );
         
         if (mounted) {
+          // Hemen setState ile güncelle (hemen görünsün)
           setState(() {
             _profileImageUrl = downloadUrl;
           });

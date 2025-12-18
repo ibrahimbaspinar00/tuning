@@ -358,6 +358,13 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         
         // Profil bilgilerini kaydet
         await _saveProfileImageUrl(url);
+        
+        // Hemen setState ile güncelle (hemen görünsün)
+        if (mounted) {
+          setState(() {
+            _profileImageUrl = url;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
