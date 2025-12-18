@@ -45,7 +45,7 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
   bool _isLoading = true;
   bool _reviewsLoaded = false;
   bool _isRefreshingReviews = false;
-  ProductReview? _userReview;
+  // _userReview kaldırıldı - kullanıcılar istediği kadar yorum yapabilir
   bool _hasPurchased = false;
   bool _isCheckingPurchase = true;
   ScaffoldMessengerState? _scaffoldMessenger;
@@ -180,13 +180,6 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
       final reviews = await ReviewService.getProductReviews(widget.product.id);
       if (!mounted) return;
       
-      final user = FirebaseAuth.instance.currentUser;
-      ProductReview? userReview;
-      if (user != null) {
-        userReview = await ReviewService.getUserReviewForProduct(widget.product.id, user.uid);
-        if (!mounted) return;
-      }
-      
       if (!mounted) return;
       final calculatedAverageRating = ProductReview.calculateAverageRating(reviews);
       
@@ -195,7 +188,6 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
           _reviews = reviews;
           _averageRating = calculatedAverageRating;
           _totalReviews = reviews.length;
-          _userReview = userReview;
           _isLoading = false;
           _reviewsLoaded = true;
           _isRefreshingReviews = false;
@@ -227,18 +219,7 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
       }
     }
     
-    if (!mounted) return;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && mounted) {
-      try {
-        final userReview = await ReviewService.getUserReviewForProduct(widget.product.id, user.uid);
-        if (mounted) {
-          setState(() => _userReview = userReview);
-        }
-      } catch (e) {
-        debugPrint('Error loading user review: $e');
-      }
-    }
+    // _userReview güncellemesi kaldırıldı - kullanıcılar istediği kadar yorum yapabilir
   }
 
 
@@ -1121,16 +1102,9 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
                         if (FirebaseAuth.instance.currentUser != null)
                           if (_isCheckingPurchase)
                             const Center(child: CircularProgressIndicator())
-                          else if (_userReview == null)
-                            ReviewForm(
-                              productId: widget.product.id,
-                              onReviewAdded: _onReviewAdded,
-                              hasPurchased: _hasPurchased,
-                            )
                           else
                             ReviewForm(
                               productId: widget.product.id,
-                              existingReview: _userReview,
                               onReviewAdded: _onReviewAdded,
                               hasPurchased: _hasPurchased,
                             )
