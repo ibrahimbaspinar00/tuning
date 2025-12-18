@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import '../services/firebase_data_service.dart';
 import '../services/order_service.dart';
 import '../services/external_image_upload_service.dart';
 import '../config/external_image_storage_config.dart';
+import '../widgets/image_cropper_widget.dart';
 import 'adres_yonetimi_sayfasi.dart';
 import 'odeme_yontemleri_sayfasi.dart';
 import 'bildirim_ayarlari_sayfasi.dart';
@@ -122,7 +124,9 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
         );
         
         if (image != null) {
-          await _processAndUploadImage(image);
+          // Önce crop ekranını göster
+          final imageBytes = await image.readAsBytes();
+          await _showCropDialog(imageBytes);
         }
       } else {
         // Mobil platformlar için
@@ -164,7 +168,9 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
           );
           
           if (image != null) {
-            await _processAndUploadImage(image);
+            // Önce crop ekranını göster
+            final imageBytes = await image.readAsBytes();
+            await _showCropDialog(imageBytes);
           }
         }
       }
@@ -191,7 +197,26 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
     }
   }
   
-  Future<void> _processAndUploadImage(XFile image) async {
+  /// Crop dialog'unu göster
+  Future<void> _showCropDialog(Uint8List imageBytes) async {
+    if (!mounted) return;
+    
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ImageCropperWidget(
+          imageData: imageBytes,
+          onCropComplete: (croppedData) async {
+            // Crop edilmiş fotoğrafı yükle
+            await _processAndUploadCroppedImage(croppedData);
+          },
+        ),
+      ),
+    );
+  }
+  
+  /// Crop edilmiş fotoğrafı yükle
+  Future<void> _processAndUploadCroppedImage(Uint8List croppedBytes) async {
     try {
       // Yükleme başladı mesajı
       if (mounted) {
@@ -217,7 +242,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       }
       
       // Cloudinary (external) upload
-      final String? downloadUrl = await _uploadProfileImage(image);
+      final String? downloadUrl = await _uploadProfileImageBytes(croppedBytes);
       
       if (downloadUrl != null) {
         // Kullanıcı profilini güncelle
@@ -286,12 +311,12 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
     }
   }
   
-  Future<String?> _uploadProfileImage(XFile image) async {
+  /// Bytes'tan direkt yükleme (crop edilmiş fotoğraf için)
+  Future<String?> _uploadProfileImageBytes(Uint8List bytes) async {
     try {
       final user = _auth.currentUser;
       if (user == null) return null;
       
-      final bytes = await image.readAsBytes();
       if (bytes.isEmpty) return null;
 
       // Basic size guard (3MB)
@@ -319,7 +344,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       final external = ExternalImageUploadService();
       final url = await external.uploadImageBytes(
         bytes: bytes,
-        fileName: image.name.isNotEmpty ? image.name : 'profile_${user.uid}.jpg',
+        fileName: 'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg',
         folder: ExternalImageStorageConfig.cloudinaryProfileFolder,
       );
       
@@ -329,6 +354,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       rethrow; // Hata mesajını yukarı fırlat
     }
   }
+  
   
   @override
   Widget build(BuildContext context) {

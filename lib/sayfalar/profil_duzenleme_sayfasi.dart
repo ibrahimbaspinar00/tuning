@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +9,7 @@ import '../services/user_auth_service.dart';
 import '../services/external_image_upload_service.dart';
 import '../config/external_image_storage_config.dart';
 import '../widgets/error_handler.dart';
+import '../widgets/image_cropper_widget.dart';
 import '../config/app_routes.dart';
 
 class ProfilDuzenlemeSayfasi extends StatefulWidget {
@@ -198,7 +200,9 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         );
         
         if (image != null) {
-          await _processAndUploadImage(image);
+          // Önce crop ekranını göster
+          final imageBytes = await image.readAsBytes();
+          await _showCropDialog(imageBytes);
         }
       } else {
         // Mobil platformlar için
@@ -233,7 +237,9 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
           );
           
           if (image != null) {
-            await _processAndUploadImage(image);
+            // Önce crop ekranını göster
+            final imageBytes = await image.readAsBytes();
+            await _showCropDialog(imageBytes);
           }
         }
       }
@@ -260,7 +266,26 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
     }
   }
   
-  Future<void> _processAndUploadImage(XFile image) async {
+  /// Crop dialog'unu göster
+  Future<void> _showCropDialog(Uint8List imageBytes) async {
+    if (!mounted) return;
+    
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ImageCropperWidget(
+          imageData: imageBytes,
+          onCropComplete: (croppedData) async {
+            // Crop edilmiş fotoğrafı yükle
+            await _processAndUploadCroppedImage(croppedData);
+          },
+        ),
+      ),
+    );
+  }
+  
+  /// Crop edilmiş fotoğrafı yükle
+  Future<void> _processAndUploadCroppedImage(Uint8List croppedBytes) async {
     try {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -287,11 +312,10 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
       final user = _auth.currentUser;
       if (user == null) return;
       
-      final bytes = await image.readAsBytes();
-      if (bytes.isEmpty) return;
+      if (croppedBytes.isEmpty) return;
 
       const maxSize = 3 * 1024 * 1024; // 3MB
-      if (bytes.length > maxSize) {
+      if (croppedBytes.length > maxSize) {
         throw Exception('Dosya boyutu çok büyük. Maksimum 3MB olmalıdır.');
       }
 
@@ -307,8 +331,8 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
       // Cloudinary'ye yükle
       final external = ExternalImageUploadService();
       final url = await external.uploadImageBytes(
-        bytes: bytes,
-        fileName: image.name.isNotEmpty ? image.name : 'profile_${user.uid}.jpg',
+        bytes: croppedBytes,
+        fileName: 'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg',
         folder: ExternalImageStorageConfig.cloudinaryProfileFolder,
       );
       
