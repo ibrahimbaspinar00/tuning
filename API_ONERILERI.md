@@ -1,317 +1,264 @@
-# API Önerileri - Tuning Web Projesi
+# Ücretsiz API Önerileri - Tuning E-Ticaret Projesi
 
-## 🎯 Öncelikli API'ler
+## 📸 Görsel ve Medya API'leri
 
-### 1. **Ödeme API'leri** 💳
-**Mevcut Durum:** Mock payment gateway kullanılıyor
+### 1. **Pexels API** (Ücretsiz)
+- **Ne İşe Yarar:** Yüksek kaliteli ücretsiz fotoğraflar
+- **Kullanım Alanı:** Ürün görselleri, blog yazıları, banner'lar
+- **Limit:** 200 istek/saat
+- **Link:** https://www.pexels.com/api/
+- **Örnek Kullanım:** Ürün kategorileri için placeholder görseller
 
-**Önerilen API'ler:**
-- **iyzico** (Türkiye için en uygun)
-  - Türk Lirası desteği
-  - Taksit seçenekleri
-  - Kolay entegrasyon
-  - Ücretsiz test ortamı
-  
-- **Stripe** (Uluslararası)
-  - 135+ ülke desteği
-  - Güçlü güvenlik
-  - Modern API
-  
-- **PayPal**
-  - Yaygın kullanım
-  - Kolay entegrasyon
-  - Müşteri güveni
-
-**Faydaları:**
-- Gerçek ödeme işlemleri
-- Güvenli ödeme altyapısı
-- Taksit seçenekleri
-- İade/iptal yönetimi
+### 2. **Unsplash API** (Ücretsiz)
+- **Ne İşe Yarar:** Profesyonel fotoğraf kütüphanesi
+- **Kullanım Alanı:** Ürün görselleri, arka plan görselleri
+- **Limit:** 50 istek/saat
+- **Link:** https://unsplash.com/developers
+- **Örnek Kullanım:** Ürün detay sayfalarında görsel zenginliği
 
 ---
 
-### 2. **Kargo Takip API'leri** 📦
-**Mevcut Durum:** Kargo takip sistemi yok
+## 💰 Finansal API'ler
 
-**Önerilen API'ler:**
-- **Yurtiçi Kargo API**
-- **Aras Kargo API**
-- **MNG Kargo API**
-- **Sürat Kargo API**
-- **PTT Kargo API**
+### 3. **ExchangeRate-API** (Ücretsiz)
+- **Ne İşe Yarar:** Döviz kurları (TL, USD, EUR)
+- **Kullanım Alanı:** Çoklu para birimi desteği, fiyat gösterimi
+- **Limit:** 1,500 istek/ay
+- **Link:** https://www.exchangerate-api.com/
+- **Örnek Kullanım:** Ürün fiyatlarını farklı para birimlerinde gösterme
 
-**Faydaları:**
-- Otomatik kargo takip numarası oluşturma
-- Gerçek zamanlı kargo durumu
-- Müşteri bildirimleri
-- Kargo maliyeti hesaplama
-
----
-
-### 3. **SMS/Email API'leri** 📧
-**Mevcut Durum:** Bildirim sistemi var ama SMS/Email entegrasyonu yok
-
-**Önerilen API'ler:**
-- **Twilio** (SMS)
-  - Global SMS gönderimi
-  - OTP desteği
-  - Güvenilir altyapı
-  
-- **SendGrid** (Email)
-  - Yüksek deliverability
-  - Template desteği
-  - Analytics
-  
-- **Netgsm** (Türkiye SMS)
-  - Türkiye odaklı
-  - Uygun fiyat
-  - Kolay entegrasyon
-
-**Faydaları:**
-- Sipariş onay SMS'i
-- Kargo takip bildirimleri
-- OTP doğrulama
-- Email pazarlama
+### 4. **CurrencyAPI** (Ücretsiz)
+- **Ne İşe Yarar:** 170+ para birimi döviz kurları
+- **Kullanım Alanı:** Otomatik fiyat dönüşümü
+- **Limit:** 300 istek/ay
+- **Link:** https://currencyapi.net/
+- **Örnek Kullanım:** Sepet toplamını farklı para birimlerinde gösterme
 
 ---
 
-### 4. **Harita API'leri** 🗺️
-**Mevcut Durum:** Adres yönetimi var ama harita entegrasyonu yok
+## 🗺️ Harita ve Konum API'leri
 
-**Önerilen API'ler:**
-- **Google Maps API**
-  - Adres otomatik tamamlama
-  - Konum seçimi
-  - Mesafe hesaplama
-  - Kargo maliyeti hesaplama
-  
-- **Yandex Maps API** (Alternatif)
-  - Türkiye için uygun
-  - Ücretsiz kullanım limiti
+### 5. **OpenStreetMap Nominatim API** (Ücretsiz)
+- **Ne İşe Yarar:** Adres arama, koordinat dönüşümü
+- **Kullanım Alanı:** Teslimat adresi doğrulama, mağaza konumları
+- **Limit:** 1 istek/saniye
+- **Link:** https://nominatim.org/
+- **Örnek Kullanım:** Kullanıcı adreslerini otomatik tamamlama
 
-**Faydaları:**
-- Adres doğrulama
-- Otomatik adres tamamlama
-- Kargo maliyeti hesaplama
-- Mağaza konumu gösterimi
+### 6. **Mapbox API** (Ücretsiz Tier)
+- **Ne İşe Yarar:** İnteraktif haritalar, rota planlama
+- **Kullanım Alanı:** Mağaza konumları, teslimat takibi
+- **Limit:** 50,000 istek/ay
+- **Link:** https://www.mapbox.com/
+- **Örnek Kullanım:** "Bize Ulaşın" sayfasında harita gösterimi
 
 ---
 
-### 5. **Sosyal Medya Giriş API'leri** 🔐
-**Mevcut Durum:** Sadece email/şifre ile giriş var
+## 📧 Email ve SMS API'leri
 
-**Önerilen API'ler:**
-- **Google Sign-In**
-  - Firebase ile entegre
-  - Kolay kullanım
-  
-- **Facebook Login**
-  - Yaygın kullanım
-  - Profil bilgileri
-  
-- **Apple Sign-In** (iOS için)
-  - Gizlilik odaklı
-  - Modern standart
+### 7. **EmailJS** (Ücretsiz)
+- **Ne İşe Yarar:** Backend olmadan email gönderme
+- **Kullanım Alanı:** Sipariş onayı, şifre sıfırlama, bildirimler
+- **Limit:** 200 email/ay
+- **Link:** https://www.emailjs.com/
+- **Örnek Kullanım:** Sipariş onay email'leri
 
-**Faydaları:**
-- Hızlı kayıt/giriş
-- Daha fazla kullanıcı
-- Güvenli kimlik doğrulama
+### 8. **Twilio** (Ücretsiz Trial)
+- **Ne İşe Yarar:** SMS gönderme, telefon doğrulama
+- **Kullanım Alanı:** 2FA, sipariş bildirimleri
+- **Limit:** $15.50 kredi (trial)
+- **Link:** https://www.twilio.com/
+- **Örnek Kullanım:** Telefon numarası doğrulama
 
 ---
 
-## 🚀 Gelişmiş API'ler
+## 🔍 Arama ve Veri API'leri
 
-### 6. **Arama ve Öneri API'leri** 🔍
-**Önerilen API'ler:**
-- **Algolia**
-  - Hızlı arama
-  - Akıllı öneriler
-  - Typo tolerance
-  
-- **Elasticsearch**
-  - Güçlü arama
-  - Özelleştirilebilir
-  - Açık kaynak
+### 9. **RapidAPI Hub** (Ücretsiz)
+- **Ne İşe Yarar:** Binlerce ücretsiz API'ye erişim
+- **Kullanım Alanı:** Çeşitli servisler (hava durumu, haberler, vb.)
+- **Limit:** API'ye göre değişir
+- **Link:** https://rapidapi.com/
+- **Örnek Kullanım:** Otomotiv haberleri, hava durumu
 
-**Faydaları:**
-- Gelişmiş ürün arama
-- "Bunlar da ilginizi çekebilir" önerileri
-- Arama sonuçlarını iyileştirme
+### 10. **NewsAPI** (Ücretsiz)
+- **Ne İşe Yarar:** Haber makaleleri
+- **Kullanım Alanı:** Otomotiv haberleri, blog içeriği
+- **Limit:** 100 istek/gün
+- **Link:** https://newsapi.org/
+- **Örnek Kullanım:** Ana sayfada "Son Haberler" bölümü
 
 ---
 
-### 7. **Analitik API'leri** 📊
-**Önerilen API'ler:**
-- **Google Analytics 4**
-  - Kullanıcı davranışı
-  - E-ticaret takibi
-  - Ücretsiz
-  
-- **Mixpanel**
-  - Event tracking
-  - Kullanıcı segmentasyonu
-  - A/B testing
+## 🤖 AI ve Chatbot API'leri
 
-**Faydaları:**
-- Kullanıcı davranış analizi
-- Satış raporları
-- Dönüşüm optimizasyonu
+### 11. **Groq API** (Zaten Kullanılıyor ✅)
+- **Ne İşe Yarar:** Hızlı AI chat bot
+- **Kullanım Alanı:** Müşteri desteği, ürün önerileri
+- **Limit:** Ücretsiz tier mevcut
+- **Link:** https://groq.com/
+- **Durum:** Projede zaten entegre
 
----
-
-### 8. **Fiyat Karşılaştırma API'leri** 💰
-**Önerilen API'ler:**
-- **Rakuten API**
-- **PriceGrabber API**
-- **Google Shopping API**
-
-**Faydaları:**
-- Otomatik fiyat güncelleme
-- Rekabet analizi
-- Fiyat optimizasyonu
+### 12. **Hugging Face Inference API** (Ücretsiz)
+- **Ne İşe Yarar:** AI modelleri (çeviri, analiz, vb.)
+- **Kullanım Alanı:** Ürün açıklamaları çevirisi, duygu analizi
+- **Limit:** Sınırlı ücretsiz tier
+- **Link:** https://huggingface.co/inference-api
+- **Örnek Kullanım:** Yorumlarda duygu analizi
 
 ---
 
-### 9. **Stok Yönetim API'leri** 📦
-**Önerilen API'ler:**
-- **Tedarikçi API'leri**
-- **ERP entegrasyonları**
-- **WooCommerce API** (eğer WordPress kullanılıyorsa)
+## 📊 Analytics ve İstatistik API'leri
 
-**Faydaları:**
-- Otomatik stok güncelleme
-- Tedarikçi entegrasyonu
-- Stok uyarıları
+### 13. **Google Analytics API** (Ücretsiz)
+- **Ne İşe Yarar:** Web sitesi istatistikleri
+- **Kullanım Alanı:** Ziyaretçi analizi, dönüşüm takibi
+- **Limit:** Ücretsiz
+- **Link:** https://developers.google.com/analytics
+- **Örnek Kullanım:** Admin panelinde istatistikler
 
----
-
-### 10. **Canlı Destek API'leri** 💬
-**Mevcut Durum:** AI chat bot var
-
-**Önerilen API'ler:**
-- **Intercom**
-  - Canlı sohbet
-  - Ticket sistemi
-  - Bot entegrasyonu
-  
-- **Zendesk**
-  - Müşteri desteği
-  - Knowledge base
-  - Ticket yönetimi
-
-**Faydaları:**
-- Gerçek zamanlı müşteri desteği
-- Ticket yönetimi
-- AI bot ile birlikte kullanım
+### 14. **Plausible Analytics** (Ücretsiz Trial)
+- **Ne İşe Yarar:** Gizlilik odaklı analytics
+- **Kullanım Alanı:** Ziyaretçi takibi (GDPR uyumlu)
+- **Limit:** 30 gün trial
+- **Link:** https://plausible.io/
+- **Örnek Kullanım:** Gizlilik odaklı analytics
 
 ---
 
-## 🎨 Ek Özellik API'leri
+## 🎨 QR Kod ve Barcode API'leri
 
-### 11. **Görsel İşleme API'leri** 🖼️
-**Mevcut Durum:** Cloudinary kullanılıyor
+### 15. **QR Code API** (Ücretsiz)
+- **Ne İşe Yarar:** QR kod oluşturma
+- **Kullanım Alanı:** Sipariş takip kodu, ürün QR kodları
+- **Limit:** Sınırsız
+- **Link:** https://goqr.me/api/
+- **Örnek Kullanım:** Sipariş numarası QR kodu
 
-**Ek Öneriler:**
-- **Google Vision API**
-  - Ürün görseli analizi
-  - Otomatik etiketleme
-  - Benzer ürün bulma
-
----
-
-### 12. **Çeviri API'leri** 🌍
-**Önerilen API'ler:**
-- **Google Translate API**
-  - Çoklu dil desteği
-  - Otomatik çeviri
-  - Ürün açıklamaları
-
-**Faydaları:**
-- Uluslararası pazara açılma
-- Çoklu dil desteği
+### 16. **Barcode Lookup API** (Ücretsiz)
+- **Ne İşe Yarar:** Barcode'dan ürün bilgisi
+- **Kullanım Alanı:** Ürün ekleme, stok takibi
+- **Limit:** 100 istek/gün
+- **Link:** https://www.barcodelookup.com/api
+- **Örnek Kullanım:** Ürün barkod okuma
 
 ---
 
-### 13. **Hava Durumu API'leri** ☁️
-**Önerilen API'ler:**
-- **OpenWeatherMap**
-  - Hava durumu bilgisi
-  - Kargo gecikme tahmini
+## 🌤️ Hava Durumu API'leri
 
-**Faydaları:**
-- Kargo gecikme uyarıları
-- Müşteri bilgilendirme
-
----
-
-## 📋 Öncelik Sıralaması
-
-### Yüksek Öncelik (Hemen Eklenmeli)
-1. ✅ **iyzico** - Gerçek ödeme sistemi
-2. ✅ **Kargo API'leri** - Kargo takip
-3. ✅ **SMS/Email API'leri** - Müşteri bildirimleri
-4. ✅ **Google Maps API** - Adres doğrulama
-
-### Orta Öncelik (Yakın Gelecek)
-5. ✅ **Sosyal Medya Giriş** - Kullanıcı deneyimi
-6. ✅ **Algolia** - Gelişmiş arama
-7. ✅ **Google Analytics** - Analitik
-
-### Düşük Öncelik (Gelecek Planlama)
-8. ✅ **Canlı Destek API'leri** - Müşteri desteği
-9. ✅ **Fiyat Karşılaştırma** - Rekabet analizi
-10. ✅ **Stok Yönetim** - Tedarikçi entegrasyonu
+### 17. **OpenWeatherMap API** (Ücretsiz)
+- **Ne İşe Yarar:** Hava durumu bilgisi
+- **Kullanım Alanı:** Araç bakım önerileri, teslimat tahmini
+- **Limit:** 60 istek/dakika
+- **Link:** https://openweathermap.org/api
+- **Örnek Kullanım:** "Hava durumuna göre bakım önerileri"
 
 ---
 
-## 💡 Entegrasyon Önerileri
+## 📱 Bildirim API'leri
 
-### Hızlı Başlangıç Paketi
-1. **iyzico** - Ödeme (1-2 gün)
-2. **Netgsm** - SMS bildirimleri (1 gün)
-3. **Google Maps** - Adres doğrulama (1 gün)
-4. **Yurtiçi Kargo** - Kargo takip (2-3 gün)
-
-**Toplam Süre:** ~1 hafta
-**Maliyet:** Düşük-Orta
-**ROI:** Yüksek
+### 18. **OneSignal API** (Ücretsiz)
+- **Ne İşe Yarar:** Push notification
+- **Kullanım Alanı:** Sipariş bildirimleri, kampanya duyuruları
+- **Limit:** 10,000 abone/ay
+- **Link:** https://onesignal.com/
+- **Örnek Kullanım:** Sipariş durumu bildirimleri
 
 ---
 
-## 🔧 Teknik Notlar
+## 🔐 Güvenlik API'leri
 
-### API Entegrasyon İçin Gerekenler
-- API key yönetimi (`.env` veya config dosyası)
-- Error handling
-- Rate limiting
-- Retry mekanizması
-- Logging ve monitoring
+### 19. **Have I Been Pwned API** (Ücretsiz)
+- **Ne İşe Yarar:** Email güvenlik kontrolü
+- **Kullanım Alanı:** Kayıt sırasında email güvenlik kontrolü
+- **Limit:** Rate limit var
+- **Link:** https://haveibeenpwned.com/API/v3
+- **Örnek Kullanım:** Kullanıcı kayıt sırasında uyarı
 
-### Güvenlik
-- API key'leri güvenli saklama
-- HTTPS kullanımı
-- Rate limiting
-- Input validation
-
----
-
-## 📚 Kaynaklar
-
-- **iyzico Dokümantasyon:** https://dev.iyzipay.com/
-- **Google Maps API:** https://developers.google.com/maps
-- **Twilio:** https://www.twilio.com/docs
-- **Algolia:** https://www.algolia.com/doc/
+### 20. **IP Geolocation API** (Ücretsiz)
+- **Ne İşe Yarar:** IP adresinden konum bilgisi
+- **Kullanım Alanı:** Güvenlik, bölgesel içerik
+- **Limit:** 1,000 istek/gün
+- **Link:** https://ipgeolocation.io/
+- **Örnek Kullanım:** Şüpheli giriş tespiti
 
 ---
 
-## ✅ Sonuç
+## 🎯 Öncelikli Öneriler (Tuning E-Ticaret İçin)
 
-Projeye eklenebilecek en önemli API'ler:
-1. **iyzico** - Gerçek ödeme
-2. **Kargo API'leri** - Kargo takip
-3. **SMS/Email API'leri** - Bildirimler
-4. **Google Maps** - Adres yönetimi
+### Yüksek Öncelik:
+1. **ExchangeRate-API** - Çoklu para birimi desteği
+2. **EmailJS** - Email bildirimleri
+3. **QR Code API** - Sipariş takip kodu
+4. **OpenStreetMap** - Adres doğrulama
+5. **NewsAPI** - Otomotiv haberleri
 
-Bu API'ler e-ticaret platformunuzu tam fonksiyonlu hale getirecektir.
+### Orta Öncelik:
+6. **Pexels/Unsplash** - Ürün görselleri
+7. **OneSignal** - Push notification
+8. **OpenWeatherMap** - Hava durumu önerileri
+9. **Barcode Lookup** - Ürün ekleme kolaylığı
+10. **Hugging Face** - AI özellikleri
+
+---
+
+## 💡 Kullanım Senaryoları
+
+### Senaryo 1: Çoklu Para Birimi
+```dart
+// ExchangeRate-API ile fiyat dönüşümü
+final usdPrice = turkishLiraPrice * exchangeRate;
+```
+
+### Senaryo 2: Email Bildirimleri
+```dart
+// EmailJS ile sipariş onay email'i
+await emailjs.send('service_id', 'template_id', {
+  'user_email': userEmail,
+  'order_number': orderNumber,
+});
+```
+
+### Senaryo 3: QR Kod Oluşturma
+```dart
+// QR kod ile sipariş takibi
+final qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=$orderId';
+```
+
+### Senaryo 4: Adres Doğrulama
+```dart
+// OpenStreetMap ile adres tamamlama
+final address = await nominatim.search(query: userInput);
+```
+
+---
+
+## 📝 Entegrasyon Notları
+
+1. **API Key Yönetimi:** Tüm API key'leri `lib/config/` klasöründe saklayın
+2. **Rate Limiting:** Her API için rate limit kontrolü ekleyin
+3. **Error Handling:** API hatalarını kullanıcıya göstermeden loglayın
+4. **Caching:** Sık kullanılan verileri cache'leyin (döviz kurları, vb.)
+5. **Fallback:** API çalışmazsa alternatif çözümler hazırlayın
+
+---
+
+## 🔗 Hızlı Başlangıç Linkleri
+
+- **API Test Araçları:** https://reqbin.com/, https://postman.com/
+- **API Dokümantasyon:** Her API'nin kendi sitesinde mevcut
+- **Rate Limit Takibi:** Her API'nin dashboard'unda görülebilir
+
+---
+
+## ⚠️ Önemli Notlar
+
+- Tüm API'ler ücretsiz tier'da sınırlıdır
+- Production'da rate limit'leri kontrol edin
+- API key'leri asla public repository'de paylaşmayın
+- GDPR ve KVKK uyumluluğunu kontrol edin
+
+---
+
+**Son Güncelleme:** 2024
 
