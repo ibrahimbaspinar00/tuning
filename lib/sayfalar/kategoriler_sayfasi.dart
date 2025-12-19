@@ -586,10 +586,15 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                 tablet: 10.0,
                 desktop: 12.0,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: double.infinity,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
                   // Ürün Resmi - Ana sayfadaki gibi
                   AspectRatio(
                     aspectRatio: 1,
@@ -697,54 +702,104 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     ),
                   ),
                   SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 3.0, desktop: 6.0)),
-                  // Değerlendirme - Mobilde daha kompakt (Her zaman göster)
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.star,
-                        color: Colors.amber[700],
-                        size: ResponsiveHelper.responsiveIconSize(
-                          context,
-                          mobile: 12.0, // Mobilde ikon küçültüldü
-                          desktop: 16.0,
-                        ),
-                      ),
-                      SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
-                      Text(
-                        product.averageRating > 0 
-                            ? product.averageRating.toStringAsFixed(1)
-                            : '0.0',
-                        style: GoogleFonts.inter(
-                          fontSize: ResponsiveHelper.responsiveFontSize(
-                            context,
-                            mobile: 10.0, // Mobilde font küçültüldü
-                            desktop: 12.0,
-                          ),
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A1A),
-                        ),
-                      ),
-                      if (product.reviewCount > 0) ...[
-                        SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
-                        Flexible(
-                          child: Text(
-                          '(${product.reviewCount})',
-                          style: GoogleFonts.inter(
-                            fontSize: ResponsiveHelper.responsiveFontSize(
-                              context,
-                                mobile: 10.0, // Mobilde font küçültüldü
-                              desktop: 12.0,
+                  // Değerlendirme - Mobilde Wrap kullanarak taşmayı önle
+                  ResponsiveHelper.isMobile(context)
+                      ? Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0),
+                          children: [
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber[700],
+                              size: ResponsiveHelper.responsiveIconSize(
+                                context,
+                                mobile: 11.0, // Mobilde ikon daha da küçültüldü
+                                desktop: 16.0,
+                              ),
                             ),
-                            color: Colors.grey[600],
+                            Text(
+                              product.averageRating > 0 
+                                  ? product.averageRating.toStringAsFixed(1)
+                                  : '0.0',
+                              style: GoogleFonts.inter(
+                                fontSize: ResponsiveHelper.responsiveFontSize(
+                                  context,
+                                  mobile: 9.0, // Mobilde font daha da küçültüldü
+                                  desktop: 12.0,
+                                ),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1A1A1A),
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            if (product.reviewCount > 0)
+                              Text(
+                                '(${product.reviewCount})',
+                                style: GoogleFonts.inter(
+                                  fontSize: ResponsiveHelper.responsiveFontSize(
+                                    context,
+                                    mobile: 9.0, // Mobilde font daha da küçültüldü
+                                    desktop: 12.0,
+                                  ),
+                                  color: Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber[700],
+                              size: ResponsiveHelper.responsiveIconSize(
+                                context,
+                                mobile: 12.0,
+                                desktop: 16.0,
+                              ),
+                            ),
+                            SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                            Flexible(
+                              child: Text(
+                                product.averageRating > 0 
+                                    ? product.averageRating.toStringAsFixed(1)
+                                    : '0.0',
+                                style: GoogleFonts.inter(
+                                  fontSize: ResponsiveHelper.responsiveFontSize(
+                                    context,
+                                    mobile: 10.0,
+                                    desktop: 12.0,
+                                  ),
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A1A),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (product.reviewCount > 0) ...[
+                              SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                              Flexible(
+                                child: Text(
+                                  '(${product.reviewCount})',
+                                  style: GoogleFonts.inter(
+                                    fontSize: ResponsiveHelper.responsiveFontSize(
+                                      context,
+                                      mobile: 10.0,
+                                      desktop: 12.0,
+                                    ),
+                                    color: Colors.grey[600],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                      ],
-                    ],
-                  ),
                   SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
-                  // Fiyat - Mobilde daha kompakt
+                  // Fiyat - Mobilde daha kompakt ve overflow kontrolü ile
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -755,12 +810,14 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                           style: GoogleFonts.inter(
                             fontSize: ResponsiveHelper.responsiveFontSize(
                               context,
-                              mobile: 10.0, // Mobilde font küçültüldü
+                              mobile: 9.0, // Mobilde font daha da küçültüldü
                               desktop: 12.0,
                             ),
                             decoration: TextDecoration.lineThrough,
                             color: Colors.grey[500],
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 1.0, desktop: 2.0)),
                       Text(
@@ -768,13 +825,15 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                         style: GoogleFonts.inter(
                           fontSize: ResponsiveHelper.responsiveFontSize(
                             context,
-                            mobile: 14.0, // Mobilde font küçültüldü
+                            mobile: 13.0, // Mobilde font biraz küçültüldü
                             tablet: 17.0,
                             desktop: 18.0,
                           ),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFFD4AF37),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -821,6 +880,7 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ),
