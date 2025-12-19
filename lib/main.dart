@@ -345,14 +345,14 @@ class TuningWebApp extends StatelessWidget {
             height: 1.4,
           ),
         ),
-        // Modern Web AppBar teması - Daha büyük ve premium
+        // Modern Web AppBar teması - Premium ve şık tasarım
         appBarTheme: AppBarTheme(
           elevation: 0,
-          scrolledUnderElevation: 2,
+          scrolledUnderElevation: 4,
           surfaceTintColor: Colors.transparent,
           backgroundColor: Colors.white,
           foregroundColor: const Color(0xFF0F0F0F),
-          shadowColor: Colors.black.withOpacity(0.08),
+          shadowColor: Colors.black.withOpacity(0.12),
           centerTitle: false,
           titleTextStyle: GoogleFonts.inter(
             fontSize: 22,
@@ -2062,23 +2062,32 @@ class _HeaderButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        borderRadius: BorderRadius.circular(16),
+        hoverColor: const Color(0xFFF8F8F8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFE8E8E8).withOpacity(0.5),
+              width: 1.5,
+            ),
+            color: Colors.white,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 18,
-                color: const Color(0xFF4A4A4A),
+                size: 19,
+                color: const Color(0xFF2A2A2A),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 label,
                 style: GoogleFonts.inter(
                   fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   color: const Color(0xFF1A1A1A),
                   letterSpacing: 0.2,
                 ),
@@ -2101,16 +2110,29 @@ class _TopActionBar extends StatelessWidget {
         final isCompact = constraints.maxWidth < 900;
         return Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isCompact ? 24 : 48,
-            vertical: isCompact ? 14 : 16,
+            horizontal: isCompact ? 20 : 64,
+            vertical: isCompact ? 14 : 18,
           ),
           decoration: BoxDecoration(
             color: Colors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: const Color(0xFFE5E5E5).withOpacity(0.5),
+                width: 1,
+              ),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 20,
                 offset: const Offset(0, 2),
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.01),
+                blurRadius: 6,
+                offset: const Offset(0, 1),
+                spreadRadius: 0,
               ),
             ],
           ),
@@ -2120,28 +2142,33 @@ class _TopActionBar extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        SizedBox(
-                          height: 54,
-                          child: OptimizedImage(
-                            imageUrl: kBrandWordmarkAsset,
-                            fit: BoxFit.contain,
-                            borderRadius: BorderRadius.circular(8),
-                            placeholder: Text(
-                              'BAŞPINAR',
-                            style: GoogleFonts.playfairDisplay(
-                                fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                                color: const Color(0xFF0A0A0A),
+                        GestureDetector(
+                          onTap: () {
+                            // Ana sayfaya dön
+                          },
+                          child: SizedBox(
+                            height: 50,
+                            child: OptimizedImage(
+                              imageUrl: kBrandWordmarkAsset,
+                              fit: BoxFit.contain,
+                              borderRadius: BorderRadius.circular(8),
+                              placeholder: Text(
+                                'BAŞPINAR',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                  color: const Color(0xFF0A0A0A),
+                                ),
                               ),
-                            ),
-                            errorWidget: Text(
-                              'BAŞPINAR',
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                                color: const Color(0xFF0A0A0A),
+                              errorWidget: Text(
+                                'BAŞPINAR',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                  color: const Color(0xFF0A0A0A),
+                                ),
                               ),
                             ),
                           ),
@@ -2150,152 +2177,234 @@ class _TopActionBar extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.shopping_basket_outlined, size: 20),
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => OrdersPage()),
-                                );
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              icon: const Icon(Icons.favorite_border, size: 20),
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => FavoritesPage()),
-                                );
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => OrdersPage()),
+                                  );
+                                },
                                 borderRadius: BorderRadius.circular(14),
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF0A0A0A), Color(0xFF1A1A1A)],
+                                hoverColor: const Color(0xFFF8F8F8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(11),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: const Color(0xFFE8E8E8).withOpacity(0.5),
+                                      width: 1.5,
+                                    ),
+                                    color: Colors.white,
+                                  ),
+                                  child: const Icon(
+                                    Icons.shopping_basket_outlined,
+                                    size: 20,
+                                    color: Color(0xFF2A2A2A),
+                                  ),
                                 ),
                               ),
-                              child: const Icon(
-                                Icons.person_outline_rounded,
-                                color: Color(0xFFD4AF37),
-                                size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => FavoritesPage()),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(14),
+                                hoverColor: const Color(0xFFF8F8F8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(11),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: const Color(0xFFE8E8E8).withOpacity(0.5),
+                                      width: 1.5,
+                                    ),
+                                    color: Colors.white,
+                                  ),
+                                  child: const Icon(
+                                    Icons.favorite_border,
+                                    size: 20,
+                                    color: Color(0xFF2A2A2A),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => const GirisSayfasi()),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF0A0A0A), Color(0xFF1A1A1A)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFFD4AF37).withOpacity(0.25),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 3),
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.person_outline_rounded,
+                                    color: Color(0xFFD4AF37),
+                                    size: 18,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFAFAFA),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: const Color(0xFFE8E8E8).withOpacity(0.5),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 17,
-                            color: const Color(0xFF4A4A4A),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Teslimat Adresi',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A1A),
-                              letterSpacing: 0.2,
+                    const SizedBox(height: 14),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          // Teslimat adresi seçimi
+                        },
+                        borderRadius: BorderRadius.circular(18),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFAFAFA),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: const Color(0xFFE8E8E8).withOpacity(0.6),
+                              width: 1.5,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            size: 18,
-                            color: const Color(0xFF6A6A6A),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 18,
+                                color: const Color(0xFF4A4A4A),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Teslimat Adresi',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A1A),
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 18,
+                                color: const Color(0xFF6A6A6A),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
                 )
               : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Logo
-                    SizedBox(
-                      height: 60,
-                      child: OptimizedImage(
-                        imageUrl: kBrandWordmarkAsset,
-                        fit: BoxFit.contain,
-                        borderRadius: BorderRadius.circular(10),
-                        placeholder: Text(
-                          'BAŞPINAR AUTO GARAGE',
-                        style: GoogleFonts.playfairDisplay(
-                            fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                            color: const Color(0xFF0A0A0A),
+                    GestureDetector(
+                      onTap: () {
+                        // Ana sayfaya dön
+                      },
+                      child: SizedBox(
+                        height: 60,
+                        child: OptimizedImage(
+                          imageUrl: kBrandWordmarkAsset,
+                          fit: BoxFit.contain,
+                          borderRadius: BorderRadius.circular(10),
+                          placeholder: Text(
+                            'BAŞPINAR AUTO GARAGE',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.8,
+                              color: const Color(0xFF0A0A0A),
+                            ),
                           ),
-                        ),
-                        errorWidget: Text(
-                          'BAŞPINAR AUTO GARAGE',
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                            color: const Color(0xFF0A0A0A),
+                          errorWidget: Text(
+                            'BAŞPINAR AUTO GARAGE',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.8,
+                              color: const Color(0xFF0A0A0A),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 32),
+                    const SizedBox(width: 48),
                     // Teslimat Adresi
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFAFAFA),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: const Color(0xFFE8E8E8).withOpacity(0.5),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 17,
-                            color: const Color(0xFF4A4A4A),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Teslimat Adresi',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A1A),
-                              letterSpacing: 0.2,
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          // Teslimat adresi seçimi
+                        },
+                        borderRadius: BorderRadius.circular(18),
+                        hoverColor: const Color(0xFFF5F5F5),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFAFAFA),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: const Color(0xFFE8E8E8).withOpacity(0.6),
+                              width: 1.5,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            size: 18,
-                            color: const Color(0xFF6A6A6A),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 18,
+                                color: const Color(0xFF4A4A4A),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Teslimat Adresi',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A1A),
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 18,
+                                color: const Color(0xFF6A6A6A),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -2312,7 +2421,7 @@ class _TopActionBar extends StatelessWidget {
                             );
                           },
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 14),
                         _HeaderButton(
                           icon: Icons.favorite_border,
                           label: 'Favoriler',
@@ -2322,64 +2431,70 @@ class _TopActionBar extends StatelessWidget {
                             );
                           },
                         ),
-                        const SizedBox(width: 12),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF0A0A0A), Color(0xFF1A1A1A)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFD4AF37).withOpacity(0.25),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
+                        const SizedBox(width: 18),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const GirisSayfasi()),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            hoverColor: Colors.white.withOpacity(0.15),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 26,
+                                vertical: 13,
                               ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const GirisSayfasi()),
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 12,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF0A0A0A), Color(0xFF1A1A1A)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFD4AF37).withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(
-                                        Icons.person_outline_rounded,
-                                        color: Color(0xFFD4AF37),
-                                        size: 17,
-                                      ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFD4AF37).withOpacity(0.3),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 4),
+                                    spreadRadius: 0,
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFD4AF37).withOpacity(0.25),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      'Giriş Yap',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
-                                        letterSpacing: 0.4,
-                                      ),
+                                    child: const Icon(
+                                      Icons.person_outline_rounded,
+                                      color: Color(0xFFD4AF37),
+                                      size: 18,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Giriş Yap',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -2410,39 +2525,52 @@ class _SearchBar extends StatelessWidget {
         final isCompact = constraints.maxWidth < 1000;
         final searchField = Expanded(
           child: Container(
-            height: isCompact ? 44 : 50,
+            height: isCompact ? 46 : 52,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFFD4AF37),
-                width: 2,
+                color: const Color(0xFFD4AF37).withOpacity(0.3),
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFD4AF37).withOpacity(0.1),
-                  blurRadius: 8,
+                  color: const Color(0xFFD4AF37).withOpacity(0.08),
+                  blurRadius: 12,
                   offset: const Offset(0, 2),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                  spreadRadius: 0,
                 ),
               ],
             ),
             child: Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Icon(Icons.search, color: Colors.grey[600], size: 22),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: Colors.grey[600],
+                    size: 22,
+                  ),
                 ),
                 Expanded(
                   child: TextField(
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       color: const Color(0xFF1A1A1A),
+                      fontWeight: FontWeight.w400,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Ürün, kategori veya marka ara',
+                      hintText: 'Aradığınız ürün, kategori veya markayı yazınız',
                       hintStyle: GoogleFonts.inter(
                         color: Colors.grey[500],
                         fontSize: 15,
+                        fontWeight: FontWeight.w400,
                       ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
@@ -2450,23 +2578,36 @@ class _SearchBar extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: isCompact ? 80 : 100,
+                  width: isCompact ? 85 : 110,
                   height: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFD4AF37),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(6),
-                      bottomRight: Radius.circular(6),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFD4AF37), Color(0xFFC19B2E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFD4AF37).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () {},
                       borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(6),
-                        bottomRight: Radius.circular(6),
+                        topRight: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
                       ),
+                      hoverColor: Colors.white.withOpacity(0.1),
                       child: Center(
                         child: Text(
                           'ARA',
@@ -2474,7 +2615,7 @@ class _SearchBar extends StatelessWidget {
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.8,
                           ),
                         ),
                       ),
@@ -2539,16 +2680,17 @@ class _SearchBar extends StatelessWidget {
 
         return Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isCompact ? 16 : 48,
-            vertical: isCompact ? 12 : 16,
+            horizontal: isCompact ? 20 : 64,
+            vertical: isCompact ? 14 : 18,
           ),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 1),
+                spreadRadius: 0,
               ),
             ],
           ),
