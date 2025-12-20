@@ -37,8 +37,21 @@ jobs:
 
       - name: Build web
         run: |
+          set -e
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          flutter build web --release --base-href "/$REPO_NAME/"
+          echo "🔨 Building for repository: $REPO_NAME"
+          echo "📦 Flutter version:"
+          flutter --version
+          echo "🔍 Analyzing code..."
+          flutter analyze --no-fatal-infos || true
+          echo "🏗️ Building web..."
+          flutter build web --release --base-href "/$REPO_NAME/" --verbose 2>&1 | tee build.log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Build failed! Showing last 100 lines of build.log:"
+            tail -100 build.log
+            exit 1
+          fi
+          echo "✅ Build successful!"
         # Repository adı otomatik olarak alınır
         # Eğer repository root'ta yayınlayacaksanız: flutter build web --release --base-href "/"
 
