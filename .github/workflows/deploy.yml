@@ -38,9 +38,19 @@ jobs:
       - name: Build web
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          flutter build web --release --base-href "/$REPO_NAME/" --no-wasm-dry-run 2>&1 | tee build.log || (cat build.log && exit 1)
+          flutter build web --release --base-href "/$REPO_NAME/" --no-wasm-dry-run
         # Repository adı otomatik olarak alınır
         # Eğer repository root'ta yayınlayacaksanız: flutter build web --release --base-href "/"
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "build/web" ]; then
+            echo "❌ build/web klasörü bulunamadı!"
+            exit 1
+          fi
+          echo "✅ build/web klasörü mevcut"
+          ls -la build/web/ | head -20
+          echo "📦 Dosya sayısı: $(find build/web -type f | wc -l)"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
