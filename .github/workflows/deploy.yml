@@ -25,17 +25,20 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'  # Flutter versiyonunuzu kontrol edin: flutter --version
+          flutter-version: '3.24.0'
           channel: 'stable'
           cache: true
 
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Flutter doctor
+        run: flutter doctor -v
+
       - name: Build web
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          flutter build web --release --base-href "/$REPO_NAME/"
+          flutter build web --release --base-href "/$REPO_NAME/" --no-wasm-dry-run 2>&1 | tee build.log || (cat build.log && exit 1)
         # Repository adı otomatik olarak alınır
         # Eğer repository root'ta yayınlayacaksanız: flutter build web --release --base-href "/"
 
