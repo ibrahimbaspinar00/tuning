@@ -38,7 +38,7 @@ jobs:
       - name: Build web
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          flutter build web --release --base-href "/$REPO_NAME/" --no-wasm-dry-run
+          flutter build web --release --base-href "/$REPO_NAME/"
         # Repository adı otomatik olarak alınır
         # Eğer repository root'ta yayınlayacaksanız: flutter build web --release --base-href "/"
 
