@@ -63,6 +63,7 @@ dependencies:
   # Web için gerekli paketler
   crypto: ^3.0.5
   path_provider: ^2.1.4
+  web: ^1.0.0  # dart:html yerine package:web kullanıyoruz
   
   # Bildirimler (web desteği ile)
   flutter_local_notifications: ^18.0.1
