@@ -265,7 +265,10 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              // Ana sayfaya yönlendir
+              AppRoutes.navigateToMain(context);
+            },
             child: Text(
               'Anasayfa',
               style: GoogleFonts.inter(
@@ -871,7 +874,20 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppDesignSystem.textPrimary),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Ana sayfaya kadar geri git, giriş sayfasına kadar gitme
+            if (Navigator.canPop(context)) {
+              // Eğer ana sayfa stack'te varsa oraya git
+              Navigator.popUntil(context, (route) {
+                // Ana sayfa route'unu bul (main route)
+                return route.settings.name == AppRoutes.main || 
+                       route.isFirst;
+              });
+            } else {
+              // Stack boşsa ana sayfaya yönlendir
+              AppRoutes.navigateToMain(context);
+            }
+          },
         ),
         actions: [
           IconButton(

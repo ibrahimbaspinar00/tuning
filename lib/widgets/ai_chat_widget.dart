@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/ai_chat_service.dart';
@@ -19,6 +20,7 @@ class _AIChatWidgetState extends State<AIChatWidget> {
   final FirebaseDataService _dataService = FirebaseDataService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _messageController = TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> _messages = [];
   bool _isOpen = false;
@@ -79,6 +81,7 @@ class _AIChatWidgetState extends State<AIChatWidget> {
   @override
   void dispose() {
     _messageController.dispose();
+    _messageFocusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -97,6 +100,11 @@ class _AIChatWidgetState extends State<AIChatWidget> {
     });
     _messageController.clear();
     _scrollToBottom();
+    
+    // TextField'ı tekrar focus'ta tut
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _messageFocusNode.requestFocus();
+    });
 
     try {
       // AI'dan yanıt al
@@ -116,7 +124,17 @@ class _AIChatWidgetState extends State<AIChatWidget> {
         _isLoading = false;
       });
       _scrollToBottom();
-    } catch (e) {
+      
+      // TextField'ı tekrar focus'ta tut (setState sonrası)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _messageFocusNode.canRequestFocus) {
+          _messageFocusNode.requestFocus();
+        }
+      });
+    } catch (e, stackTrace) {
+      debugPrint('❌ Chat widget hatası: $e');
+      debugPrint('Stack trace: $stackTrace');
+      
       setState(() {
         _messages.add({
           'role': 'assistant',
@@ -125,6 +143,11 @@ class _AIChatWidgetState extends State<AIChatWidget> {
         _isLoading = false;
       });
       _scrollToBottom();
+      
+      // TextField'ı tekrar focus'ta tut
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _messageFocusNode.requestFocus();
+      });
     }
   }
 
@@ -171,6 +194,10 @@ class _AIChatWidgetState extends State<AIChatWidget> {
         onTap: () {
           setState(() {
             _isOpen = true;
+            // Chat penceresi açıldığında TextField'ı focus'ta tut
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _messageFocusNode.requestFocus();
+            });
           });
           // Chat açıldığında hoş geldin mesajını göster
           _showWelcomeMessage();
@@ -431,6 +458,7 @@ class _AIChatWidgetState extends State<AIChatWidget> {
           Expanded(
             child: TextField(
               controller: _messageController,
+              focusNode: _messageFocusNode,
               decoration: InputDecoration(
                 hintText: 'Mesajınızı yazın...',
                 hintStyle: GoogleFonts.inter(

@@ -1052,8 +1052,8 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                       }
                       
                       return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
                           children: displayCategories.map((category) {
                             return _buildCategoryLink(
                               category.name,
@@ -1317,8 +1317,8 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                       }
                       
                       return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
                           children: displayCategories.map((category) {
                             return _buildCategoryLink(
                               category.name,

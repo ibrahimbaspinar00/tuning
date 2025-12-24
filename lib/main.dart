@@ -5513,6 +5513,20 @@ class CategoryPage extends StatelessWidget {
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
           appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Color(0xFF0F0F0F)),
+              onPressed: () {
+                // Ana sayfaya kadar geri git, giriş sayfasına kadar gitme
+                if (Navigator.canPop(context)) {
+                  Navigator.popUntil(context, (route) {
+                    return route.settings.name == AppRoutes.main || 
+                           route.isFirst;
+                  });
+                } else {
+                  AppRoutes.navigateToMain(context);
+                }
+              },
+            ),
             title: Text(
               category,
               style: GoogleFonts.playfairDisplay(

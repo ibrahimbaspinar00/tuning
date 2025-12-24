@@ -26,9 +26,18 @@ class AIChatService {
           context: context,
         );
       }
-    } catch (e) {
-      debugPrint('AI Chat hatası: $e');
-      return 'Üzgünüm, şu anda size yardımcı olamıyorum. Lütfen daha sonra tekrar deneyin. 😊';
+    } catch (e, stackTrace) {
+      debugPrint('❌ AI Chat hatası: $e');
+      debugPrint('Stack trace: $stackTrace');
+      
+      // Daha spesifik hata mesajları
+      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+        return '⏳ İstek zaman aşımına uğradı. Lütfen tekrar deneyin. 😊';
+      } else if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+        return '🌐 İnternet bağlantınızı kontrol edin ve tekrar deneyin. 😊';
+      }
+      
+      return 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin. 😊';
     }
   }
 
@@ -41,6 +50,11 @@ class AIChatService {
     final apiKey = AIChatConfig.groqApiKey;
     if (apiKey == 'YOUR_GROQ_API_KEY' || apiKey.isEmpty) {
       return '⚠️ Lütfen Groq API anahtarınızı `lib/config/ai_chat_config.dart` dosyasına ekleyin.\n\n1. https://console.groq.com/ adresine gidin\n2. Ücretsiz hesap oluşturun\n3. API Key oluşturun\n4. `groqApiKey` değişkenine ekleyin';
+    }
+    
+    // API key format kontrolü
+    if (!apiKey.startsWith('gsk_')) {
+      debugPrint('⚠️ API key formatı geçersiz görünüyor');
     }
 
     // Mesaj geçmişini hazırla
@@ -73,6 +87,10 @@ class AIChatService {
     });
 
     // API isteği
+    debugPrint('📤 Groq API isteği gönderiliyor...');
+    debugPrint('Model: ${AIChatConfig.groqModel}');
+    debugPrint('Mesaj sayısı: ${messages.length}');
+    
     final response = await http.post(
       Uri.parse(AIChatConfig.groqApiUrl),
       headers: {
@@ -83,17 +101,38 @@ class AIChatService {
         'model': AIChatConfig.groqModel,
         'messages': messages,
         'temperature': 0.7,
-        'max_tokens': 500,
+        'max_tokens': 1000, // Artırıldı
       }),
     ).timeout(const Duration(seconds: 30));
+    
+    debugPrint('📥 Groq API yanıtı: ${response.statusCode}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final content = data['choices']?[0]?['message']?['content'] ?? '';
+      
+      if (content.isEmpty) {
+        debugPrint('⚠️ Groq API boş yanıt döndü: ${response.body}');
+        return 'Üzgünüm, yanıt alınamadı. Lütfen tekrar deneyin. 😊';
+      }
+      
       return content.trim();
     } else {
-      debugPrint('Groq API hatası: ${response.statusCode} - ${response.body}');
-      return 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin. 😊';
+      debugPrint('❌ Groq API hatası: ${response.statusCode}');
+      debugPrint('Yanıt: ${response.body}');
+      
+      // Daha detaylı hata mesajları
+      if (response.statusCode == 401) {
+        debugPrint('❌ API key geçersiz - 401 hatası');
+        debugPrint('API Key (ilk 10 karakter): ${apiKey.substring(0, apiKey.length > 10 ? 10 : apiKey.length)}...');
+        return '⚠️ API anahtarı geçersiz veya süresi dolmuş.\n\nLütfen:\n1. https://console.groq.com/ adresine gidin\n2. Yeni bir API Key oluşturun\n3. `lib/config/ai_chat_config.dart` dosyasındaki `groqApiKey` değerini güncelleyin\n\nGeçici olarak Gemini API kullanmak için `useGroq = false` yapabilirsiniz.';
+      } else if (response.statusCode == 429) {
+        return '⏳ Çok fazla istek gönderildi. Lütfen birkaç saniye bekleyip tekrar deneyin. 😊';
+      } else if (response.statusCode >= 500) {
+        return '🔧 Sunucu hatası oluştu. Lütfen birkaç dakika sonra tekrar deneyin. 😊';
+      }
+      
+      return 'Üzgünüm, bir hata oluştu (${response.statusCode}). Lütfen tekrar deneyin. 😊';
     }
   }
 
