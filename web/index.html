@@ -19,17 +19,22 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Başpınar Auto Garage - Premium Auto Parts">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <!-- Cache busting - Service worker güncellemeleri için -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
   <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Başpınar Auto Garage">
-  <link rel="apple-touch-icon" href="assets/assets/images/Baspinar_auto_garge.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/assets/images/Baspinar_auto_garge.png"/>
@@ -87,6 +92,26 @@
   </div>
   
   <script>
+    // iOS Safari için özel ayarlar
+    // iPhone 11 ve diğer iOS cihazlar için uyumluluk
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // iOS için viewport düzeltmesi
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover');
+      }
+      
+      // iOS Safari için touch event desteği
+      document.addEventListener('touchstart', function() {}, { passive: true });
+      document.addEventListener('touchmove', function() {}, { passive: true });
+      document.addEventListener('touchend', function() {}, { passive: true });
+      
+      // iOS için özel hata yakalama
+      window.addEventListener('error', function(event) {
+        console.error('iOS Error:', event.error);
+      });
+    }
+    
     // Service Worker Cache Yönetimi - Beyaz ekran sorununu önlemek için
     if ('serviceWorker' in navigator) {
       // Service worker'ı kontrol et ve güncelle
@@ -130,6 +155,37 @@
         }, 300);
       }
     });
+    
+    // iOS için Flutter yükleme kontrolü
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // iOS'ta Flutter yüklenene kadar bekle
+      let flutterLoaded = false;
+      const checkFlutter = setInterval(function() {
+        if (window.flutter_bootstrap || flutterLoaded) {
+          flutterLoaded = true;
+          clearInterval(checkFlutter);
+          const loading = document.getElementById('loading');
+          if (loading && !loading.classList.contains('loaded')) {
+            loading.classList.add('loaded');
+            setTimeout(function() {
+              loading.style.display = 'none';
+            }, 300);
+          }
+        }
+      }, 100);
+      
+      // 15 saniye sonra timeout
+      setTimeout(function() {
+        clearInterval(checkFlutter);
+        const loading = document.getElementById('loading');
+        if (loading && !loading.classList.contains('loaded')) {
+          loading.classList.add('loaded');
+          setTimeout(function() {
+            loading.style.display = 'none';
+          }, 300);
+        }
+      }, 15000);
+    }
     
     // Timeout - 10 saniye sonra loading ekranını gizle (hata durumunda)
     setTimeout(function() {
