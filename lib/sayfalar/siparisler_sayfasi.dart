@@ -415,7 +415,8 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
   // Trendyol tarzı sipariş kartı
   Widget _buildTrendyolOrderCard(Order order) {
     final deliveryCount = 1; // Demo: 1 teslimat
-    final productCount = order.products.length;
+    // Toplam ürün miktarını hesapla (her ürünün quantity'sini topla)
+    final totalProductQuantity = order.products.fold(0, (sum, product) => sum + product.quantity);
     final isDelivered = order.status.toLowerCase() == 'delivered' || 
                        order.status.toLowerCase() == 'teslim edildi';
     final isCreated = order.status.toLowerCase() == 'pending' || 
@@ -465,7 +466,7 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                       SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 8.0)),
                       // Sipariş özeti
                       Text(
-                        '$deliveryCount Teslimat, $productCount Ürün',
+                        '$deliveryCount Teslimat, $totalProductQuantity Ürün',
                         style: AppDesignSystem.bodySmall.copyWith(
                           fontSize: ResponsiveHelper.responsiveFontSize(
                             context,
@@ -747,9 +748,9 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
                         Flexible(
                           child: Text(
                             isDelivered 
-                                ? '$productCount ürün teslim edildi'
+                                ? '$totalProductQuantity ürün teslim edildi'
                                 : isCreated
-                                    ? '$productCount ürün için sipariş oluşturuldu'
+                                    ? '$totalProductQuantity ürün için sipariş oluşturuldu'
                                     : '',
                             style: AppDesignSystem.bodySmall.copyWith(
                               fontSize: ResponsiveHelper.responsiveFontSize(

@@ -907,6 +907,38 @@ class _OdemeSayfasiState extends State<OdemeSayfasi> {
 
       // Ödeme başarılı ise siparişi oluştur
       if (paymentResult.success && paymentResult.paymentId != null) {
+        // Sipariş vermeden önce stok kontrolü yap
+        try {
+          final firestore = FirebaseFirestore.instance;
+          for (final product in widget.cartProducts) {
+            final productDoc = await firestore
+                .collection('products')
+                .doc(product.id)
+                .get(const GetOptions(source: Source.server));
+            
+            if (!productDoc.exists) {
+              throw Exception('${product.name} ürünü bulunamadı');
+            }
+            
+            final data = productDoc.data()!;
+            final currentStock = (data['stock'] ?? 0) as int;
+            
+            if (product.quantity > currentStock) {
+              throw Exception('${product.name} için yeterli stok yok. Mevcut stok: $currentStock, Sepetteki miktar: ${product.quantity}');
+            }
+            
+            if (currentStock <= 0) {
+              throw Exception('${product.name} ürünü stokta yok');
+            }
+          }
+        } catch (e) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            ErrorHandler.showError(context, e.toString());
+          }
+          return;
+        }
+        
         String fullAddress = _addressController.text.trim();
         if (_cityController.text.trim().isNotEmpty) {
           fullAddress += ', ${_cityController.text.trim()}';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/no_overflow.dart';
 import '../model/product.dart';
@@ -40,6 +41,33 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
   
   // Services
   final FirebaseDataService _firebaseDataService = FirebaseDataService();
+  
+  // Ürün miktarı controller'ları için Map
+  final Map<String, TextEditingController> _quantityControllers = {};
+  
+  @override
+  void dispose() {
+    _couponController.dispose();
+    // Tüm quantity controller'ları temizle
+    for (final controller in _quantityControllers.values) {
+      controller.dispose();
+    }
+    _quantityControllers.clear();
+    super.dispose();
+  }
+  
+  TextEditingController _getQuantityController(Product product) {
+    if (!_quantityControllers.containsKey(product.id)) {
+      _quantityControllers[product.id] = TextEditingController(text: '${product.quantity}');
+    } else {
+      // Controller varsa ama değer farklıysa güncelle
+      final controller = _quantityControllers[product.id]!;
+      if (controller.text != '${product.quantity}') {
+        controller.text = '${product.quantity}';
+      }
+    }
+    return _quantityControllers[product.id]!;
+  }
 
   double get _subtotal {
     return widget.cartProducts.fold(0.0, (sum, product) => sum + (product.price * product.quantity));
@@ -59,12 +87,6 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
 
   double get _total {
     return _subtotal - _couponDiscountAmount + _finalShippingCost;
-  }
-
-  @override
-  void dispose() {
-    _couponController.dispose();
-    super.dispose();
   }
 
   void _applyCoupon() {
@@ -143,11 +165,57 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
   }
 
   void _updateProductQuantity(Product product, int newQuantity) {
+    // Stok kontrolü
+    if (newQuantity > product.stock) {
+      ProfessionalErrorHandler.showWarning(
+        context: context,
+        title: 'Yeterli Stok Yok',
+        message: 'Mevcut stok: ${product.stock} adet. Daha fazla ekleyemezsiniz.',
+      );
+      // Controller'ı güncelle
+      if (_quantityControllers.containsKey(product.id)) {
+        _quantityControllers[product.id]!.text = '${product.quantity}';
+      }
+      return;
+    }
+    
     if (newQuantity <= 0) {
       widget.onRemoveFromCart(product);
+      // Controller'ı temizle
+      _quantityControllers.remove(product.id)?.dispose();
     } else {
       widget.onUpdateQuantity(product, newQuantity);
+      // Controller'ı güncelle
+      if (_quantityControllers.containsKey(product.id)) {
+        _quantityControllers[product.id]!.text = '$newQuantity';
+      }
     }
+  }
+  
+  void _updateProductQuantityFromText(Product product, String value) {
+    if (value.isEmpty) {
+      // Boşsa eski değere geri dön
+      if (_quantityControllers.containsKey(product.id)) {
+        _quantityControllers[product.id]!.text = '${product.quantity}';
+      }
+      return;
+    }
+    
+    final newQuantity = int.tryParse(value);
+    if (newQuantity == null || newQuantity < 1) {
+      ProfessionalErrorHandler.showWarning(
+        context: context,
+        title: 'Geçersiz Miktar',
+        message: 'Lütfen geçerli bir sayı girin (minimum 1).',
+      );
+      // Controller'ı eski değere geri dön
+      if (_quantityControllers.containsKey(product.id)) {
+        _quantityControllers[product.id]!.text = '${product.quantity}';
+      }
+      return;
+    }
+    
+    _updateProductQuantity(product, newQuantity);
   }
 
   Future<void> _proceedToCheckout() async {
@@ -421,57 +489,103 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
                 
                 const SizedBox(height: AppDesignSystem.spacingXS),
                 
-                // Miktar kontrolü
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                // Miktar kontrolü ve stok bilgisi
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppDesignSystem.surfaceVariant,
-                        borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
-                      ),
-                      child: IconButton(
-                        onPressed: () => _updateProductQuantity(product, product.quantity - 1),
-                        icon: const Icon(Icons.remove, size: 18),
-                        color: AppDesignSystem.textPrimary,
-                        padding: const EdgeInsets.all(AppDesignSystem.spacingS),
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppDesignSystem.surfaceVariant,
+                            borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                          ),
+                          child: IconButton(
+                            onPressed: () => _updateProductQuantity(product, product.quantity - 1),
+                            icon: const Icon(Icons.remove, size: 18),
+                            color: AppDesignSystem.textPrimary,
+                            padding: const EdgeInsets.all(AppDesignSystem.spacingS),
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 36,
+                            ),
+                          ),
                         ),
-                      ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spacingS),
+                          width: 60,
+                          child: TextField(
+                            controller: _getQuantityController(product),
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            style: AppDesignSystem.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: AppDesignSystem.spacingS,
+                                vertical: AppDesignSystem.spacingS,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                                borderSide: BorderSide(color: AppDesignSystem.borderLight),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                                borderSide: BorderSide(color: AppDesignSystem.borderLight),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                                borderSide: BorderSide(color: AppDesignSystem.accent, width: 2),
+                              ),
+                              isDense: true,
+                            ),
+                            onSubmitted: (value) {
+                              _updateProductQuantityFromText(product, value);
+                            },
+                            onTap: () {
+                              // Tıklanınca tüm metni seç
+                              final controller = _getQuantityController(product);
+                              controller.selection = TextSelection(
+                                baseOffset: 0,
+                                extentOffset: controller.text.length,
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppDesignSystem.surfaceVariant,
+                            borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
+                          ),
+                          child: IconButton(
+                            onPressed: () => _updateProductQuantity(product, product.quantity + 1),
+                            icon: const Icon(Icons.add, size: 18),
+                            color: AppDesignSystem.textPrimary,
+                            padding: const EdgeInsets.all(AppDesignSystem.spacingS),
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 36,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spacingS),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDesignSystem.spacingM,
-                        vertical: AppDesignSystem.spacingS,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppDesignSystem.borderLight),
-                        borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
-                      ),
-                      child: Text(
-                        '${product.quantity}',
-                        style: AppDesignSystem.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppDesignSystem.surfaceVariant,
-                        borderRadius: BorderRadius.circular(AppDesignSystem.radiusS),
-                      ),
-                      child: IconButton(
-                        onPressed: () => _updateProductQuantity(product, product.quantity + 1),
-                        icon: const Icon(Icons.add, size: 18),
-                        color: AppDesignSystem.textPrimary,
-                        padding: const EdgeInsets.all(AppDesignSystem.spacingS),
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
-                        ),
+                    const SizedBox(height: AppDesignSystem.spacingXS),
+                    // Stok bilgisi
+                    Text(
+                      'Stok: ${product.stock} adet',
+                      style: AppDesignSystem.bodySmall.copyWith(
+                        color: product.stock > 0 
+                            ? (product.stock < 10 
+                                ? const Color(0xFFF59E0B) 
+                                : const Color(0xFF10B981))
+                            : const Color(0xFFEF4444),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],

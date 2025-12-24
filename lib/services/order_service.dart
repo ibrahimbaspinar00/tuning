@@ -45,15 +45,26 @@ class OrderService {
       final orderNumber = _generateOrderNumber();
       final orderId = DateTime.now().millisecondsSinceEpoch.toString();
       
-      // Stok kontrolü - sipariş oluşturmadan önce
+      // Stok kontrolü - sipariş oluşturmadan önce (server'dan güncel stok bilgisi)
       for (final product in products) {
-        final productDoc = await _firestore.collection('products').doc(product.id).get(
-        );
-        if (productDoc.exists) {
-          final currentStock = (productDoc.data()?['stock'] ?? 0) as int;
-          if (product.quantity > currentStock) {
-            throw Exception('${product.name} için yeterli stok yok. Mevcut stok: $currentStock');
-          }
+        final productDoc = await _firestore
+            .collection('products')
+            .doc(product.id)
+            .get(const GetOptions(source: Source.server));
+        
+        if (!productDoc.exists) {
+          throw Exception('${product.name} ürünü bulunamadı');
+        }
+        
+        final data = productDoc.data()!;
+        final currentStock = (data['stock'] ?? 0) as int;
+        
+        if (product.quantity > currentStock) {
+          throw Exception('${product.name} için yeterli stok yok. Mevcut stok: $currentStock, İstenen: ${product.quantity}');
+        }
+        
+        if (currentStock <= 0) {
+          throw Exception('${product.name} ürünü stokta yok');
         }
       }
       
