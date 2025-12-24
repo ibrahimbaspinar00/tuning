@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/product.dart';
+import '../model/admin_product.dart';
 import '../services/product_service.dart';
+import '../services/admin_service.dart';
 import '../widgets/optimized_image.dart';
 import '../widgets/professional_components.dart';
 import '../config/app_routes.dart';
@@ -31,15 +33,17 @@ class KategorilerSayfasi extends StatefulWidget {
 }
 
 class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
+  final AdminService _adminService = AdminService();
   List<Product> _allProducts = [];
   List<Product> _filteredProducts = [];
+  List<ProductCategory> _categories = [];
   bool _isLoading = true;
+  bool _isLoadingCategories = true;
   String _selectedCategory = 'Tümü';
   String _sortBy = 'Popülerlik';
   double _minPrice = 0;
   double _maxPrice = 10000;
   bool _showFilters = false;
-
 
   final List<String> _sortOptions = [
     'Popülerlik',
@@ -56,7 +60,37 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
     if (widget.initialCategory != null) {
       _selectedCategory = widget.initialCategory!;
     }
+    _loadCategories();
     _loadProducts();
+  }
+
+  /// Admin panelinden aktif kategorileri yükle
+  void _loadCategories() {
+    _adminService.getCategories().listen((categories) {
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _isLoadingCategories = false;
+          
+          // Eğer seçili kategori listede yoksa ve "Tümü" değilse, "Tümü" yap
+          if (_selectedCategory != 'Tümü') {
+            final categoryNames = _categories.map((c) => c.name).toList();
+            if (!categoryNames.contains(_selectedCategory)) {
+              _selectedCategory = 'Tümü';
+            }
+          }
+        });
+        _filterProducts();
+      }
+    }, onError: (error) {
+      debugPrint('❌ Kategori yükleme hatası: $error');
+      if (mounted) {
+        setState(() {
+          _isLoadingCategories = false;
+          _categories = [];
+        });
+      }
+    });
   }
 
   Future<void> _loadProducts() async {
@@ -133,9 +167,16 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
   void _filterProducts() {
     List<Product> filtered = _allProducts;
 
-    // Kategori filtresi
+    // Kategori filtresi - Sadece admin panelinden gelen aktif kategorilere göre
     if (_selectedCategory != 'Tümü') {
-      filtered = filtered.where((product) => product.category == _selectedCategory).toList();
+      // Seçili kategorinin admin panelinde aktif olup olmadığını kontrol et
+      final categoryExists = _categories.any((c) => c.name == _selectedCategory && c.isActive);
+      if (categoryExists) {
+        filtered = filtered.where((product) => product.category == _selectedCategory).toList();
+      } else {
+        // Kategori aktif değilse veya yoksa, tüm ürünleri göster
+        _selectedCategory = 'Tümü';
+      }
     }
 
     // Fiyat filtresi
@@ -147,6 +188,10 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
 
     // Sıralama
     switch (_sortBy) {
+      case 'Popülerlik':
+        // Varsayılan: Rasgele sırala
+        filtered.shuffle();
+        break;
       case 'Fiyat (Düşük-Yüksek)':
         filtered.sort((a, b) => a.price.compareTo(b.price));
         break;
@@ -154,13 +199,17 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
         filtered.sort((a, b) => b.price.compareTo(a.price));
         break;
       case 'Yeni':
-        filtered.sort((a, b) => b.id.compareTo(a.id));
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
       case 'Değerlendirme':
-        filtered.shuffle(); // Demo için
+        filtered.sort((a, b) => b.averageRating.compareTo(a.averageRating));
         break;
       case 'Stok Durumu':
         filtered.sort((a, b) => b.stock.compareTo(a.stock));
+        break;
+      default:
+        // Varsayılan: Rasgele sırala
+        filtered.shuffle();
         break;
     }
 
@@ -342,6 +391,72 @@ class _KategorilerSayfasiState extends State<KategorilerSayfasi> {
           ),
           
           const SizedBox(height: 12),
+          
+          // Kategori Filtresi
+          Text(
+            'Kategori:',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              fontSize: isSmallScreen ? 13 : isDesktop ? 15 : 14,
+              color: const Color(0xFF0F0F0F),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _isLoadingCategories
+              ? const Center(child: CircularProgressIndicator())
+              : DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  isDense: true,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE8E8E8)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE8E8E8)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFFF6000), width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : isDesktop ? 18 : 16,
+                      vertical: isSmallScreen ? 10 : isDesktop ? 14 : 12,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFFAFBFC),
+                  ),
+                  items: [
+                    const DropdownMenuItem(
+                      value: 'Tümü',
+                      child: Text('Tümü'),
+                    ),
+                    ..._categories.map((category) {
+                      return DropdownMenuItem(
+                        value: category.name,
+                        child: Text(
+                          category.name,
+                          style: GoogleFonts.inter(
+                            fontSize: isSmallScreen ? 13 : isDesktop ? 15 : 14,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    if (!mounted || value == null) return;
+                    setState(() {
+                      _selectedCategory = value;
+                      _filterProducts();
+                    });
+                  },
+                ),
+          
+          const SizedBox(height: 20),
           
           // Sıralama
           Text(

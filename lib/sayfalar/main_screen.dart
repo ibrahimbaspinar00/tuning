@@ -19,6 +19,8 @@ import '../utils/network_manager.dart';
 import '../services/firebase_data_service.dart';
 import '../services/product_service.dart';
 import '../services/order_service.dart';
+import '../services/admin_service.dart';
+import '../model/admin_product.dart';
 import '../widgets/ai_chat_widget.dart';
 
 class MainScreen extends StatefulWidget {
@@ -51,6 +53,9 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
   
   // Profil fotoğrafı
   String? _profileImageUrl;
+  
+  // Admin kategorileri için service
+  final AdminService _adminService = AdminService();
 
   @override
   bool get wantKeepAlive => true;
@@ -1027,22 +1032,37 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                 ),
                 const SizedBox(width: 24),
                 Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildCategoryLink('Motor Parçaları', () => _navigateToCategory('Motor Parçaları')),
-                        _buildCategoryLink('Egzoz Sistemleri', () => _navigateToCategory('Egzoz Sistemleri')),
-                        _buildCategoryLink('Jant & Lastik', () => _navigateToCategory('Jant & Lastik')),
-                        _buildCategoryLink('Görünüm & Body Kit', () => _navigateToCategory('Görünüm & Body Kit')),
-                        _buildCategoryLink('İç Donanım', () => _navigateToCategory('İç Donanım')),
-                        _buildCategoryLink('Elektronik & ECU', () => _navigateToCategory('Elektronik & ECU')),
-                        _buildCategoryLink('Fren Sistemleri', () => _navigateToCategory('Fren Sistemleri')),
-                        _buildCategoryLink('Süspansiyon', () => _navigateToCategory('Süspansiyon')),
-                        _buildCategoryLink('Çok Satanlar', () => _navigateToCategory('Tümü'), isNew: true),
-                        _buildCategoryLink('Yeni Ürünler', () => _navigateToCategory('Tümü'), isNew: true),
-                      ],
-                    ),
+                  child: StreamBuilder<List<ProductCategory>>(
+                    stream: _adminService.getCategories(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ));
+                      }
+                      
+                      final categories = snapshot.data ?? [];
+                      // Maksimum 8 kategori göster, rasgele sırala
+                      final displayCategories = categories.take(8).toList()..shuffle();
+                      
+                      if (displayCategories.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: displayCategories.map((category) {
+                            return _buildCategoryLink(
+                              category.name,
+                              () => _navigateToCategory(category.name),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -1262,28 +1282,52 @@ class _MainScreenState extends State<MainScreen> with AutomaticKeepAliveClientMi
                 _AllCategoriesButton(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    setState(() {
-                      _selectedCategoryForNavigation = null;
-                      _selectedIndex = 4;
-                    });
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => KategorilerSayfasi(
+                          favoriteProducts: favoriteProducts,
+                          cartProducts: cartProducts,
+                          onFavoriteToggle: _toggleFavorite,
+                          onAddToCart: _addToCart,
+                          onRemoveFromCart: _removeFromCart,
+                        ),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildCategoryLink('Motor Parçaları', () => _navigateToCategory('Motor Parçaları')),
-                        _buildCategoryLink('Egzoz Sistemleri', () => _navigateToCategory('Egzoz Sistemleri')),
-                        _buildCategoryLink('Jant & Lastik', () => _navigateToCategory('Jant & Lastik')),
-                        _buildCategoryLink('Görünüm & Body Kit', () => _navigateToCategory('Görünüm & Body Kit')),
-                        _buildCategoryLink('İç Donanım', () => _navigateToCategory('İç Donanım')),
-                        _buildCategoryLink('Elektronik & ECU', () => _navigateToCategory('Elektronik & ECU')),
-                        _buildCategoryLink('Fren Sistemleri', () => _navigateToCategory('Fren Sistemleri')),
-                        _buildCategoryLink('Süspansiyon', () => _navigateToCategory('Süspansiyon')),
-                      ],
-                    ),
+                  child: StreamBuilder<List<ProductCategory>>(
+                    stream: _adminService.getCategories(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ));
+                      }
+                      
+                      final categories = snapshot.data ?? [];
+                      // Maksimum 8 kategori göster, rasgele sırala
+                      final displayCategories = categories.take(8).toList()..shuffle();
+                      
+                      if (displayCategories.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: displayCategories.map((category) {
+                            return _buildCategoryLink(
+                              category.name,
+                              () => _navigateToCategory(category.name),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

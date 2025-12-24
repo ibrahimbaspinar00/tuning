@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../widgets/no_overflow.dart';
 import '../model/product.dart';
 import '../services/firebase_data_service.dart';
-import '../services/order_service.dart';
 import '../widgets/optimized_image.dart';
 import '../utils/professional_animations.dart';
 import '../utils/professional_error_handler.dart';
@@ -41,7 +40,6 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
   
   // Services
   final FirebaseDataService _firebaseDataService = FirebaseDataService();
-  final OrderService _orderService = OrderService();
 
   double get _subtotal {
     return widget.cartProducts.fold(0.0, (sum, product) => sum + (product.price * product.quantity));
@@ -163,33 +161,9 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
     }
 
     try {
-      // Kullanıcı bilgilerini al
-      final userProfile = await _firebaseDataService.getUserProfile();
-      
-      // Sipariş oluştur
-      final orderId = await _orderService.createOrder(
-        products: widget.cartProducts,
-        totalAmount: _total,
-        customerName: userProfile?['fullName'] ?? 'Müşteri',
-        customerEmail: userProfile?['email'] ?? 'musteri@example.com',
-        customerPhone: userProfile?['phone'] ?? '555-0123',
-        shippingAddress: userProfile?['address'] ?? 'Adres bilgisi',
-        paymentMethod: 'Kredi Kartı',
-        notes: _appliedCoupon.isNotEmpty ? 'Kupon: $_appliedCoupon' : null,
-      );
-
-      // Sepeti temizle
-      for (final product in widget.cartProducts) {
-        await _firebaseDataService.removeFromCart(product.id);
-      }
-
+      // Sadece ödeme sayfasına yönlendir - sipariş oluşturma işlemi ödeme sayfasında yapılacak
+      // Bu şekilde tek bir sipariş oluşturulur ve sepet doğru şekilde temizlenir
       if (mounted) {
-        ProfessionalErrorHandler.showSuccess(
-          context: context,
-          title: 'Sipariş Oluşturuldu!',
-          message: 'Siparişiniz başarıyla oluşturuldu. Sipariş No: $orderId',
-        );
-
         // Ödeme sayfasına yönlendir
         AppRoutes.navigateToPayment(
           context,
@@ -197,7 +171,6 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
           appliedCoupon: _appliedCoupon,
           couponDiscount: _couponDiscount,
           isCouponApplied: _isCouponApplied,
-          orderId: orderId,
         );
       }
     } catch (e) {

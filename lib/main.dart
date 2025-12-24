@@ -9,7 +9,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
 import 'model/product.dart';
+import 'model/admin_product.dart';
 import 'services/product_service.dart';
+import 'services/admin_service.dart';
 import 'config/app_routes.dart';
 import 'sayfalar/main_screen.dart';
 import 'sayfalar/giris_sayfasi.dart';
@@ -2029,6 +2031,10 @@ List<Product> _applyFiltersAndSort(
   }).toList();
 
   switch (sortBy) {
+    case 'Önerilen':
+      // Varsayılan: Rasgele sırala
+      filtered.shuffle();
+      break;
     case 'Artan Fiyat':
       filtered.sort((a, b) => a.discountedPrice.compareTo(b.discountedPrice));
       break;
@@ -2039,7 +2045,9 @@ List<Product> _applyFiltersAndSort(
       filtered.sort((b, a) => a.reviewCount.compareTo(b.reviewCount));
       break;
     default:
-      filtered.sort((b, a) => a.salesCount.compareTo(b.salesCount));
+      // Varsayılan: Rasgele sırala
+      filtered.shuffle();
+      break;
   }
 
   return filtered;
@@ -2509,7 +2517,7 @@ class _TopActionBar extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends StatefulWidget {
   const _SearchBar({
     required this.onCategoryChange,
     required this.selectedCategory,
@@ -2517,6 +2525,13 @@ class _SearchBar extends StatelessWidget {
 
   final ValueChanged<String> onCategoryChange;
   final String selectedCategory;
+
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  final AdminService _adminService = AdminService();
 
   @override
   Widget build(BuildContext context) {
@@ -2627,40 +2642,50 @@ class _SearchBar extends StatelessWidget {
           ),
         );
 
-        final quickCategories = categories.take(4).toList();
-        final quickSelection = quickCategories.contains(selectedCategory)
-            ? selectedCategory
-            : quickCategories.first;
-        final categorySelector = SegmentedButton<String>(
-          segments: quickCategories
-              .map(
-                (c) => ButtonSegment(
-                  value: c,
-                  label: Text(
-                    c,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+        return StreamBuilder<List<ProductCategory>>(
+          stream: _adminService.getCategories(),
+          builder: (context, categorySnapshot) {
+            final adminCategories = categorySnapshot.data ?? [];
+            // Maksimum 8 kategori göster, rasgele sırala
+            final displayCategories = adminCategories.take(8).toList()..shuffle();
+            
+            // "Tümü" seçeneğini ekle
+            final allCategories = ['Tümü', ...displayCategories.map((c) => c.name)];
+            final quickCategories = allCategories.take(4).toList();
+            final quickSelection = quickCategories.contains(widget.selectedCategory)
+                ? widget.selectedCategory
+                : quickCategories.first;
+            
+            final categorySelector = SegmentedButton<String>(
+              segments: quickCategories
+                  .map(
+                    (c) => ButtonSegment(
+                      value: c,
+                      label: Text(
+                        c,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
+                  )
+                  .toList(),
+              selected: {quickSelection},
+              showSelectedIcon: false,
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                padding: WidgetStateProperty.all(
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 ),
-              )
-              .toList(),
-          selected: {quickSelection},
-          showSelectedIcon: false,
-          style: ButtonStyle(
-            visualDensity: VisualDensity.compact,
-            padding: WidgetStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            ),
-            side: WidgetStateProperty.all(
-              BorderSide(color: Colors.grey.shade300),
-            ),
-          ),
-          onSelectionChanged: (value) => onCategoryChange(value.first),
-        );
+                side: WidgetStateProperty.all(
+                  BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
+              onSelectionChanged: (value) => widget.onCategoryChange(value.first),
+            );
 
-        final cartButton = ValueListenableBuilder<List<CartItem>>(
+            final cartButton = ValueListenableBuilder<List<CartItem>>(
           valueListenable: cartItems,
           builder: (context, items, _) {
             final count = getCartItemCount();
@@ -2678,43 +2703,45 @@ class _SearchBar extends StatelessWidget {
           },
         );
 
-        return Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isCompact ? 20 : 64,
-            vertical: isCompact ? 14 : 18,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 12,
-                offset: const Offset(0, 1),
-                spreadRadius: 0,
+            return Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 20 : 64,
+                vertical: isCompact ? 14 : 18,
               ),
-            ],
-          ),
-          child: isCompact
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [searchField]),
-                    const SizedBox(height: 10),
-                    categorySelector,
-                    const SizedBox(height: 10),
-                    Align(alignment: Alignment.centerRight, child: cartButton),
-                  ],
-                )
-              : Row(
-                  children: [
-                    searchField,
-                    const SizedBox(width: 24),
-                    categorySelector,
-                    const SizedBox(width: 24),
-                    cartButton,
-                  ],
-                ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 12,
+                    offset: const Offset(0, 1),
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: isCompact
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [searchField]),
+                        const SizedBox(height: 10),
+                        categorySelector,
+                        const SizedBox(height: 10),
+                        Align(alignment: Alignment.centerRight, child: cartButton),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        searchField,
+                        const SizedBox(width: 24),
+                        categorySelector,
+                        const SizedBox(width: 24),
+                        cartButton,
+                      ],
+                    ),
+            );
+          },
         );
       },
     );
@@ -5537,7 +5564,8 @@ class CategoryPage extends StatelessWidget {
               final products = snapshot.data ?? [];
               final filteredProducts = products
                   .where((p) => p.category == category)
-                  .toList();
+                  .toList()
+                ..shuffle(); // Rasgele sırala
               if (filteredProducts.isEmpty) {
                 return Center(
                   child: Container(

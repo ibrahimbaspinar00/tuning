@@ -945,6 +945,18 @@ class _OdemeSayfasiState extends State<OdemeSayfasi> {
         final orderDoc = await FirebaseFirestore.instance.collection('orders').doc(orderId).get();
         final orderNumber = orderDoc.data()?['orderNumber'] as String? ?? orderId;
 
+        // Sepeti temizle - sipariş başarıyla oluşturulduktan sonra
+        try {
+          final firebaseDataService = FirebaseDataService();
+          for (final product in widget.cartProducts) {
+            await firebaseDataService.removeFromCart(product.id);
+          }
+          debugPrint('✅ Sepet başarıyla temizlendi');
+        } catch (e) {
+          debugPrint('⚠️ Sepet temizleme hatası: $e');
+          // Hata olsa bile devam et
+        }
+
         if (mounted) {
           // Profesyonel sipariş onay sayfasına yönlendir
           Navigator.of(context).pushReplacementNamed(

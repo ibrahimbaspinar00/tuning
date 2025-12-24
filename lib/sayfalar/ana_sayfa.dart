@@ -338,12 +338,8 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
     // Sıralama - optimize with stable sort
     switch (_sortBy) {
       case 'Popülerlik':
-        // Popülerlik skoru = satış sayısı * 0.4 + yorum sayısı * 0.3 + ortalama puan * 10 * 0.3
-        filtered.sort((a, b) {
-          final scoreA = (a.salesCount * 0.4) + (a.reviewCount * 0.3) + (a.averageRating * 10 * 0.3);
-          final scoreB = (b.salesCount * 0.4) + (b.reviewCount * 0.3) + (b.averageRating * 10 * 0.3);
-          return scoreB.compareTo(scoreA);
-        });
+        // Varsayılan: Rasgele sırala
+        filtered.shuffle();
         break;
       case 'Fiyat (Düşük-Yüksek)':
         filtered.sort((a, b) => a.price.compareTo(b.price));
@@ -358,6 +354,10 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
       case 'Değerlendirme':
         // Ortalama puana göre sıralama
         filtered.sort((a, b) => b.averageRating.compareTo(a.averageRating));
+        break;
+      default:
+        // Varsayılan: Rasgele sırala
+        filtered.shuffle();
         break;
     }
 
