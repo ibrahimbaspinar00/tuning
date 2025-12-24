@@ -47,3 +47,19 @@ app.*.map.json
 # API Keys and sensitive configuration
 # Not: ai_chat_config.dart GitHub'da olmalı ama API key boş olmalı
 # Kullanıcılar kendi API key'lerini ekleyecek
+
+# Node modules
+node_modules/
+**/node_modules/
+scripts/node_modules/
+functions/node_modules/
+
+# Documentation files (gereksiz)
+*.md
+!README.md
+functions/README.md
+
+# Example files
+*.example.dart
+*.example.js
+*.example.json
