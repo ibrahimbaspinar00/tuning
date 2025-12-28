@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_data_service.dart';
 import '../widgets/error_handler.dart';
 import '../utils/responsive_helper.dart';
+import '../config/app_routes.dart';
 
 class OdemeYontemi {
   final String id;
@@ -136,6 +137,13 @@ class _OdemeYontemleriSayfasiState extends State<OdemeYontemleriSayfasi> {
         foregroundColor: Colors.black87,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Color(0xFFF27A1A)),

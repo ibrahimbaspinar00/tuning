@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/order.dart';
 import '../model/product.dart';
@@ -154,7 +155,10 @@ class _SiparislerSayfasiState extends State<SiparislerSayfasi> {
             Icons.arrow_back,
             color: AppDesignSystem.textPrimary,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
         ),
         flexibleSpace: Container(
           padding: ResponsiveHelper.responsiveHorizontalPadding(

@@ -126,6 +126,13 @@ class _SiparisDetaySayfasiState extends State<SiparisDetaySayfasi> {
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.05),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
       ),
       body: SafeArea(
         child: Container(

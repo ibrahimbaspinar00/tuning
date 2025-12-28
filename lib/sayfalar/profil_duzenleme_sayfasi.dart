@@ -506,6 +506,13 @@ class _ProfilDuzenlemeSayfasiState extends State<ProfilDuzenlemeSayfasi> {
         foregroundColor: Colors.black87,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

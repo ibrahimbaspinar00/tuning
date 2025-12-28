@@ -8,6 +8,7 @@ import '../services/product_service.dart';
 import '../widgets/optimized_image.dart';
 import 'urun_detay_sayfasi.dart';
 import '../theme/app_design_system.dart';
+import '../config/app_routes.dart';
 
 class DegerlendirmelerimSayfasi extends StatefulWidget {
   const DegerlendirmelerimSayfasi({super.key});
@@ -108,7 +109,10 @@ class _DegerlendirmelerimSayfasiState extends State<DegerlendirmelerimSayfasi> {
         automaticallyImplyLeading: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppDesignSystem.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
         ),
         title: Text(
           'Değerlendirmelerim',

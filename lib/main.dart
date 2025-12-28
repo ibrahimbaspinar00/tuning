@@ -3690,6 +3690,78 @@ class ProductCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // En çok sepete eklenen ve favorilenen bilgisi
+                if (product.cartCount > 0 || product.favoriteCount > 0)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0),
+                      bottom: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        if (product.cartCount > 0) ...[
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            size: ResponsiveHelper.responsiveIconSize(
+                              context,
+                              mobile: 10.0,
+                              desktop: 12.0,
+                            ),
+                            color: Colors.grey[600],
+                          ),
+                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                          Text(
+                            '${product.cartCount} kez sepete eklendi',
+                            style: GoogleFonts.inter(
+                              fontSize: ResponsiveHelper.responsiveFontSize(
+                                context,
+                                mobile: 9.0,
+                                desktop: 10.0,
+                              ),
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                        if (product.cartCount > 0 && product.favoriteCount > 0)
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: ResponsiveHelper.responsiveSpacing(context, mobile: 4.0, desktop: 6.0),
+                            ),
+                            child: Container(
+                              width: 2,
+                              height: 10,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                        if (product.favoriteCount > 0) ...[
+                          Icon(
+                            Icons.favorite_outline,
+                            size: ResponsiveHelper.responsiveIconSize(
+                              context,
+                              mobile: 10.0,
+                              desktop: 12.0,
+                            ),
+                            color: Colors.grey[600],
+                          ),
+                          SizedBox(width: ResponsiveHelper.responsiveSpacing(context, mobile: 2.0, desktop: 4.0)),
+                          Text(
+                            '${product.favoriteCount} kez favorilendi',
+                            style: GoogleFonts.inter(
+                              fontSize: ResponsiveHelper.responsiveFontSize(
+                                context,
+                                mobile: 9.0,
+                                desktop: 10.0,
+                              ),
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 SizedBox(height: ResponsiveHelper.responsiveSpacing(context, mobile: 6.0, desktop: 10.0)),
                 // Sepete Ekle Butonu - Responsive ve kompakt
                 SizedBox(
@@ -4411,6 +4483,13 @@ class CartPage extends StatelessWidget {
             ),
             backgroundColor: Colors.white,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                // Ana sayfaya yönlendir
+                AppRoutes.navigateToMain(context);
+              },
+            ),
           ),
           body: ValueListenableBuilder<List<CartItem>>(
             valueListenable: cartItems,

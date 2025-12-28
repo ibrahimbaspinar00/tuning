@@ -76,7 +76,10 @@ class _BildirimlerSayfasiState extends State<BildirimlerSayfasi>
       shadowColor: Colors.black.withOpacity(0.05),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          // Ana sayfaya yönlendir
+          AppRoutes.navigateToMain(context);
+        },
       ),
       flexibleSpace: FlexibleSpaceBar(
         title: Text(

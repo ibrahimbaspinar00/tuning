@@ -875,18 +875,8 @@ class _UrunDetaySayfasiState extends State<UrunDetaySayfasi> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppDesignSystem.textPrimary),
           onPressed: () {
-            // Ana sayfaya kadar geri git, giriş sayfasına kadar gitme
-            if (Navigator.canPop(context)) {
-              // Eğer ana sayfa stack'te varsa oraya git
-              Navigator.popUntil(context, (route) {
-                // Ana sayfa route'unu bul (main route)
-                return route.settings.name == AppRoutes.main || 
-                       route.isFirst;
-              });
-            } else {
-              // Stack boşsa ana sayfaya yönlendir
-              AppRoutes.navigateToMain(context);
-            }
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
           },
         ),
         actions: [

@@ -390,6 +390,13 @@ class _OdemeSayfasiState extends State<OdemeSayfasi> {
         foregroundColor: const Color(0xFF0F0F0F),
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.05),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF0F0F0F)),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())

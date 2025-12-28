@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/notification_settings_service.dart';
+import '../config/app_routes.dart';
 
 class BildirimAyarlariSayfasi extends StatefulWidget {
   const BildirimAyarlariSayfasi({super.key});
@@ -96,6 +97,13 @@ class _BildirimAyarlariSayfasiState extends State<BildirimAyarlariSayfasi> {
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.05),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
       ),
       body: Container(
         color: const Color(0xFFF8F9FA),

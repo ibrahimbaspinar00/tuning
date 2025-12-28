@@ -269,7 +269,8 @@ class _SepetimSayfasiState extends State<SepetimSayfasi> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppDesignSystem.textPrimary),
           onPressed: () {
-            Navigator.of(context).pop();
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
           },
         ),
         actions: [

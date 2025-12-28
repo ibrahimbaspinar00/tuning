@@ -69,7 +69,7 @@ class ProductService {
               debugPrint('✅ Sunucuda ${serverSnapshot.docs.length} ürün bulundu - Cache sorunu tespit edildi');
               debugPrint('💡 Sunucu verileri kullanılıyor');
               // Sunucudan gelen verileri işle
-              return _processProducts(serverSnapshot.docs);
+              return await _processProducts(serverSnapshot.docs);
             } else {
               debugPrint('⚠️ Sunucuda da ürün yok - Gerçekten boş olabilir');
             }
@@ -80,7 +80,7 @@ class ProductService {
         }
         
         // Normal durumda stream'den gelen verileri işle
-        return _processProducts(snapshot.docs);
+        return await _processProducts(snapshot.docs);
       }).handleError((error, stackTrace) {
         debugPrint('❌ Stream asyncMap hatası: $error');
         debugPrint('📋 Stack trace: $stackTrace');
@@ -95,7 +95,7 @@ class ProductService {
   }
   
   // Ürünleri işle - ortak metod
-  List<Product> _processProducts(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+  Future<List<Product>> _processProducts(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
     final products = <Product>[];
     for (final doc in docs) {
       try {
@@ -120,6 +120,10 @@ class ProductService {
           debugPrint('⏭️ Ürün ${doc.id} pasif (isActive: $isActive), atlanıyor');
           continue;
         }
+        
+        // cartCount ve favoriteCount'u varsayılan olarak 0 yap (Firestore'da yoksa)
+        data['cartCount'] = data['cartCount'] ?? 0;
+        data['favoriteCount'] = data['favoriteCount'] ?? 0;
         
         final product = Product.fromMap(data);
         if (product.name.isNotEmpty) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../config/app_routes.dart';
 
 class SaticiMesajlarimSayfasi extends StatefulWidget {
   const SaticiMesajlarimSayfasi({super.key});
@@ -20,7 +21,10 @@ class _SaticiMesajlarimSayfasiState extends State<SaticiMesajlarimSayfasi> {
         automaticallyImplyLeading: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF0F0F0F)),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
         ),
         title: Text(
           'Satıcı Mesajlarım',

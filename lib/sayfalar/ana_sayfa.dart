@@ -727,6 +727,63 @@ class _AnaSayfaState extends State<AnaSayfa> with TickerProviderStateMixin {
                       ],
                     ),
                     
+                    // En çok sepete eklenen ve favorilenen bilgisi
+                    if (product.cartCount > 0 || product.favoriteCount > 0)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: isSmallScreen ? 4 : 6,
+                          bottom: isSmallScreen ? 2 : 4,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            if (product.cartCount > 0) ...[
+                              Icon(
+                                Icons.shopping_cart_outlined,
+                                size: isSmallScreen ? 10 : 12,
+                                color: Colors.grey[600],
+                              ),
+                              SizedBox(width: isSmallScreen ? 2 : 4),
+                              Text(
+                                '${product.cartCount} kez sepete eklendi',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 8 : 10,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                            if (product.cartCount > 0 && product.favoriteCount > 0)
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isSmallScreen ? 4 : 6,
+                                ),
+                                child: Container(
+                                  width: 2,
+                                  height: 10,
+                                  color: Colors.grey[400],
+                                ),
+                              ),
+                            if (product.favoriteCount > 0) ...[
+                              Icon(
+                                Icons.favorite_outline,
+                                size: isSmallScreen ? 10 : 12,
+                                color: Colors.grey[600],
+                              ),
+                              SizedBox(width: isSmallScreen ? 2 : 4),
+                              Text(
+                                '${product.favoriteCount} kez favorilendi',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 8 : 10,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    
                     SizedBox(height: isSmallScreen ? 6 : 8),
                     
                     // Butonlar - Mobil uygulamadan

@@ -14,6 +14,8 @@ class Product {
   final double averageRating;
   final int reviewCount;
   final int salesCount;
+  final int cartCount; // Sepete eklenme sayısı
+  final int favoriteCount; // Favorilere eklenme sayısı
   final DateTime createdAt;
   final List<String>? colors; // Admin panelinden eklenen renkler
   final List<String>? sizes; // Admin panelinden eklenen bedenler
@@ -31,6 +33,8 @@ class Product {
     this.averageRating = 0.0,
     this.reviewCount = 0,
     this.salesCount = 0,
+    this.cartCount = 0,
+    this.favoriteCount = 0,
     DateTime? createdAt,
     this.colors,
     this.sizes,
@@ -59,6 +63,8 @@ class Product {
     double? averageRating,
     int? reviewCount,
     int? salesCount,
+    int? cartCount,
+    int? favoriteCount,
     DateTime? createdAt,
     List<String>? colors,
     List<String>? sizes,
@@ -76,6 +82,8 @@ class Product {
       averageRating: averageRating ?? this.averageRating,
       reviewCount: reviewCount ?? this.reviewCount,
       salesCount: salesCount ?? this.salesCount,
+      cartCount: cartCount ?? this.cartCount,
+      favoriteCount: favoriteCount ?? this.favoriteCount,
       createdAt: createdAt ?? this.createdAt,
       colors: colors ?? this.colors,
       sizes: sizes ?? this.sizes,
@@ -97,6 +105,8 @@ class Product {
       'averageRating': averageRating,
       'reviewCount': reviewCount,
       'salesCount': salesCount,
+      'cartCount': cartCount,
+      'favoriteCount': favoriteCount,
       'createdAt': Timestamp.fromDate(createdAt), // Firestore Timestamp olarak kaydet
       'colors': colors,
       'sizes': sizes,
@@ -217,6 +227,8 @@ class Product {
       averageRating: safeToDouble(map['averageRating']),
       reviewCount: safeToInt(map['reviewCount'] ?? map['totalReviews']), // totalReviews desteği eklendi
       salesCount: safeToInt(map['salesCount']),
+      cartCount: safeToInt(map['cartCount']),
+      favoriteCount: safeToInt(map['favoriteCount']),
       createdAt: map['createdAt'] != null 
           ? parseDateTime(map['createdAt'])
           : DateTime.now(),

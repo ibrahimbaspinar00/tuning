@@ -95,7 +95,8 @@ class _SiparisOnaySayfasiState extends State<SiparisOnaySayfasi>
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.grey[800]),
           onPressed: () {
-            Navigator.of(context).pop();
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
           },
         ),
         title: Text(

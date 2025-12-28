@@ -46,6 +46,9 @@ class FirebaseDataService {
         'productId': productId,
         'addedAt': FieldValue.serverTimestamp(),
       });
+      
+      // Ürünün favoriteCount'unu artır
+      await _incrementProductFavoriteCount(productId);
     } catch (e) {
       debugPrint('Error adding to favorites: $e');
       rethrow;
@@ -56,7 +59,7 @@ class FirebaseDataService {
   Future<void> removeFromFavorites(String productId) async {
     final user = _auth.currentUser;
     if (user == null) {
-      throw Exception('Kullanıcı giriş yapmamış');
+throw Exception('Kullanıcı giriş yapmamış');
     }
 
     try {
@@ -66,6 +69,9 @@ class FirebaseDataService {
           .collection('favorites')
           .doc(productId)
           .delete();
+      
+      // Ürünün favoriteCount'unu azalt
+      await _decrementProductFavoriteCount(productId);
     } catch (e) {
       debugPrint('Error removing from favorites: $e');
       rethrow;
@@ -109,6 +115,16 @@ class FirebaseDataService {
     }
 
     try {
+      // Önce sepette var mı kontrol et
+      final cartDoc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('cart')
+          .doc(productId)
+          .get();
+      
+      final wasInCart = cartDoc.exists;
+      
       await _firestore
           .collection('users')
           .doc(user.uid)
@@ -119,6 +135,11 @@ class FirebaseDataService {
         'quantity': quantity,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+      
+      // Eğer sepette yoksa, cartCount'u artır
+      if (!wasInCart) {
+        await _incrementProductCartCount(productId);
+      }
     } catch (e) {
       debugPrint('Error adding to cart: $e');
       rethrow;
@@ -139,6 +160,9 @@ class FirebaseDataService {
           .collection('cart')
           .doc(productId)
           .delete();
+      
+      // Ürünün cartCount'unu azalt
+      await _decrementProductCartCount(productId);
     } catch (e) {
       debugPrint('Error removing from cart: $e');
       rethrow;
@@ -272,6 +296,86 @@ class FirebaseDataService {
     } catch (e) {
       debugPrint('Error getting user stats: $e');
       return {};
+    }
+  }
+
+  /// Ürünün cartCount'unu artır
+  Future<void> _incrementProductCartCount(String productId) async {
+    try {
+      await _firestore
+          .collection('products')
+          .doc(productId)
+          .update({
+        'cartCount': FieldValue.increment(1),
+      });
+    } catch (e) {
+      // Ürün bulunamadıysa veya hata varsa sessizce devam et
+      debugPrint('⚠️ cartCount artırılamadı: $e');
+    }
+  }
+
+  /// Ürünün cartCount'unu azalt
+  Future<void> _decrementProductCartCount(String productId) async {
+    try {
+      final productDoc = await _firestore
+          .collection('products')
+          .doc(productId)
+          .get();
+      
+      if (productDoc.exists) {
+        final currentCount = (productDoc.data()?['cartCount'] ?? 0) as int;
+        if (currentCount > 0) {
+          await _firestore
+              .collection('products')
+              .doc(productId)
+              .update({
+            'cartCount': FieldValue.increment(-1),
+          });
+        }
+      }
+    } catch (e) {
+      // Ürün bulunamadıysa veya hata varsa sessizce devam et
+      debugPrint('⚠️ cartCount azaltılamadı: $e');
+    }
+  }
+
+  /// Ürünün favoriteCount'unu artır
+  Future<void> _incrementProductFavoriteCount(String productId) async {
+    try {
+      await _firestore
+          .collection('products')
+          .doc(productId)
+          .update({
+        'favoriteCount': FieldValue.increment(1),
+      });
+    } catch (e) {
+      // Ürün bulunamadıysa veya hata varsa sessizce devam et
+      debugPrint('⚠️ favoriteCount artırılamadı: $e');
+    }
+  }
+
+  /// Ürünün favoriteCount'unu azalt
+  Future<void> _decrementProductFavoriteCount(String productId) async {
+    try {
+      final productDoc = await _firestore
+          .collection('products')
+          .doc(productId)
+          .get();
+      
+      if (productDoc.exists) {
+        final currentCount = (productDoc.data()?['favoriteCount'] ?? 0) as int;
+        if (currentCount > 0) {
+          await _firestore
+              .collection('products')
+              .doc(productId)
+              .update({
+            'favoriteCount': FieldValue.increment(-1),
+          });
+        }
+      }
+    } catch (e) {
+      // Ürün bulunamadıysa veya hata varsa sessizce devam et
+      debugPrint('⚠️ favoriteCount azaltılamadı: $e');
     }
   }
 

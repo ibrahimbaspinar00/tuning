@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/responsive_helper.dart';
+import '../config/app_routes.dart';
 
 class Adres {
   final String id;
@@ -126,6 +127,13 @@ class _AdresYonetimiSayfasiState extends State<AdresYonetimiSayfasi> {
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.05),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
       ),
       body: Container(
         color: const Color(0xFFF8F9FA),

@@ -310,6 +310,13 @@ class _KoleksiyonDetaySayfasiState extends State<KoleksiyonDetaySayfasi> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            // Ana sayfaya yönlendir
+            AppRoutes.navigateToMain(context);
+          },
+        ),
         iconTheme: const IconThemeData(color: Colors.black87),
         actions: [
           IconButton(
