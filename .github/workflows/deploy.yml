@@ -25,7 +25,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.4'
+          flutter-version: '3.24.0'
           channel: 'stable'
           cache: true
 
@@ -45,7 +45,7 @@ jobs:
           echo "🔍 Analyzing code..."
           flutter analyze --no-fatal-infos || true
           echo "🏗️ Building web..."
-          flutter build web --release --base-href "/$REPO_NAME/" --no-wasm-dry-run --verbose 2>&1 | tee build.log
+          flutter build web --release --base-href "/$REPO_NAME/" --web-renderer canvaskit 2>&1 | tee build.log
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
             echo "❌ Build failed! Showing last 100 lines of build.log:"
             tail -100 build.log
