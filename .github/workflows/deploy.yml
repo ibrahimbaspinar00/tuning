@@ -3,8 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # veya master, ana branch adınızı kullanın
-  workflow_dispatch:  # Manuel çalıştırma için
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -39,31 +39,24 @@ jobs:
         run: |
           set -e
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "🔨 Building for repository: $REPO_NAME"
-          echo "📦 Flutter version:"
+          echo "Building for repository: $REPO_NAME"
+          echo "Flutter version:"
           flutter --version
-          echo "🔍 Analyzing code..."
+          echo "Analyzing code..."
           flutter analyze --no-fatal-infos || true
-          echo "🏗️ Building web..."
-          flutter build web --release --base-href "/$REPO_NAME/" --web-renderer canvaskit 2>&1 | tee build.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "❌ Build failed! Showing last 100 lines of build.log:"
-            tail -100 build.log
-            exit 1
-          fi
-          echo "✅ Build successful!"
-        # Repository adı otomatik olarak alınır
-        # Eğer repository root'ta yayınlayacaksanız: flutter build web --release --base-href "/"
+          echo "Building web..."
+          flutter build web --release --base-href "/$REPO_NAME/" --web-renderer canvaskit
+          echo "Build successful!"
 
       - name: Verify build output
         run: |
           if [ ! -d "build/web" ]; then
-            echo "❌ build/web klasörü bulunamadı!"
+            echo "build/web directory not found!"
             exit 1
           fi
-          echo "✅ build/web klasörü mevcut"
+          echo "build/web directory exists"
           ls -la build/web/ | head -20
-          echo "📦 Dosya sayısı: $(find build/web -type f | wc -l)"
+          echo "File count: $(find build/web -type f | wc -l)"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -86,4 +79,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
