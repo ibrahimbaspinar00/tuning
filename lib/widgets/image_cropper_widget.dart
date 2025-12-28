@@ -101,7 +101,7 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                   aspectRatio: 1, // Kare crop
                   withCircleUi: true, // Yuvarlak UI
                   baseColor: Colors.blue.shade900,
-                  maskColor: Colors.white.withValues(alpha: 0.3),
+                  maskColor: Colors.white.withOpacity(0.3),
                 ),
               ),
             ),
